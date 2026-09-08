@@ -268,8 +268,8 @@
   },
   "publish": {
     "provider": "github",
-    "owner": "OpenWhispr",
-    "repo": "openwhispr",
+    "owner": "FaridBerlin",
+    "repo": "vocelibre",
     "private": false,
     "releaseType": "draft"
   }

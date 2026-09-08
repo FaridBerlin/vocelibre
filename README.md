@@ -22,7 +22,7 @@ VoceLibre is a local-first fork of [OpenWhispr](https://github.com/OpenWhispr/op
 ## Quick start
 
 ```bash
-git clone <this-repo-url>
+git clone https://github.com/FaridBerlin/vocelibre.git
 cd vocelibre
 npm install
 npm run dev
