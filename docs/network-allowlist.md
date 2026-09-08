@@ -1,6 +1,6 @@
 # Network Allowlist
 
-Outbound hosts the OpenWhispr desktop app contacts. For firewall, proxy, and
+Outbound hosts the VoceLibre desktop app contacts. For firewall, proxy, and
 DNS filter configuration.
 
 All connections are client-initiated over TLS. No inbound ports.

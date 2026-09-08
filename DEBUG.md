@@ -8,10 +8,10 @@ Enable verbose logging to diagnose issues like "no audio detected" or transcript
 
 ```bash
 # macOS
-/Applications/OpenWhispr.app/Contents/MacOS/OpenWhispr --log-level=debug
+/Applications/VoceLibre.app/Contents/MacOS/VoceLibre --log-level=debug
 
 # Windows
-OpenWhispr.exe --log-level=debug
+VoceLibre.exe --log-level=debug
 ```
 
 ### Option 2: Environment File
@@ -24,15 +24,15 @@ OPENWHISPR_LOG_LEVEL=debug
 
 **Env file locations:**
 
-- macOS: `~/Library/Application Support/OpenWhispr/.env`
-- Windows: `%APPDATA%\OpenWhispr\.env`
-- Linux: `~/.config/OpenWhispr/.env`
+- macOS: `~/Library/Application Support/VoceLibre/.env`
+- Windows: `%APPDATA%\VoceLibre\.env`
+- Linux: `~/.config/VoceLibre/.env`
 
 ## Log File Locations
 
-- **macOS**: `~/Library/Application Support/OpenWhispr/logs/debug-*.log`
-- **Windows**: `%APPDATA%\OpenWhispr\logs\debug-*.log`
-- **Linux**: `~/.config/OpenWhispr/logs/debug-*.log`
+- **macOS**: `~/Library/Application Support/VoceLibre/logs/debug-*.log`
+- **Windows**: `%APPDATA%\VoceLibre\logs\debug-*.log`
+- **Linux**: `~/.config/VoceLibre/logs/debug-*.log`
 
 ## What Gets Logged
 
