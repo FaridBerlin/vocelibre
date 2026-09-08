@@ -88,4 +88,4 @@ We welcome contributions. Fork the repo, create a feature branch, and open a pul
 - **[Electron](https://www.electronjs.org/)** — cross-platform desktop framework
 - **[React](https://react.dev/)** — UI component library
 - **[shadcn/ui](https://ui.shadcn.com/)** — accessible components built on Radix primitives
-- **[OpenWhispr](https://github.com/OpenWhispr/openwhispr)** — the project VoceLibre is forked from
+- **[OpenWhispr](https://github.com/OpenWhispr/openwhispr)** — the project VoceLibre is forked from...
