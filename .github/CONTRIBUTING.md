@@ -1,18 +1,19 @@
-# Contributing to OpenWhispr
+# Contributing to VoceLibre
 
-Thanks for your interest in contributing. OpenWhispr is an open-source,
+Thanks for your interest in contributing. VoceLibre is an open-source,
 privacy-first voice-to-text app, and improvements from the community —
 bug reports, fixes, docs, features — are very welcome.
 
-The canonical contributing guide lives at
-**[docs.openwhispr.com/contributing](https://docs.openwhispr.com/contributing)**.
-This file is a short pointer with the repo-local details you may need
-along the way.
+VoceLibre is a fork of [OpenWhispr](https://github.com/OpenWhispr/openwhispr);
+their contributing guide at
+[docs.openwhispr.com/contributing](https://docs.openwhispr.com/contributing)
+still covers coding conventions and general workflow. This file is a short
+pointer with the repo-local details you may need along the way.
 
 ## Filing issues
 
 - Bugs and feature requests:
-  [github.com/OpenWhispr/openwhispr/issues](https://github.com/OpenWhispr/openwhispr/issues)
+  [github.com/FaridBerlin/vocelibre/issues](https://github.com/FaridBerlin/vocelibre/issues)
 - Please use the existing issue templates (`bug_report`, `feature_request`)
   so we have the info needed to reproduce.
 - For transcription or audio problems, attaching debug logs is a huge
@@ -24,19 +25,18 @@ along the way.
 
 **Please do not open public issues for security vulnerabilities.**
 Follow the process in [`SECURITY.md`](../SECURITY.md): use
-[GitHub's private vulnerability reporting](https://github.com/OpenWhispr/openwhispr/security/advisories/new)
-or email `security@openwhispr.com`.
+[GitHub's private vulnerability reporting](https://github.com/FaridBerlin/vocelibre/security/advisories/new).
 
 ## Contributing code
 
 See the [contributing guide](https://docs.openwhispr.com/contributing)
-for the full workflow, coding conventions, and review expectations.
+for the general workflow, coding conventions, and review expectations.
 The short version:
 
 1. Fork the repo and create a feature branch off `main`.
 2. Make your change, keeping the diff focused.
 3. Run `npm run lint` and `npm run format` before opening a PR.
-4. Open a pull request against `OpenWhispr/openwhispr` `main` and fill
+4. Open a pull request against `FaridBerlin/vocelibre` `main` and fill
    in the description so reviewers can see the "why".
 
 ### Local setup
@@ -57,4 +57,4 @@ in [`README.md`](../README.md) and
 ## Thanks
 
 Thanks for taking the time to contribute — every issue, fix, and
-improvement helps make OpenWhispr better.
+improvement helps make VoceLibre better.
