@@ -116,7 +116,7 @@ test(
       1
     );
     const binds = fs.readFileSync(path.join(configDir, "openwhispr-binds.lua"), "utf8");
-    assert.match(binds, /^-- OpenWhispr keybinds/m);
+    assert.match(binds, /^-- VoceLibre keybinds/m);
     assert.match(binds, /hl\.bind\("CTRL \+ SHIFT \+ RETURN", hl\.dsp\.exec_cmd\("dbus-send/);
     assert.doesNotMatch(
       fs.readFileSync(path.join(configDir, "hyprland.conf"), "utf8"),
@@ -387,7 +387,7 @@ test(
 
     const content = fs.readFileSync(bindsPath, "utf8");
     assert.doesNotMatch(content, /matching source line/);
-    assert.equal((content.match(/OpenWhispr keybinds/g) || []).length, 1);
+    assert.equal((content.match(/VoceLibre keybinds/g) || []).length, 1);
   })
 );
 
