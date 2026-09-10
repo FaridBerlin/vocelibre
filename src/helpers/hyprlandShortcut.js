@@ -62,12 +62,15 @@ const BINDS_FILENAMES = {
   lua: "openwhispr-binds.lua",
 };
 const MANAGED_HEADER_TEXT = [
-  "OpenWhispr keybinds (managed automatically)",
+  "VoceLibre keybinds (managed automatically)",
   "If you delete this file, also remove the matching load line from your Hyprland config.",
 ];
 const MANAGED_HEADER_VARIANTS = new Set([
   ...MANAGED_HEADER_TEXT,
   "If you delete this file, also remove the matching source line from your Hyprland config.",
+  // Pre-rename header text, so files written by an older build are still
+  // recognized as managed rather than treated as user-owned.
+  "OpenWhispr keybinds (managed automatically)",
 ]);
 
 function isManagedHeaderLine(line) {
@@ -594,7 +597,7 @@ class HyprlandShortcutManager {
       const config = this._getConfig();
       const runtimeBinding = config.format === "lua" ? converted.luaKeys : converted.bindKey;
 
-      // First unregister any existing OpenWhispr binding if the hotkey changed.
+      // First unregister any existing VoceLibre binding if the hotkey changed.
       if (this.currentBinding && this.currentBinding !== runtimeBinding) {
         const unregistered = await this.unregisterKeybinding();
         if (!unregistered) return false;

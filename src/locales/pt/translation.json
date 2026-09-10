@@ -434,7 +434,7 @@
       "systemAudioDescription": "Permite que o gravador de reuniões ouça o outro lado das suas chamadas — reuniões, aulas, podcasts. Você pode ativar depois nas Configurações.",
       "optional": "Opcional",
       "recommended": "Recomendado",
-      "accessibilityTroubleshooting": "Em Configurações do Sistema → Acessibilidade, desative o interruptor do VoceLibre e ative-o novamente. Se o VoceLibre não aparecer na lista, clique em + e adicione-o a partir da pasta Aplicativos. Ainda com problemas? Envie um e-mail para support@openwhispr.com."
+      "accessibilityTroubleshooting": "Em Configurações do Sistema → Acessibilidade, desative o interruptor do VoceLibre e ative-o novamente. Se o VoceLibre não aparecer na lista, clique em + e adicione-o a partir da pasta Aplicativos."
     },
     "transcription": {
       "title": "Configuração de transcrição",

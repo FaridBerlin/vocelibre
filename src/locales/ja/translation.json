@@ -455,7 +455,7 @@
       "systemAudioDescription": "会議レコーダーが通話の相手側の音声（会議、講義、ポッドキャストなど）を聴けるようにします。後から設定で有効にできます。",
       "optional": "任意",
       "recommended": "推奨",
-      "accessibilityTroubleshooting": "システム設定 → アクセシビリティで、VoceLibreのスイッチをオフにしてから再度オンにしてください。VoceLibreがリストに表示されていない場合は、+ をクリックしてアプリケーションフォルダから追加してください。それでも解決しませんか？support@openwhispr.com までメールでお問い合わせください。"
+      "accessibilityTroubleshooting": "システム設定 → アクセシビリティで、VoceLibreのスイッチをオフにしてから再度オンにしてください。VoceLibreがリストに表示されていない場合は、+ をクリックしてアプリケーションフォルダから追加してください。"
     },
     "transcription": {
       "title": "文字起こし設定",

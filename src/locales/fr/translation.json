@@ -455,7 +455,7 @@
       "systemAudioDescription": "Permet à l'enregistreur de réunion d'entendre vos interlocuteurs : réunions, cours, podcasts. Activable plus tard dans les Réglages.",
       "optional": "Facultatif",
       "recommended": "Recommandé",
-      "accessibilityTroubleshooting": "Dans Réglages Système → Accessibilité, désactivez le bouton d'VoceLibre puis réactivez-le. Si VoceLibre n'apparaît pas du tout dans la liste, cliquez sur + et ajoutez-le depuis le dossier Applications. Toujours bloqué ? Écrivez à support@openwhispr.com."
+      "accessibilityTroubleshooting": "Dans Réglages Système → Accessibilité, désactivez le bouton d'VoceLibre puis réactivez-le. Si VoceLibre n'apparaît pas du tout dans la liste, cliquez sur + et ajoutez-le depuis le dossier Applications."
     },
     "transcription": {
       "title": "Configuration de la transcription",

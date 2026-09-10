@@ -238,8 +238,12 @@ class KDEShortcutManager {
     // Map friendly names back to slot names
     const friendlyToSlot = {};
     for (const slotName of this.registeredSlots) {
+      friendlyToSlot[`VoceLibre ${slotName}`] = slotName;
+      friendlyToSlot[`VoceLibre`] = "dictation"; // legacy compat
+      // Also accept the pre-rename friendly name for shortcuts registered
+      // by an older build that hasn't re-registered yet.
       friendlyToSlot[`OpenWhispr ${slotName}`] = slotName;
-      friendlyToSlot[`OpenWhispr`] = "dictation"; // legacy compat
+      friendlyToSlot[`OpenWhispr`] = "dictation";
     }
     return friendlyToSlot[name] || null;
   }
@@ -272,7 +276,7 @@ class KDEShortcutManager {
     }
 
     // actionId: [componentUnique, actionUnique, componentFriendly, actionFriendly]
-    const actionId = [COMPONENT_NAME, slotName, "OpenWhispr", `OpenWhispr ${slotName}`];
+    const actionId = [COMPONENT_NAME, slotName, "VoceLibre", `VoceLibre ${slotName}`];
 
     try {
       // Pre-registration conflict check via low-level D-Bus call
@@ -396,7 +400,7 @@ class KDEShortcutManager {
   async unregisterKeybinding(slotName = "dictation") {
     if (!this.kglobalaccel) return;
 
-    const actionId = [COMPONENT_NAME, slotName, "OpenWhispr", `OpenWhispr ${slotName}`];
+    const actionId = [COMPONENT_NAME, slotName, "VoceLibre", `VoceLibre ${slotName}`];
 
     try {
       await new Promise((resolve, reject) => {
@@ -414,7 +418,25 @@ class KDEShortcutManager {
   }
 
   async removeRetiredAgentKeybinding() {
-    await this.unregisterKeybinding("agent");
+    if (!this.kglobalaccel) return;
+
+    // Historical cleanup only: this must stay the literal actionId a
+    // pre-rename build actually registered under KGlobalAccel ("agent" was
+    // retired as a slot before the VoceLibre rename), or KDE won't find a
+    // match to remove. Do not follow the current brand name here.
+    const actionId = ["openwhispr", "agent", "OpenWhispr", "OpenWhispr agent"];
+
+    try {
+      await new Promise((resolve, reject) => {
+        this.kglobalaccel.unRegister(actionId, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+      debugLogger.log("[KDEShortcut] Removed retired agent keybinding");
+    } catch (err) {
+      debugLogger.log("[KDEShortcut] Failed to remove retired agent keybinding:", err.message);
+    }
   }
 
   close() {
@@ -423,7 +445,7 @@ class KDEShortcutManager {
     // clean up stale registrations from dead processes anyway.
     const promises = [];
     for (const slotName of this.registeredSlots) {
-      const actionId = [COMPONENT_NAME, slotName, "OpenWhispr", `OpenWhispr ${slotName}`];
+      const actionId = [COMPONENT_NAME, slotName, "VoceLibre", `VoceLibre ${slotName}`];
       try {
         promises.push(
           new Promise((resolve, reject) => {
