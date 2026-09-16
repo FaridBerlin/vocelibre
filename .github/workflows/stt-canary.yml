@@ -1,13 +1,15 @@
-# Weekly live check that every STT provider still accepts the app's credential
+# Live check (on demand) that every STT provider still accepts the app's credential
 # flow — WebSocket handshake for realtime providers, a real transcription for
 # batch providers with a bespoke request shape. Deliberately NOT part of PR CI:
 # it exercises external APIs and its failures are provider news, not code
 # regressions. Same pattern as llm-canary.yml.
 name: stt-canary
 
+# Schedule removed for the VoceLibre fork: this needs a full set of live
+# provider keys as repo secrets, and without them the weekly run fails and
+# files a tracking issue every Monday. Re-add the `schedule:` trigger once
+# the secrets below are configured.
 on:
-  schedule:
-    - cron: "30 6 * * 1" # Mondays 06:30 UTC
   workflow_dispatch:
 
 permissions:

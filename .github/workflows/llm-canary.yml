@@ -1,12 +1,14 @@
-# Weekly live check that every LLM provider still accepts the exact request
+# Live check (on demand) that every LLM provider still accepts the exact request
 # shapes the app sends (reasoning params, token-limit param, temperature), plus
 # a model-catalog drift diff. Deliberately NOT part of PR CI: it exercises
 # external APIs and their failures are provider news, not code regressions.
 name: llm-canary
 
+# Schedule removed for the VoceLibre fork: this needs a full set of live
+# provider keys as repo secrets, and without them the weekly run fails and
+# files a tracking issue every Monday. Re-add the `schedule:` trigger once
+# the secrets below are configured.
 on:
-  schedule:
-    - cron: "0 6 * * 1" # Mondays 06:00 UTC
   workflow_dispatch:
 
 permissions:
