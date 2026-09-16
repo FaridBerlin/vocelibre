@@ -30,6 +30,35 @@ npm run dev
 
 Requires Node.js 24+. On first run, pick **local** setup, download a Whisper model (e.g. `base`, ~142MB), and skip sign-in entirely — no account is ever required for dictation.
 
+## Development
+
+`npm install` builds the native modules (`better-sqlite3`) against **Electron's**
+ABI, which is what the app needs — but the test suite runs under plain Node, so
+`npm test` fails out of the box with `ERR_DLOPEN_FAILED` /
+`NODE_MODULE_VERSION` errors. Switch the build between the two targets:
+
+```bash
+npm run rebuild:node      # before running npm test
+npm test
+
+npm run rebuild:electron  # before running npm run dev / npm start again
+```
+
+The two are mutually exclusive, which is why neither is wired to a `pretest`
+hook — an automatic rebuild for one target silently breaks the other. CI runs
+`rebuild:node` explicitly for the same reason.
+
+`rebuild:electron` forces `electron-rebuild` rather than reusing `postinstall`'s
+`electron-builder install-app-deps`, which reports success but no-ops when the
+module is already built — for the wrong ABI included.
+
+```bash
+npm run typecheck     # tsc --noEmit
+npm run lint          # eslint
+npm run format        # eslint --fix + prettier
+npm run i18n:check    # locale key/placeholder parity
+```
+
 > On Intel Macs, live speaker identification and voice fingerprinting are unavailable (ONNX Runtime [stopped shipping macOS x86_64 binaries](https://github.com/microsoft/onnxruntime/releases/tag/v1.24.1)). Meetings still record and transcribe normally, and notes search falls back to keyword matching.
 
 ## Features

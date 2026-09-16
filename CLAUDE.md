@@ -706,13 +706,48 @@ Live meeting transcription runs two streams (mic + system-audio tap) and must ke
 
 ## Development Guidelines
 
+### The OpenWhispr → VoceLibre rename — REQUIRED
+
+VoceLibre is a fork of OpenWhispr. **Display text was renamed; identifiers were
+deliberately not.** A grep for "openwhispr" therefore returns hundreds of live,
+correct hits. Do not "finish the rename."
+
+**Rename** — anything a user reads: UI copy, i18n values, dialog text, log
+prose, window and menu titles, docs.
+
+**Never rename** — any identifier that crosses a process, disk, or OS boundary,
+because the OS or an existing install already holds the old string and renaming
+it orphans state or silently breaks the contract:
+
+| Identifier | Where | Breaks if renamed |
+| --- | --- | --- |
+| `com.openwhispr.App` | D-Bus service/interface (GNOME, Hyprland, KDE) | `dbus-send` in every registered keybinding targets the old name |
+| `/org/gnome/settings-daemon/.../openwhispr*/` | gsettings keybinding paths | Existing GNOME shortcuts orphan; user sees a dead binding |
+| `openwhispr` | `COMPONENT_NAME` in `kdeShortcut.js` | KGlobalAccel loses the registration it matches on |
+| `~/.cache/openwhispr/` | model + Qdrant data on disk | Re-downloads every model (GBs) |
+| `openwhispr://` | deep-link protocol | Registered handler and OAuth callbacks stop resolving |
+| `OPENWHISPR_LOG_LEVEL`, `VITE_OPENWHISPR_API_URL` | env vars | Existing `.env` files and docs stop working |
+| `.bundle-migrated`, pre-Gizmo bundle ID | `postMigrationDetector.js` | Migration onboarding misfires |
+
+Historical cleanup paths (`removeRetiredAgentKeybinding`) must keep the **literal
+old string a previous build actually wrote**, never the current brand name.
+
+Where a lookup has to tolerate both, accept old and new (see
+`slotFromFriendlyName` in `kdeShortcut.js`) rather than picking one.
+
+**Still genuinely upstream-owned** (not identifiers — decisions pending, see
+README): `auth.openwhispr.com`, `api.openwhispr.com`, `notes.openwhispr.com`,
+`mcp.openwhispr.com`, `docs.openwhispr.com`, `openwhispr.com/*`, and the
+`OpenWhispr/openwhispr` release assets the `scripts/download-*.js` helpers pull
+native binaries from.
+
 ### Internationalization (i18n) — REQUIRED
 
 All user-facing strings **must** use the i18n system. Never hardcode UI text in components.
 
 **Setup**: react-i18next (v15) with i18next (v25). Translation files in `src/locales/{lang}/translation.json`.
 
-**Supported languages**: en, es, fr, de, pt, it, ru, zh-CN, zh-TW
+**Supported languages**: en, es, fr, de, pt, it, ja, ru, zh-CN, zh-TW
 
 **How to use**:
 
@@ -924,7 +959,7 @@ Raster UI assets live in `src/assets/` (onboarding ones are named `onboarding-*`
 
 - Streaming transcription support
 - Custom wake word detection
-- ~~Multi-language UI~~ (implemented — 9 languages via react-i18next)
+- ~~Multi-language UI~~ (implemented — 10 languages via react-i18next)
 - Cloud model selection
 - Batch transcription
 - Export formats beyond clipboard
