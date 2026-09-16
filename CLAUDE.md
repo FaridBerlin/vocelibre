@@ -735,11 +735,35 @@ old string a previous build actually wrote**, never the current brand name.
 Where a lookup has to tolerate both, accept old and new (see
 `slotFromFriendlyName` in `kdeShortcut.js`) rather than picking one.
 
-**Still genuinely upstream-owned** (not identifiers — decisions pending, see
-README): `auth.openwhispr.com`, `api.openwhispr.com`, `notes.openwhispr.com`,
-`mcp.openwhispr.com`, `docs.openwhispr.com`, `openwhispr.com/*`, and the
-`OpenWhispr/openwhispr` release assets the `scripts/download-*.js` helpers pull
-native binaries from.
+### Native helper binaries — where they come from
+
+`scripts/download-*.js` fetch prebuilt native helpers from **this repo's own
+GitHub releases** (`FaridBerlin/vocelibre`). Every one of them builds from
+source in this repo, so nothing depends on the upstream project:
+
+| Binary | Source | Workflow |
+| --- | --- | --- |
+| `windows-key-listener.exe` | `resources/windows-key-listener.c` | `build-windows-key-listener.yml` |
+| `windows-mic-listener.exe` | `resources/windows-mic-listener.c` | `build-windows-mic-listener.yml` |
+| `windows-fast-paste.exe` | `resources/windows-fast-paste.c` | `build-windows-fast-paste.yml` |
+| `windows-system-audio-helper.exe` | `resources/windows-system-audio-helper.c` | `build-windows-system-audio-helper.yml` |
+| text monitor | `resources/{windows,linux}-text-monitor.c` | `build-{windows,linux}-text-monitor.yml` |
+| `meeting-aec-helper` | `native/meeting-aec-helper/` | `build-meeting-aec-helper.yml` |
+
+**These releases do not exist yet.** Run each workflow once from the Actions tab
+(they are `workflow_dispatch`, and `softprops/action-gh-release` publishes to
+whichever repo it runs in) to populate them. Until then the download scripts
+fail soft — they never fail a build — and the affected features degrade:
+Windows push-to-talk falls back to tap mode, mic detection falls back to
+polling, and system-audio capture falls back to the Chromium loopback path.
+
+**The one exception is whisper.cpp.** `scripts/download-whisper-cpp.js` points
+at `OpenWhispr/whisper.cpp`, a fork that publishes purpose-built
+`whisper-server-*` binaries. Upstream `ggml-org/whisper.cpp` ships **no binary
+assets at all**, so this cannot simply be repointed — doing so would break
+local transcription on every platform. To cut this last upstream tie, fork
+`ggml-org/whisper.cpp`, run its release build, and change `WHISPER_CPP_REPO`.
+
 
 ### Internationalization (i18n) — REQUIRED
 

@@ -96,7 +96,7 @@ React 19, TypeScript, Tailwind CSS v4, Electron 41, better-sqlite3, whisper.cpp,
 
 ## Support
 
-VoceLibre is free software. If it's useful to you, consider supporting development via donations rather than a subscription — no account required to use it, none required to support it either.
+VoceLibre is free software and free for everyone — no account, no subscription, no paid tier. There is nothing to buy and nothing to sign up for.
 
 ## Contributing
 
