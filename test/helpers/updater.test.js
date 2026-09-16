@@ -16,7 +16,10 @@ function makeAutoUpdater({ offline = false } = {}) {
   const autoUpdater = {
     calls: 0,
     listeners,
-    setFeedURL() {},
+    feedURL: null,
+    setFeedURL(options) {
+      autoUpdater.feedURL = options;
+    },
     on(event, handler) {
       listeners[event] = handler;
     },
@@ -198,4 +201,21 @@ test("the update-available popup honors the same App updates gate", () => {
     assert.equal(popups.length, shown, JSON.stringify(prefs));
     manager.cleanup();
   }
+});
+
+// The feed is where updates come FROM; electron-builder's publish block is
+// where they go TO. When they disagree the app quietly updates itself into a
+// different project's releases — which is exactly what the OpenWhispr fork
+// shipped with. Pin them together rather than trusting either in isolation.
+test("the update feed points at the same repo electron-builder publishes to", () => {
+  const publish = require("../../electron-builder.json").publish;
+  const autoUpdater = makeAutoUpdater();
+  const manager = createUpdateManager(autoUpdater);
+
+  assert.deepEqual(
+    { provider: autoUpdater.feedURL.provider, owner: autoUpdater.feedURL.owner, repo: autoUpdater.feedURL.repo },
+    { provider: publish.provider, owner: publish.owner, repo: publish.repo }
+  );
+
+  manager.cleanup();
 });

@@ -27,10 +27,14 @@ class UpdateManager {
       return;
     }
 
+    // Must stay in sync with the "publish" block in electron-builder.json —
+    // this is where updates are fetched from, that is where they are uploaded
+    // to. A mismatch silently migrates users onto somebody else's app, so
+    // test/helpers/updater.test.js asserts the two agree.
     autoUpdater.setFeedURL({
       provider: "github",
-      owner: "OpenWhispr",
-      repo: "openwhispr",
+      owner: "FaridBerlin",
+      repo: "vocelibre",
       private: false,
     });
 
