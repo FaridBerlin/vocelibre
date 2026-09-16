@@ -909,10 +909,12 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
 
   const handleCreateAccount = useStartOnboarding();
 
+  // Cloud upload was removed, so the "file too large" escape hatch is a local
+  // model rather than a managed endpoint. The surrounding upsell UI goes away
+  // with the rest of the account surface.
   const switchToCloud = () => {
-    setUploadTranscriptionMode("openwhispr");
-    setUploadCloudTranscriptionMode("openwhispr");
-    setUploadUseLocalWhisper(false);
+    setUploadTranscriptionMode("local");
+    setUploadUseLocalWhisper(true);
   };
 
   const getTranscribingLabel = (): string => {

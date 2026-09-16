@@ -1,10 +1,9 @@
 // Map a reasoning cloud routing to the InferenceMode its Settings tab selects on.
 // Mirrors deriveTranscriptionMode (byok custom → self-hosted, other cloud → providers).
+// Cloud and BYOK reasoning were removed, so a custom endpoint is the only
+// non-local routing left; everything else runs on a downloaded local model.
 export function deriveReasoningMode(cloudMode, provider) {
-  if (cloudMode === "byok") {
-    return provider === "custom" ? "self-hosted" : "providers";
-  }
-  return "openwhispr";
+  return cloudMode === "byok" && provider === "custom" ? "self-hosted" : "local";
 }
 
 // Whether a scope may borrow the fallback scope's API key along with its endpoint.

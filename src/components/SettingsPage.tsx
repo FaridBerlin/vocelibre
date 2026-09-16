@@ -554,20 +554,6 @@ function TranscriptionSection({
   } = usePolicyModeOptions<InferenceModeOption>(
     [
       {
-        id: "openwhispr",
-        label: t("settingsPage.transcription.modes.openwhispr"),
-        description: t("settingsPage.transcription.modes.openwhisprDesc"),
-        icon: <Cloud className="w-4 h-4" />,
-        disabled: !isSignedIn,
-        badge: !isSignedIn ? t("common.freeAccountRequired") : undefined,
-      },
-      {
-        id: "providers",
-        label: t("settingsPage.transcription.modes.providers"),
-        description: t("settingsPage.transcription.modes.providersDesc"),
-        icon: <Key className="w-4 h-4" />,
-      },
-      {
         id: "local",
         label: t("settingsPage.transcription.modes.local"),
         description: t("settingsPage.transcription.modes.localDesc"),
@@ -586,19 +572,12 @@ function TranscriptionSection({
   );
   const handleTranscriptionModeSelect = (mode: InferenceMode) => {
     if (!isModeAllowed(mode)) return;
-    if (mode === "openwhispr" && !isSignedIn) {
-      startOnboarding();
-      return;
-    }
     if (mode === effectiveTranscriptionMode) return;
     setTranscriptionMode(mode);
     setUseLocalWhisper(mode === "local");
     updateTranscriptionSettings({ useLocalWhisper: mode === "local" });
-    setCloudTranscriptionMode(mode === "openwhispr" ? "openwhispr" : "byok");
 
     const toastKey = {
-      openwhispr: "switchedCloud",
-      providers: "switchedProviders",
       local: "switchedLocal",
       "self-hosted": "switchedSelfHosted",
     }[mode];
@@ -688,7 +667,6 @@ function TranscriptionSection({
         onSelect={handleTranscriptionModeSelect}
       />
 
-      {effectiveTranscriptionMode === "providers" && renderTranscriptionPicker("cloud")}
       {effectiveTranscriptionMode === "local" && renderTranscriptionPicker("local")}
       {previewAvailable && renderPreviewToggle()}
 
@@ -719,11 +697,8 @@ interface AiModelsSectionProps {
 }
 
 const CLEANUP_MODE_TOAST_KEY: Record<InferenceMode, string> = {
-  openwhispr: "switchedCloud",
-  providers: "switchedProviders",
   local: "switchedLocal",
   "self-hosted": "switchedSelfHosted",
-  enterprise: "switchedEnterprise",
 };
 
 function NoteFormattingSettings() {

@@ -64,20 +64,6 @@ export function MeetingTranscriptionPanel() {
   } = usePolicyModeOptions<InferenceModeOption>(
     [
       {
-        id: "openwhispr",
-        label: t("settingsPage.transcription.modes.openwhispr"),
-        description: t("settingsPage.transcription.modes.openwhisprDesc"),
-        icon: <Cloud className="w-4 h-4" />,
-        disabled: !isSignedIn,
-        badge: !isSignedIn ? t("common.freeAccountRequired") : undefined,
-      },
-      {
-        id: "providers",
-        label: t("settingsPage.transcription.modes.providers"),
-        description: t("settingsPage.transcription.modes.providersDesc"),
-        icon: <Key className="w-4 h-4" />,
-      },
-      {
         id: "local",
         label: t("settingsPage.transcription.modes.local"),
         description: t("settingsPage.transcription.modes.localDesc"),
@@ -99,14 +85,9 @@ export function MeetingTranscriptionPanel() {
   const handleTranscriptionModeSelect = (mode: InferenceMode) => {
     if (!isModeAllowed(mode)) return;
     if (mode === "self-hosted") return;
-    if (mode === "openwhispr" && !isSignedIn) {
-      startOnboarding();
-      return;
-    }
     if (mode === effectiveTranscriptionMode) return;
     setMeetingTranscriptionMode(mode);
     setMeetingUseLocalWhisper(mode === "local");
-    setMeetingCloudTranscriptionMode(mode === "openwhispr" ? "openwhispr" : "byok");
   };
 
   const handleLocalTranscriptionModelSelect = useCallback(
@@ -163,7 +144,6 @@ export function MeetingTranscriptionPanel() {
         onSelect={handleTranscriptionModeSelect}
       />
 
-      {effectiveTranscriptionMode === "providers" && renderTranscriptionPicker("cloud")}
       {effectiveTranscriptionMode === "local" && renderTranscriptionPicker("local")}
       <MeetingSpeakerDetectionRow />
     </div>

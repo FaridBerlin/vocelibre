@@ -207,35 +207,14 @@ export function resolveEffectivePolicySelection(
   const allowedEnterpriseProviders = (catalog.enterpriseProviders ?? []).filter((provider) =>
     policy.llm.allowedEnterpriseProviders.includes(provider)
   );
-  const modeIsUsable = (mode: InferenceMode): boolean => {
-    if (!catalog.modes.includes(mode)) return false;
-    if (!policy[scope].allowedModes.includes(mode)) return false;
-    if (mode === "providers") return allowedByokProviders.length > 0;
-    if (mode === "enterprise") return scope === "llm" && allowedEnterpriseProviders.length > 0;
-    return true;
-  };
+  const modeIsUsable = (mode: InferenceMode): boolean =>
+    catalog.modes.includes(mode) && policy[scope].allowedModes.includes(mode);
 
   const mode = modeIsUsable(selection.mode)
     ? selection.mode
     : (catalog.modes.find(modeIsUsable) ?? null);
   if (!mode) return null;
 
-  if (mode === "providers") {
-    return {
-      mode,
-      provider: allowedByokProviders.includes(selection.provider)
-        ? selection.provider
-        : allowedByokProviders[0],
-    };
-  }
-  if (mode === "enterprise") {
-    return {
-      mode,
-      provider: allowedEnterpriseProviders.includes(selection.provider)
-        ? selection.provider
-        : allowedEnterpriseProviders[0],
-    };
-  }
   return { mode, provider: selection.provider };
 }
 
@@ -243,14 +222,7 @@ export function isLlmSelectionAllowed(
   state: PolicyDecisionSnapshot,
   selection: LlmSelection
 ): boolean {
-  if (!isModeAllowedByPolicy(state, "llm", selection.mode)) return false;
-  if (selection.mode === "providers") {
-    return isProviderAllowedByPolicy(state, "llm", selection.provider);
-  }
-  if (selection.mode === "enterprise") {
-    return isEnterpriseProviderAllowed(state, selection.provider);
-  }
-  return true;
+  return isModeAllowedByPolicy(state, "llm", selection.mode);
 }
 
 export interface TranscriptionSelection {
@@ -262,9 +234,7 @@ export function isTranscriptionSelectionAllowed(
   state: PolicyDecisionSnapshot,
   selection: TranscriptionSelection
 ): boolean {
-  if (!isModeAllowedByPolicy(state, "transcription", selection.mode)) return false;
-  if (selection.mode !== "providers") return true;
-  return isProviderAllowedByPolicy(state, "transcription", selection.provider);
+  return isModeAllowedByPolicy(state, "transcription", selection.mode);
 }
 
 export type TranscriptionPolicyContext = "dictation" | "meeting" | "upload";
@@ -381,27 +351,13 @@ export function isControlPanelViewAllowed(
 }
 
 function policyModeHasAvailableProvider(
-  policy: OrgPolicy,
-  scope: PolicyScope,
-  mode: InferenceMode,
-  providerCatalog?: Pick<PolicySelectionCatalog, "byokProviders" | "enterpriseProviders">
+  _policy: OrgPolicy,
+  _scope: PolicyScope,
+  _mode: InferenceMode,
+  _providerCatalog?: Pick<PolicySelectionCatalog, "byokProviders" | "enterpriseProviders">
 ): boolean {
-  if (mode === "providers") {
-    return providerCatalog
-      ? providerCatalog.byokProviders.some((provider) =>
-          policy[scope].allowedByokProviders.includes(provider)
-        )
-      : policy[scope].allowedByokProviders.length > 0;
-  }
-  if (mode === "enterprise") {
-    const selectableProviders = providerCatalog?.enterpriseProviders ?? ["bedrock"];
-    return (
-      scope === "llm" &&
-      selectableProviders.some((provider) =>
-        policy.llm.allowedEnterpriseProviders.includes(provider)
-      )
-    );
-  }
+  // Local and self-hosted are the only modes left and neither draws from a
+  // provider allowlist, so every surviving mode always has a runtime.
   return true;
 }
 

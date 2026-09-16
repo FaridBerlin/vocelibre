@@ -214,28 +214,6 @@ function resolveScope(
     scope,
     setupMode
   ) as ManagedEnterpriseScopeResolution;
-  if (
-    resolution.kind === "managed" &&
-    !isLlmSelectionAllowed(usePolicyStore.getState(), {
-      mode: "enterprise",
-      provider: resolution.provider,
-    })
-  ) {
-    const required = resolution.mode === "managed_required" || !resolution.allowManualSetup;
-    logger.warn("Managed enterprise provider is blocked by workspace policy", {
-      provider: resolution.provider,
-      scope,
-      required,
-    });
-    return required
-      ? {
-          kind: "error",
-          code: "PROVIDER_POLICY_CONFLICT",
-          message:
-            "Managed access is blocked by your workspace policy. Contact your IT administrator.",
-        }
-      : { kind: "manual" };
-  }
   return resolution;
 }
 

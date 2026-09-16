@@ -2,9 +2,9 @@ import type { InferenceMode } from "../types/electron";
 
 export function supportsLiveTranscriptionPreview(
   mode: InferenceMode,
-  selectedCloudModelStreams = false
+  _selectedCloudModelStreams = false
 ): boolean {
-  return mode === "local" || (mode === "providers" && selectedCloudModelStreams);
+  return mode === "local";
 }
 
 export function buildLiveTranscriptionPreview(committedText = "", partialText = ""): string {

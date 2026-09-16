@@ -393,10 +393,8 @@ export default function ReasoningModelSelector({
     loading: tinfoilModelsLoading,
     error: tinfoilModelsError,
   } = useTinfoilModels(displayedCloudProvider === "tinfoil");
+  // Cloud/BYOK reasoning was removed, so local is the only tab left.
   const modeTabs = [
-    ...(isModeAllowedByPolicy(policyState, "llm", "providers") && cloudProviders.length > 0
-      ? [{ id: "cloud", name: t("reasoning.mode.cloud") }]
-      : []),
     ...(isModeAllowedByPolicy(policyState, "llm", "local")
       ? [{ id: "local", name: t("reasoning.mode.local") }]
       : []),
@@ -489,19 +487,14 @@ export default function ReasoningModelSelector({
   };
 
   const handleModeChange = (newMode: "cloud" | "local") => {
-    const policyMode = newMode === "local" ? "local" : "providers";
-    if (!isModeAllowedByPolicy(policyState, "llm", policyMode)) return;
-    if (newMode === "cloud" && cloudProviders.length === 0) return;
+    if (newMode !== "local") return;
+    if (!isModeAllowedByPolicy(policyState, "llm", "local")) return;
     setSelectedMode(newMode);
-    const inferenceMode: InferenceMode = newMode === "local" ? "local" : "providers";
+    const inferenceMode: InferenceMode = "local";
     setReasoningModeProp?.(inferenceMode);
     if (!isProviderValidForMode(localReasoningProvider, inferenceMode)) {
       setLocalReasoningProvider("");
       setReasoningModel("");
-    }
-
-    if (newMode === "cloud") {
-      window.electronAPI?.llamaServerStop?.();
     }
   };
 

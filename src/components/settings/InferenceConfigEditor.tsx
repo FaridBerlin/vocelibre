@@ -40,12 +40,6 @@ const MODE_LABEL_PREFIX: Record<InferenceScope, string> = {
   dictationTranslation: "settingsPage.aiModels.modes",
 };
 
-function startCloudOnboarding() {
-  localStorage.setItem("pendingCloudMigration", "true");
-  resetOnboardingProgress(localStorage);
-  window.location.reload();
-}
-
 interface InferenceConfigEditorProps {
   scope: InferenceScope;
   onModeChange?: (mode: InferenceMode) => void;
@@ -65,7 +59,6 @@ export default function InferenceConfigEditor({
       selectResolvedLLMConfig(selectPolicyEffectiveSettings(settings, policyState), scope)
     )
   );
-  const isSignedIn = useSettingsStore((s) => s.isSignedIn);
   const enterpriseSetupMode = useSettingsStore((s) => s.enterpriseSetupMode);
   const setEnterpriseSetupMode = useSettingsStore((s) => s.setEnterpriseSetupMode);
   const managed = useManagedScopeResolution(scope, enterpriseSetupMode);
@@ -75,20 +68,6 @@ export default function InferenceConfigEditor({
   const { modes, effectiveMode, isModeAllowed } = usePolicyModeOptions<InferenceModeOption>(
     (
       [
-        {
-          id: "openwhispr",
-          label: t(`${prefix}.openwhispr`),
-          description: t(`${prefix}.openwhisprDesc`),
-          icon: <Cloud className="w-4 h-4" />,
-          disabled: !isSignedIn,
-          badge: !isSignedIn ? t("common.freeAccountRequired") : undefined,
-        },
-        {
-          id: "providers",
-          label: t(`${prefix}.providers`),
-          description: t(`${prefix}.providersDesc`),
-          icon: <Key className="w-4 h-4" />,
-        },
         {
           id: "local",
           label: t(`${prefix}.local`),
@@ -101,20 +80,11 @@ export default function InferenceConfigEditor({
           description: t(`${prefix}.selfHostedDesc`),
           icon: <Network className="w-4 h-4" />,
         },
-        {
-          id: "enterprise",
-          label: t(`${prefix}.enterprise`),
-          description: t(`${prefix}.enterpriseDesc`),
-          icon: <Building2 className="w-4 h-4" />,
-        },
       ] as InferenceModeOption[]
     ).filter((mode) => !allowedModes || allowedModes.includes(mode.id)),
     "llm",
     config.mode,
-    {
-      byokProviders: LLM_POLICY_PROVIDER_IDS,
-      enterpriseProviders: LLM_ENTERPRISE_POLICY_PROVIDER_IDS,
-    }
+    { byokProviders: [] }
   );
 
   const setField = useCallback(
@@ -128,29 +98,23 @@ export default function InferenceConfigEditor({
   const handleModeSelect = useCallback(
     (mode: InferenceMode) => {
       if (!isModeAllowed(mode)) return;
-      if (mode === "openwhispr" && !isSignedIn) {
-        startCloudOnboarding();
-        return;
-      }
       if (mode === effectiveMode) return;
 
-      const patch: Parameters<typeof setResolvedLLMConfig>[1] = {
-        mode,
-        cloudMode: mode === "openwhispr" ? "openwhispr" : "byok",
-      };
+      const patch: Parameters<typeof setResolvedLLMConfig>[1] = { mode };
       if (!isProviderValidForMode(config.provider, mode)) {
         patch.provider = "";
         patch.model = "";
       }
       setResolvedLLMConfig(scope, patch);
 
-      if (mode === "openwhispr" || mode === "self-hosted" || mode === "enterprise") {
+      // Only the local runtime needs llama-server; anything else releases it.
+      if (mode !== "local") {
         window.electronAPI?.llamaServerStop?.();
       }
 
       onModeChange?.(mode);
     },
-    [scope, config.provider, effectiveMode, isSignedIn, onModeChange, isModeAllowed]
+    [scope, config.provider, effectiveMode, onModeChange, isModeAllowed]
   );
 
   const setMode = setField("mode");
@@ -174,10 +138,6 @@ export default function InferenceConfigEditor({
 
   const showThinkingToggle =
     effectiveMode === "self-hosted" ||
-    (effectiveMode === "providers" &&
-      (config.provider === "custom" ||
-        config.provider === "openrouter" ||
-        !!getCloudModel(config.model)?.supportsThinking)) ||
     (effectiveMode === "local" && !!getLocalModel(config.model)?.supportsThinking);
 
   if (managed.kind === "error") {
@@ -266,7 +226,6 @@ export default function InferenceConfigEditor({
       )}
       <InferenceModeSelector modes={modes} activeMode={effectiveMode} onSelect={handleModeSelect} />
 
-      {effectiveMode === "providers" && renderModelSelector("cloud")}
       {effectiveMode === "local" && renderModelSelector("local")}
 
       {effectiveMode === "self-hosted" && (
@@ -296,15 +255,6 @@ export default function InferenceConfigEditor({
           </div>
           <Toggle checked={config.disableThinking} onChange={setField("disableThinking")} />
         </div>
-      )}
-
-      {effectiveMode === "enterprise" && (
-        <EnterpriseSection
-          currentProvider={config.provider}
-          reasoningModel={config.model}
-          setReasoningModel={setModel}
-          setLocalReasoningProvider={setProvider}
-        />
       )}
     </div>
   );

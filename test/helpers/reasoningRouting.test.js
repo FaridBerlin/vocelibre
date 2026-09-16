@@ -3,9 +3,9 @@ const assert = require("node:assert/strict");
 
 const load = () => import("../../src/helpers/reasoningRouting.js");
 
-test("byok cloud provider maps to the providers mode", async () => {
+test("a byok provider with no cloud left falls back to local", async () => {
   const { deriveReasoningMode } = await load();
-  assert.equal(deriveReasoningMode("byok", "corti"), "providers");
+  assert.equal(deriveReasoningMode("byok", "corti"), "local");
 });
 
 test("byok custom provider maps to the self-hosted mode", async () => {
@@ -13,9 +13,9 @@ test("byok custom provider maps to the self-hosted mode", async () => {
   assert.equal(deriveReasoningMode("byok", "custom"), "self-hosted");
 });
 
-test("openwhispr cloud mode maps to the openwhispr mode", async () => {
+test("a remembered managed-cloud mode falls back to local", async () => {
   const { deriveReasoningMode } = await load();
-  assert.equal(deriveReasoningMode("openwhispr", "corti"), "openwhispr");
+  assert.equal(deriveReasoningMode("openwhispr", "corti"), "local");
 });
 
 test("fan-out routes provider, model and mode to all five scopes", async () => {

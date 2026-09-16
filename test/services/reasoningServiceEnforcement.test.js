@@ -125,14 +125,6 @@ test("ReasoningService entry points enforce the org policy", async (t) => {
     await assert.rejects(stream.next(), { message: REASONING_RESTRICTED });
   });
 
-  await t.test("cloud agent streaming enforces the openwhispr mode", async () => {
-    setPolicy({ llmModes: ["providers"], llmByokProviders: ["openai"] });
-    const stream = reasoningService.processTextStreamingCloud([{ role: "user", content: "hi" }], {
-      systemPrompt: "s",
-    });
-    await assert.rejects(stream.next(), { message: REASONING_RESTRICTED });
-  });
-
   await t.test("managed Custom endpoints fail closed before inference dispatch", async () => {
     setPolicy({ llmModes: ["providers"], llmByokProviders: ["custom"] });
     const originalFetch = globalThis.fetch;
@@ -184,11 +176,11 @@ test("ReasoningService entry points enforce the org policy", async (t) => {
   });
 
   await t.test("a scope's custom endpoint never borrows the cleanup key", async () => {
-    setPolicy({ llmModes: ["providers"], llmByokProviders: ["custom"] });
+    setPolicy({ llmModes: ["self-hosted"] });
     useSettingsStore.setState({
-      cleanupMode: "providers",
-      cleanupProvider: "custom",
-      cleanupCloudBaseUrl: "https://cleanup.example.com/v1",
+      cleanupMode: "self-hosted",
+      cleanupProvider: "lan",
+      cleanupRemoteUrl: "https://cleanup.example.com/v1",
       cleanupCustomApiKey: "cleanup-secret",
     });
 
@@ -236,12 +228,12 @@ test("ReasoningService entry points enforce the org policy", async (t) => {
     }
   });
 
-  await t.test("normal cleanup uses its saved valid Custom endpoint", async () => {
-    setPolicy({ llmModes: ["providers"], llmByokProviders: ["custom"] });
+  await t.test("normal cleanup uses its saved self-hosted endpoint", async () => {
+    setPolicy({ llmModes: ["self-hosted"] });
     useSettingsStore.setState({
-      cleanupMode: "providers",
-      cleanupProvider: "custom",
-      cleanupCloudBaseUrl: "https://custom.example.com/v1",
+      cleanupMode: "self-hosted",
+      cleanupProvider: "lan",
+      cleanupRemoteUrl: "https://custom.example.com/v1",
       cleanupCustomApiKey: "custom-key",
     });
 

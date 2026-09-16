@@ -9,7 +9,7 @@ export type LocalTranscriptionProvider = "whisper" | "nvidia" | "cohere";
 
 export type ChineseScriptPreference = "simplified" | "traditional" | "as-transcribed";
 
-export type InferenceMode = "openwhispr" | "providers" | "local" | "self-hosted" | "enterprise";
+export type InferenceMode = "local" | "self-hosted";
 
 export type SelfHostedType = "openai-compatible" | "lan";
 
