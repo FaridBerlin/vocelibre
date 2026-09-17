@@ -60,6 +60,14 @@ local SQLite mirror it wrote through already existed, so `renameSpace` /
 
 ## Known loose ends
 
+0. **Two regressions the tests caught**, both now fixed and worth knowing about
+   if you touch self-hosted routing: `custom` lost its provider registry entry
+   when the OpenAI provider was deleted, and the ambient `cleanupRemoteUrl`
+   fallback could override an endpoint passed on the call (which would have
+   sent another scope's request, plus the shared cleanup key, to the cleanup
+   endpoint). `test/services/reasoningServiceEnforcement.test.js` is what
+   guards this — keep it.
+
 1. **`test/helpers/uiLanguageStartup.test.js`** — "fresh Chinese browser locale
    survives settings hydration" fails with `transport was disconnected, cannot
    call "fetchModule"` from Vite 8's `SSRCompatModuleRunner`. **Pre-existing**,
