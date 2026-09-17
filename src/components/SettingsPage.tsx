@@ -91,7 +91,13 @@ import type {
   InferenceMode,
 } from "../types/electron";
 import logger from "../utils/logger";
-import { SettingsRow, InferenceModeSelector } from "./ui/SettingsSection";
+import {
+  SectionHeader,
+  SettingsPanel,
+  SettingsPanelRow,
+  SettingsRow,
+  InferenceModeSelector,
+} from "./ui/SettingsSection";
 import type { InferenceModeOption } from "./ui/SettingsSection";
 import { useSettingsLayout } from "./ui/useSettingsLayout";
 import { cn } from "./lib/utils";
@@ -145,56 +151,6 @@ const RETENTION_SELECT_CLASS =
   "h-7 rounded border border-border/70 bg-surface-1/80 px-2.5 text-xs font-medium text-foreground shadow-sm backdrop-blur-sm hover:border-border-hover hover:bg-surface-2/70 focus:outline-none focus:ring-2 focus:ring-ring/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-200";
 
 const noop = () => {};
-
-function SettingsPanel({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`rounded-lg border border-border/50 dark:border-border-subtle/70 bg-card/50 dark:bg-surface-2/50 backdrop-blur-sm divide-y divide-border/30 dark:divide-border-subtle/50 ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-function SettingsPanelRow({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  const { isCompact } = useSettingsLayout();
-
-  return (
-    <div className={`${isCompact ? "px-3 py-2.5" : "px-4 py-3"} ${className}`}>{children}</div>
-  );
-}
-
-function SectionHeader({
-  title,
-  description,
-  note,
-}: {
-  title: string;
-  description?: string;
-  note?: string;
-}) {
-  return (
-    <div className="mb-3">
-      <h3 className="text-xs font-semibold text-foreground tracking-tight">{title}</h3>
-      {description && (
-        <p className="text-xs text-muted-foreground/80 mt-0.5 leading-relaxed">{description}</p>
-      )}
-      {note && <p className="text-xs text-muted-foreground/80 mt-0.5 leading-relaxed">{note}</p>}
-    </div>
-  );
-}
 
 interface GranolaImportPreview {
   total: number;
@@ -1546,7 +1502,7 @@ export default function SettingsPage({
     switch (activeSection) {
       case "general":
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Appearance */}
             <div>
               <SectionHeader
@@ -2480,7 +2436,7 @@ EOF`,
 
       case "hotkeys":
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {isUsingHyprland && hyprlandConfigStatus && !hyprlandConfigStatus.canWrite && (
               <Alert>
                 <Info className="h-4 w-4" />
@@ -2653,7 +2609,7 @@ EOF`,
 
       case "privacyData":
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Privacy */}
             <div>
               <SectionHeader
@@ -2892,7 +2848,7 @@ EOF`,
 
       case "system":
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Software Updates */}
             <div>
               <SectionHeader title={t("settingsPage.general.updates.title")} />
@@ -3188,7 +3144,7 @@ EOF`,
                 : undefined
             }
             renderDictation={() => (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <TranscriptionSection
                   cloudTranscriptionMode={cloudTranscriptionMode}
                   setCloudTranscriptionMode={setCloudTranscriptionMode}
@@ -3225,7 +3181,7 @@ EOF`,
               </div>
             )}
             renderNoteRecording={() => (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <MeetingTranscriptionPanel />
                 {transcriptionMode === "local" &&
                   localTranscriptionProvider === "whisper" &&
@@ -3233,7 +3189,7 @@ EOF`,
               </div>
             )}
             renderUpload={() => (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <UploadTranscriptionPanel />
               </div>
             )}

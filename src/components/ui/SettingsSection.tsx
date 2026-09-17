@@ -19,9 +19,11 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   return (
     <div className={`space-y-3 ${className}`}>
       <div>
-        <h3 className="text-xs font-semibold text-foreground tracking-tight">{title}</h3>
+        <h3 className="text-[13px] font-semibold text-foreground tracking-tight leading-tight">
+          {title}
+        </h3>
         {description && (
-          <p className="text-xs text-muted-foreground/80 mt-0.5 leading-relaxed">{description}</p>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
         )}
       </div>
       {children}
@@ -97,7 +99,7 @@ export function SettingsPanel({
 }) {
   return (
     <div
-      className={`rounded-lg border border-border/50 dark:border-border-subtle/70 bg-card/50 dark:bg-surface-2/50 backdrop-blur-sm divide-y divide-border/30 dark:divide-border-subtle/50 ${className}`}
+      className={`rounded-xl border border-border/60 dark:border-border-subtle/70 bg-card/60 dark:bg-surface-2/50 backdrop-blur-sm divide-y divide-border/30 dark:divide-border-subtle/50 ${className}`}
     >
       {children}
     </div>
@@ -114,17 +116,28 @@ export function SettingsPanelRow({
   const { isCompact } = useSettingsLayout();
 
   return (
-    <div className={`${isCompact ? "px-3 py-2.5" : "px-4 py-3"} ${className}`}>{children}</div>
+    <div className={`${isCompact ? "px-3.5 py-3" : "px-4 py-3.5"} ${className}`}>{children}</div>
   );
 }
 
-export function SectionHeader({ title, description }: { title: string; description?: string }) {
+export function SectionHeader({
+  title,
+  description,
+  note,
+}: {
+  title: string;
+  description?: string;
+  note?: string;
+}) {
   return (
-    <div className="mb-3">
-      <h3 className="text-xs font-semibold text-foreground tracking-tight">{title}</h3>
+    <div className="mb-3.5">
+      <h3 className="text-[13px] font-semibold text-foreground tracking-tight leading-tight">
+        {title}
+      </h3>
       {description && (
-        <p className="text-xs text-muted-foreground/80 mt-0.5 leading-relaxed">{description}</p>
+        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
       )}
+      {note && <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{note}</p>}
     </div>
   );
 }
