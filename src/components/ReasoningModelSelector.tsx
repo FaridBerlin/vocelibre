@@ -26,13 +26,6 @@ import { getRemoteProviderIcon } from "../utils/providerIcons";
 import { GetApiKeyLink } from "./ui/GetApiKeyLink";
 import { getCachedPlatform } from "../utils/platform";
 import { useSettingsStore } from "../stores/settingsStore";
-import {
-  filterByokProviderOptionsByPolicy,
-  isModeAllowedByPolicy,
-  isProviderAllowedByPolicy,
-  reconcileProviderSelection,
-} from "../stores/policyRules";
-import { usePolicySnapshot } from "../hooks/usePolicy";
 
 type CloudModelOption = {
   value: string;
@@ -362,31 +355,23 @@ export default function ReasoningModelSelector({
   const [selectedMode, setSelectedMode] = useState<"cloud" | "local">(mode || "cloud");
   const [selectedCloudProvider, setSelectedCloudProvider] = useState("openai");
   const [selectedLocalProvider, setSelectedLocalProvider] = useState("qwen");
-  const policyState = usePolicySnapshot();
-  const providerAllowed = useCallback(
-    (providerId: string) => isProviderAllowedByPolicy(policyState, "llm", providerId),
-    [policyState]
-  );
+  const providerAllowed = useCallback((providerId: string) => true, []);
 
   const cloudProviderTabs = useMemo(
     () =>
-      filterByokProviderOptionsByPolicy(
-        CLOUD_PROVIDER_IDS.map((id): ProviderTabItem => ({
-          id,
-          name:
-            id === "custom"
-              ? t("reasoning.custom.providerName")
-              : id === OPENROUTER_TAB
-                ? "OpenRouter"
-                : REASONING_PROVIDERS[id as keyof typeof REASONING_PROVIDERS]?.name || id,
-        })),
-        "llm",
-        policyState
-      ),
-    [policyState, t]
+      CLOUD_PROVIDER_IDS.map((id): ProviderTabItem => ({
+        id,
+        name:
+          id === "custom"
+            ? t("reasoning.custom.providerName")
+            : id === OPENROUTER_TAB
+              ? "OpenRouter"
+              : REASONING_PROVIDERS[id as keyof typeof REASONING_PROVIDERS]?.name || id,
+      })),
+    [t]
   );
   const cloudProviders = cloudProviderTabs;
-  const cloudProviderFallback = reconcileProviderSelection(selectedCloudProvider, cloudProviders);
+  const cloudProviderFallback = null;
   const displayedCloudProvider = cloudProviderFallback ?? selectedCloudProvider;
   const {
     models: tinfoilModels,
@@ -394,11 +379,7 @@ export default function ReasoningModelSelector({
     error: tinfoilModelsError,
   } = useTinfoilModels(displayedCloudProvider === "tinfoil");
   // Cloud/BYOK reasoning was removed, so local is the only tab left.
-  const modeTabs = [
-    ...(isModeAllowedByPolicy(policyState, "llm", "local")
-      ? [{ id: "local", name: t("reasoning.mode.local") }]
-      : []),
-  ];
+  const modeTabs = [...(true ? [{ id: "local", name: t("reasoning.mode.local") }] : [])];
   const effectiveMode =
     mode ??
     (modeTabs.some((tab) => tab.id === selectedMode)
@@ -488,7 +469,7 @@ export default function ReasoningModelSelector({
 
   const handleModeChange = (newMode: "cloud" | "local") => {
     if (newMode !== "local") return;
-    if (!isModeAllowedByPolicy(policyState, "llm", "local")) return;
+    if (!true) return;
     setSelectedMode(newMode);
     const inferenceMode: InferenceMode = "local";
     setReasoningModeProp?.(inferenceMode);

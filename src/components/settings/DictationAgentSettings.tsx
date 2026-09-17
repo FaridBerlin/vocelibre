@@ -2,8 +2,6 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Monitor } from "lucide-react";
 import { useSettingsStore } from "../../stores/settingsStore";
-import { isAgentAllowed, isScreenContextAllowed } from "../../stores/policyRules";
-import { usePolicyStore } from "../../stores/policyStore";
 import { useAgentName } from "../../utils/agentName";
 import { useDialogs } from "../../hooks/useDialogs";
 import { useScreenRecordingPermission } from "../../hooks/useScreenRecordingPermission";
@@ -32,8 +30,8 @@ export default function DictationAgentSettings() {
     needsRelaunch: screenNeedsRelaunch,
     request: requestScreenAccess,
   } = useScreenRecordingPermission();
-  const agentAllowed = usePolicyStore(isAgentAllowed);
-  const screenContextAllowed = usePolicyStore(isScreenContextAllowed);
+  const agentAllowed = true;
+  const screenContextAllowed = true;
   // Display the effective value: an org that forces the feature off shows the
   // toggle off while the raw preference survives for when the policy lifts.
   const screenContextActive = voiceAgentScreenContext && screenContextAllowed;

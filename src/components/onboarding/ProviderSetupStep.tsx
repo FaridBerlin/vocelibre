@@ -7,12 +7,6 @@ import { ProviderIcon } from "../ui/ProviderIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { useModelDownload } from "../../hooks/useModelDownload";
 import { useSettingsStore } from "../../stores/settingsStore";
-import { usePolicySnapshot } from "../../hooks/usePolicy";
-import {
-  filterByokProviderOptionsByPolicy,
-  isModeAllowedByPolicy,
-  isProviderAllowedByPolicy,
-} from "../../stores/policyRules";
 import {
   getTranscriptionProviders,
   getParakeetModels,

@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { usePolicyStore } from "../stores/policyStore";
 import {
   Sliders,
   Mic,
@@ -57,7 +56,7 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ open, onOpenChange, initialSection }: SettingsModalProps) {
   const { t } = useTranslation();
-  const policyManaged = usePolicyStore((s) => s.managed);
+  const policyManaged = false;
   const sidebarItems: SidebarItem<SettingsSectionType>[] = useMemo(() => {
     const items: SidebarItem<SettingsSectionType>[] = [
       {

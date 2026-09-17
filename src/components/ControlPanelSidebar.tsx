@@ -22,8 +22,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "./lib/utils";
 import SupportDropdown from "./ui/SupportDropdown";
 import { getCachedPlatform } from "../utils/platform";
-import { isAgentAllowed, isPolicyActionAllowed } from "../stores/policyRules";
-import { usePolicyStore } from "../stores/policyStore";
 
 const platform = getCachedPlatform();
 
@@ -52,8 +50,8 @@ export default function ControlPanelSidebar({
   updateAction,
 }: ControlPanelSidebarProps) {
   const { t } = useTranslation();
-  const agentAllowed = usePolicyStore(isAgentAllowed);
-  const policyActionsAllowed = usePolicyStore((state) => isPolicyActionAllowed(state));
+  const agentAllowed = true;
+  const policyActionsAllowed = true;
 
   const navItems: {
     id: ControlPanelView;

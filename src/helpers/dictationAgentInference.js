@@ -62,10 +62,10 @@ export function resolveDictationAgentInference(settings, { isCloudAgent = false 
 // unset fields inherit the agent's own config, and treated as "active" only
 // once the user has actually chosen a target — an inherited config is the
 // agent scope, which the base routing rules already cover.
-export function resolveDictationAgentVisionInference(settings, { isSignedIn = false } = {}) {
+export function resolveDictationAgentVisionInference(settings) {
   const resolved = selectResolvedLLMConfig(settings, "dictationAgentVision");
   const mode = resolved.mode;
-  const isCloud = isSignedIn && mode === "openwhispr" && resolved.cloudMode === "openwhispr";
+  const isCloud = false;
   const model = resolved.model?.trim() || "";
   const storedProvider = resolved.provider?.trim() || "";
   const providerForMode = isProviderValidForMode(storedProvider, mode) ? storedProvider : undefined;

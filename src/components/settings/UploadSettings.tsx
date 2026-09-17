@@ -1,8 +1,8 @@
 import { useCallback } from "react";
+import { useInferenceModeOptions } from "../../hooks/useInferenceModeOptions";
 import { useTranslation } from "react-i18next";
 import { Cloud, Key, Cpu, Network } from "lucide-react";
 import { TRANSCRIPTION_POLICY_PROVIDER_IDS, useSettingsStore } from "../../stores/settingsStore";
-import { usePolicyModeOptions } from "../../hooks/usePolicy";
 import { InferenceModeSelector } from "../ui/SettingsSection";
 import type { InferenceModeOption } from "../ui/SettingsSection";
 import TranscriptionModelPicker from "../TranscriptionModelPicker";
@@ -42,7 +42,7 @@ export function UploadTranscriptionPanel() {
     modes: transcriptionModes,
     effectiveMode: effectiveTranscriptionMode,
     isModeAllowed,
-  } = usePolicyModeOptions<InferenceModeOption>(
+  } = useInferenceModeOptions<InferenceModeOption>(
     [
       {
         id: "local",
@@ -57,9 +57,7 @@ export function UploadTranscriptionPanel() {
         icon: <Network className="w-4 h-4" />,
       },
     ],
-    "transcription",
-    uploadTranscriptionMode,
-    { byokProviders: TRANSCRIPTION_POLICY_PROVIDER_IDS }
+    uploadTranscriptionMode
   );
   const handleTranscriptionModeSelect = (mode: InferenceMode) => {
     if (!isModeAllowed(mode)) return;

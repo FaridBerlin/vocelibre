@@ -1,11 +1,6 @@
 import { useState, useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
-import {
-  selectIsCloudCleanupMode,
-  selectPolicyEffectiveSettings,
-  useSettingsStore,
-} from "../stores/settingsStore";
-import { usePolicySnapshot } from "./usePolicy";
+import { selectIsCloudCleanupMode, useSettingsStore } from "../stores/settingsStore";
 
 interface UseNotesOnboardingReturn {
   isComplete: boolean;
@@ -19,10 +14,10 @@ export function useNotesOnboarding(): UseNotesOnboardingReturn {
   // There is no paid tier any more: every feature is available to everyone.
   const isProUser = true;
   const isProLoading = false;
-  const policyState = usePolicySnapshot();
+  const policyState = null;
   const { useCleanupModel, effectiveModel, isCloudCleanup } = useSettingsStore(
     useShallow((settings) => {
-      const effective = selectPolicyEffectiveSettings(settings, policyState);
+      const effective = settings;
       return {
         useCleanupModel: effective.useCleanupModel,
         effectiveModel: effective.cleanupModel,

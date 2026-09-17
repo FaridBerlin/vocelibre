@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
+import { useInferenceModeOptions } from "../hooks/useInferenceModeOptions";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -112,17 +113,6 @@ import {
   TRANSCRIPTION_POLICY_PROVIDER_IDS,
   useSettingsStore,
 } from "../stores/settingsStore";
-import {
-  canChangeCloudBackupPreference,
-  effectiveAudioRetentionDays,
-  effectiveLocalHistoryEnabled,
-  isAgentAllowed,
-  isCloudBackupAllowed,
-  lockedLocalHistoryValue,
-  maxAudioRetentionDays,
-} from "../stores/policyRules";
-import { usePolicyModeOptions, usePolicySnapshot } from "../hooks/usePolicy";
-import { usePolicyStore } from "../stores/policyStore";
 import { canManageSystemAudioInApp } from "../utils/systemAudioAccess";
 import { formatAmount } from "../utils/formatAmount";
 import { getTranscriptionProvider } from "../models/ModelRegistry";
@@ -523,7 +513,7 @@ function TranscriptionSection({
     modes: transcriptionModes,
     effectiveMode: effectiveTranscriptionMode,
     isModeAllowed,
-  } = usePolicyModeOptions<InferenceModeOption>(
+  } = useInferenceModeOptions<InferenceModeOption>(
     [
       {
         id: "local",
@@ -538,9 +528,7 @@ function TranscriptionSection({
         icon: <Network className="w-4 h-4" />,
       },
     ],
-    "transcription",
-    transcriptionMode,
-    { byokProviders: TRANSCRIPTION_POLICY_PROVIDER_IDS }
+    transcriptionMode
   );
   const handleTranscriptionModeSelect = (mode: InferenceMode) => {
     if (!isModeAllowed(mode)) return;
@@ -886,7 +874,7 @@ function LlmsTabs({
   renderChatIntelligence: () => React.ReactNode;
 }) {
   const { t } = useTranslation();
-  const agentAllowed = usePolicyStore(isAgentAllowed);
+  const agentAllowed = true;
   const visibleTabIds = agentAllowed
     ? LLM_TABS
     : LLM_TABS.filter((tabId) => !AGENT_LLM_TABS.has(tabId));
@@ -1128,19 +1116,14 @@ export default function SettingsPage({
   const translationKey = useSettingsStore((s) => s.translationKey);
   const setTranslationKey = useSettingsStore((s) => s.setTranslationKey);
 
-  const settingsPolicyState = usePolicySnapshot();
-  const agentAllowedByPolicy = isAgentAllowed(settingsPolicyState);
-  const historyLockedByPolicy = lockedLocalHistoryValue(settingsPolicyState) !== null;
-  const effectiveDataRetentionEnabled = effectiveLocalHistoryEnabled(
-    settingsPolicyState,
-    dataRetentionEnabled
-  );
-  const cloudBackupPolicyAllowed = isCloudBackupAllowed(settingsPolicyState);
-  const audioRetentionCap = maxAudioRetentionDays(settingsPolicyState);
-  const enforcedAudioRetentionDays = effectiveAudioRetentionDays(
-    settingsPolicyState,
-    audioRetentionDays
-  );
+  const agentAllowedByPolicy = true;
+  // History retention and the audio-retention cap used to be overridable by org
+  // policy; with no workspace the user's own preferences are the effective ones.
+  const historyLockedByPolicy = false;
+  const effectiveDataRetentionEnabled = dataRetentionEnabled;
+  const cloudBackupPolicyAllowed = true;
+  const audioRetentionCap = null;
+  const enforcedAudioRetentionDays = audioRetentionDays;
 
   const { t, i18n } = useTranslation();
   const { toast } = useToast();

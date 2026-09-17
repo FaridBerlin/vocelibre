@@ -16,7 +16,6 @@ import type { NoteItem } from "../../types/electron";
 import {
   useSettingsStore,
   selectIsCloudNoteFormattingMode,
-  selectPolicyEffectiveSettings,
   selectResolvedNoteFormatting,
 } from "../../stores/settingsStore";
 import { cn } from "../lib/utils";
@@ -60,7 +59,6 @@ import {
   setSessionExpectedCount,
 } from "../../stores/meetingRecordingStore";
 import { useNotesOnboarding } from "../../hooks/useNotesOnboarding";
-import { usePolicySnapshot, useTranscriptionContextAllowed } from "../../hooks/usePolicy";
 import NotesOnboarding from "./NotesOnboarding";
 import { notesEmptyTitleKey } from "./shared";
 import { isRegenerableNoteTitle } from "../../helpers/regenerableNoteTitle";
@@ -214,10 +212,10 @@ export default function PersonalNotesView({
     [commitDraft, persistPendingWrites, takePendingSnapshots]
   );
   const { toast } = useToast();
-  const policyState = usePolicySnapshot();
+  const policyState = null;
   const noteFormatting = useSettingsStore(
     useShallow((settings) => {
-      const effectiveSettings = selectPolicyEffectiveSettings(settings, policyState);
+      const effectiveSettings = settings;
       return {
         isCloudMode: selectIsCloudNoteFormattingMode(effectiveSettings),
         modelId: selectResolvedNoteFormatting(effectiveSettings).model,
@@ -240,7 +238,7 @@ export default function PersonalNotesView({
   const sessionDiarizationEnabled = useMeetingRecordingStore((s) => s.sessionDiarizationEnabled);
   const sessionExpectedCount = useMeetingRecordingStore((s) => s.sessionExpectedCount);
   const userTouchedStepper = useMeetingRecordingStore((s) => s.userTouchedStepper);
-  const meetingRecordingAllowed = useTranscriptionContextAllowed("meeting");
+  const meetingRecordingAllowed = true;
 
   const spaces = useSpaces();
   const folders = useFolders();

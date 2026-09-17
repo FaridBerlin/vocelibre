@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useInferenceModeOptions } from "../../hooks/useInferenceModeOptions";
 import { useShallow } from "zustand/react/shallow";
 import { useTranslation } from "react-i18next";
 import { Cloud, Key, Cpu, Network, Building2, ShieldCheck, AlertTriangle } from "lucide-react";
@@ -6,11 +7,9 @@ import {
   LLM_ENTERPRISE_POLICY_PROVIDER_IDS,
   LLM_POLICY_PROVIDER_IDS,
   useSettingsStore,
-  selectPolicyEffectiveSettings,
   selectResolvedLLMConfig,
   setResolvedLLMConfig,
 } from "../../stores/settingsStore";
-import { usePolicyModeOptions, usePolicySnapshot } from "../../hooks/usePolicy";
 import { InferenceModeSelector } from "../ui/SettingsSection";
 import type { InferenceModeOption } from "../ui/SettingsSection";
 import ReasoningModelSelector from "../ReasoningModelSelector";
@@ -50,15 +49,13 @@ export default function InferenceConfigEditor({
   allowedModes,
 }: InferenceConfigEditorProps) {
   const { t } = useTranslation();
-  const policyState = usePolicySnapshot();
+  const policyState = null;
   const config = useSettingsStore(
-    useShallow((settings) =>
-      selectResolvedLLMConfig(selectPolicyEffectiveSettings(settings, policyState), scope)
-    )
+    useShallow((settings) => selectResolvedLLMConfig(settings, scope))
   );
 
   const prefix = MODE_LABEL_PREFIX[scope];
-  const { modes, effectiveMode, isModeAllowed } = usePolicyModeOptions<InferenceModeOption>(
+  const { modes, effectiveMode, isModeAllowed } = useInferenceModeOptions<InferenceModeOption>(
     (
       [
         {
@@ -75,9 +72,7 @@ export default function InferenceConfigEditor({
         },
       ] as InferenceModeOption[]
     ).filter((mode) => !allowedModes || allowedModes.includes(mode.id)),
-    "llm",
-    config.mode,
-    { byokProviders: [] }
+    config.mode
   );
 
   const setField = useCallback(

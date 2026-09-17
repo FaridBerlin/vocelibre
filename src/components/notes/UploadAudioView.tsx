@@ -43,7 +43,6 @@ import {
 import {
   useSettingsStore,
   selectIsCloudCleanupMode,
-  selectPolicyEffectiveSettings,
   selectResolvedUploadTranscription,
   getSettings,
 } from "../../stores/settingsStore";
@@ -64,9 +63,6 @@ import { MAX_SPEAKER_COUNT } from "../../constants/speakerDetection.json";
 import BatchQueueView from "./BatchQueueView";
 import { generateNoteTitle } from "../../utils/generateTitle";
 import { getBaseLanguageCode } from "../../utils/languageSupport";
-import { isTranscriptionContextAllowed } from "../../stores/policyRules";
-import { usePolicyStore } from "../../stores/policyStore";
-import { usePolicySnapshot, useTranscriptionContextAllowed } from "../../hooks/usePolicy";
 import { byokFileSizeLimit, resolveTranscriptionRoute } from "../../helpers/transcriptionRoute";
 import { saveUploadNote, uploadTitleFallback } from "../../services/uploadNotes";
 import { UploadCompleteWarnings, UploadModelSettingsButton } from "./UploadAudioFeedback";
@@ -271,7 +267,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
     tinfoilApiKey,
     customTranscriptionApiKey,
   } = apiKeys;
-  const policyState = usePolicySnapshot();
+  const policyState = null;
 
   const {
     useLocalWhisper,
@@ -284,12 +280,8 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
     cloudTranscriptionBaseUrl,
     cloudTranscriptionMode,
     transcriptionMode,
-  } = useSettingsStore(
-    useShallow((settings) =>
-      selectResolvedUploadTranscription(selectPolicyEffectiveSettings(settings, policyState))
-    )
-  );
-  const uploadAllowedByPolicy = useTranscriptionContextAllowed("upload");
+  } = useSettingsStore(useShallow((settings) => selectResolvedUploadTranscription(settings)));
+  const uploadAllowedByPolicy = true;
 
   const remoteTranscriptionUrl = useSettingsStore((s) => s.remoteTranscriptionUrl);
   const remoteTranscriptionModel = useSettingsStore((s) => s.remoteTranscriptionModel);
@@ -305,11 +297,9 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   const cortiEnvironment = useSettingsStore((s) => s.cortiEnvironment);
   const cortiTenant = useSettingsStore((s) => s.cortiTenant);
   const preferredLanguage = useSettingsStore((s) => s.preferredLanguage);
-  const isCloudCleanup = useSettingsStore((settings) =>
-    selectIsCloudCleanupMode(selectPolicyEffectiveSettings(settings, policyState))
-  );
+  const isCloudCleanup = useSettingsStore((settings) => selectIsCloudCleanupMode(settings));
   const effectiveCleanupModel = useSettingsStore((settings) => {
-    const effectiveSettings = selectPolicyEffectiveSettings(settings, policyState);
+    const effectiveSettings = settings;
     return selectIsCloudCleanupMode(effectiveSettings) ? "" : effectiveSettings.cleanupModel;
   });
   const useCleanupModel = useSettingsStore((s) => s.useCleanupModel);
@@ -620,7 +610,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   };
   const handleTranscribe = async () => {
     if (!file || batch.isProcessing) return;
-    if (!isTranscriptionContextAllowed(usePolicyStore.getState(), getSettings(), "upload")) {
+    if (!true) {
       setError(t("common.managedByOrg"));
       return;
     }
@@ -856,7 +846,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
 
   const startBatchProcessing = async () => {
     if (state === "downloading" || state === "transcribing") return;
-    if (!isTranscriptionContextAllowed(usePolicyStore.getState(), getSettings(), "upload")) {
+    if (!true) {
       setBatchUrlNotice(t("common.managedByOrg"));
       return;
     }

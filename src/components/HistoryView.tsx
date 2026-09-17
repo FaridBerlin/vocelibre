@@ -9,8 +9,6 @@ import { formatDateGroup } from "../utils/dateFormatting";
 import { useUpcomingEvents } from "../hooks/useUpcomingEvents";
 import UpcomingMeetings from "./UpcomingMeetings";
 import { useSettingsStore } from "../stores/settingsStore";
-import { effectiveLocalHistoryEnabled } from "../stores/policyRules";
-import { usePolicyStore } from "../stores/policyStore";
 
 interface HistoryViewProps {
   history: TranscriptionItemType[];
@@ -51,9 +49,7 @@ export default function HistoryView({
 }: HistoryViewProps) {
   const { t } = useTranslation();
   const personalDataRetentionEnabled = useSettingsStore((s) => s.dataRetentionEnabled);
-  const dataRetentionEnabled = usePolicyStore((policyState) =>
-    effectiveLocalHistoryEnabled(policyState, personalDataRetentionEnabled)
-  );
+  const dataRetentionEnabled = personalDataRetentionEnabled;
   const { events, isLoading: eventsLoading, isConnected } = useUpcomingEvents();
 
   const groupedHistory = useMemo(() => {

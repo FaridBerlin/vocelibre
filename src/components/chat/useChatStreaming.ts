@@ -5,12 +5,6 @@ import { getCloudModel, isEnterpriseProvider } from "../../models/ModelRegistry"
 import { PROVIDER_REGISTRY } from "../../services/ai/inferenceProviders";
 import { getSettings, selectResolvedLLMConfig } from "../../stores/settingsStore";
 import {
-  isAgentAllowed,
-  isLlmSelectionAllowed,
-  isWebSearchAllowed,
-} from "../../stores/policyRules";
-import { usePolicyStore } from "../../stores/policyStore";
-import {
   appendDictionarySuffix,
   appendScreenContextSuffix,
   getAgentSystemPrompt,
@@ -235,14 +229,11 @@ export function useChatStreaming({
       const settings = getSettings();
       const chatConfig = selectResolvedLLMConfig(settings, "chatIntelligence");
       const chatAgentMode = chatConfig.mode || "local";
-      const policyState = usePolicyStore.getState();
+      const policyState = null;
       const policyProvider = chatAgentMode === "local" ? "local" : chatConfig.provider;
-      if (
-        !isAgentAllowed(policyState) ||
-        !isLlmSelectionAllowed(policyState, { mode: chatAgentMode, provider: policyProvider })
-      ) {
+      if (!true || !true) {
         // The user message is already appended; answer it instead of dead-ending silently.
-        const restriction = !isAgentAllowed(policyState)
+        const restriction = !true
           ? t("common.policyAgentRestricted")
           : t("common.policyAiProcessingRestricted");
         announceResponse();

@@ -35,7 +35,6 @@ import { createStreamingThinkFilter } from "./ai/streamingThinkFilter";
 import { extractApiErrorMessage } from "./ai/apiErrorMessage";
 import { clearTinfoilClientCache } from "./ai/tinfoilClient";
 import { resolveChatRoute } from "../helpers/chatRouting";
-import { assertAgentAllowedByPolicy, assertReasoningAllowedByPolicy } from "./reasoningPolicy";
 import type { InferenceMode } from "../types/electron";
 
 export type ToolMetadata = Record<string, unknown> | Array<Record<string, unknown>>;
@@ -87,10 +86,9 @@ function resolveLlmDispatchMode(
   return "local";
 }
 
-function assertAgentSessionAllowedByPolicy(provider: string, mode: InferenceMode): void {
-  assertAgentAllowedByPolicy();
-  assertReasoningAllowedByPolicy(provider, mode);
-}
+// Org policy could forbid the agent or a provider/mode pair; with no workspace
+// there is nothing to enforce, so every session is allowed.
+function assertAgentSessionAllowedByPolicy(_provider: string, _mode: InferenceMode): void {}
 
 function logParamFallback(logEvent: string) {
   return (details: { status: number; stripped: string[] }) =>
@@ -445,9 +443,6 @@ class ReasoningService extends BaseReasoningService {
     if (!providerId) {
       throw new Error("No reasoning provider selected");
     }
-    if (dispatchConfig.requiresAgent) assertAgentAllowedByPolicy();
-    assertReasoningAllowedByPolicy(providerId, resolveLlmDispatchMode(providerId, dispatchConfig));
-
     if (!trimmedModel && providerId !== "openwhispr" && providerId !== "lan") {
       throw new Error("No reasoning model selected");
     }

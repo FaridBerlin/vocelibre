@@ -35,14 +35,6 @@ import { pickDefaultModelId } from "../models/providerDefaultModel";
 // the switch store only zustand, so neither reopens the ModelRegistry cycle.
 import { readCachedTinfoilModels } from "../models/tinfoilModelCache";
 import { recordTinfoilModelSwitch } from "./tinfoilModelSwitchStore";
-import {
-  getTranscriptionSelection,
-  isScreenContextAllowed,
-  resolveEffectivePolicySelection,
-  type PolicyDecisionSnapshot,
-  type TranscriptionPolicyContext,
-} from "./policyRules";
-import { usePolicyStore } from "./policyStore";
 import type {
   TranscriptionSettings,
   CleanupSettings,
@@ -103,7 +95,7 @@ const localLlmProviderIds = new Set(
 
 function transcriptionProviderModels(
   providerId: string,
-  context: TranscriptionPolicyContext
+  context: TranscriptionContext
 ): Array<{ id: string; streaming?: boolean }> {
   const models =
     modelRegistryData.transcriptionProviders.find((provider) => provider.id === providerId)
@@ -111,17 +103,14 @@ function transcriptionProviderModels(
   return context === "meeting" ? models.filter((model) => model.streaming) : models;
 }
 
-function defaultTranscriptionModel(
-  providerId: string,
-  context: TranscriptionPolicyContext
-): string {
+function defaultTranscriptionModel(providerId: string, context: TranscriptionContext): string {
   return transcriptionProviderModels(providerId, context)[0]?.id ?? "whisper-1";
 }
 
 function transcriptionModelBelongsToProvider(
   providerId: string,
   modelId: string,
-  context: TranscriptionPolicyContext
+  context: TranscriptionContext
 ): boolean {
   if (providerId === "custom") return Boolean(modelId);
   return transcriptionProviderModels(providerId, context).some((model) => model.id === modelId);
@@ -836,10 +825,7 @@ export interface SettingsState
   setCloudTranscriptionModel: (value: string) => void;
   setCloudTranscriptionBaseUrl: (value: string) => void;
   setCloudTranscriptionMode: (value: string) => void;
-  switchCloudTranscriptionProvider: (
-    context: TranscriptionPolicyContext,
-    providerId: string
-  ) => void;
+  switchCloudTranscriptionProvider: (context: TranscriptionContext, providerId: string) => void;
   switchReasoningProvider: (
     scope: InferenceScope,
     providerId: string,
@@ -1210,6 +1196,9 @@ function createSecretSetter(
     invalidateApiKeyCaches(cacheProvider);
   };
 }
+
+/** Which transcription settings scope a helper is reading or writing. */
+export type TranscriptionContext = "dictation" | "meeting" | "upload";
 
 export const MAX_TRANSLATION_TARGETS = 5;
 
@@ -2561,7 +2550,7 @@ export function isCloudChatAgentMode() {
 // --- Convenience getters for non-React code ---
 
 interface TranscriptionContextKeys {
-  context: TranscriptionPolicyContext;
+  context: TranscriptionContext;
   mode: keyof SettingsState;
   useLocal: keyof SettingsState;
   cloudMode: keyof SettingsState;
@@ -2600,21 +2589,8 @@ const TRANSCRIPTION_CONTEXT_KEYS: readonly TranscriptionContextKeys[] = [
   },
 ];
 
-/**
- * Overlay managed policy choices for rendering and future requests while
- * leaving Zustand/localStorage preferences untouched for policy removal.
- */
-export function selectPolicyEffectiveSettings(
-  state: SettingsState,
-  _policyState: PolicyDecisionSnapshot
-): SettingsState {
-  // Org-managed policy arrived with the enterprise workspace, which was
-  // removed: no policy can be in force, so the user's own settings stand.
-  return state;
-}
-
 export function getSettings(): SettingsState {
-  return selectPolicyEffectiveSettings(useSettingsStore.getState(), usePolicyStore.getState());
+  return useSettingsStore.getState();
 }
 
 /**

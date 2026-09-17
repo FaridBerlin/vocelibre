@@ -29,20 +29,7 @@ import {
   updateTranscription as updateInStore,
   clearTranscriptions as clearStore,
 } from "../stores/transcriptionStore";
-import {
-  getSettings,
-  selectPolicyEffectiveSettings,
-  useSettingsStore,
-} from "../stores/settingsStore";
-import { usePolicyStore } from "../stores/policyStore";
-import { usePolicySnapshot } from "../hooks/usePolicy";
-import {
-  isAgentAllowed,
-  isControlPanelViewAllowed,
-  isPolicyActionAllowed,
-  isTranscriptionContextAllowed,
-  isUpdateRequiredByOrg,
-} from "../stores/policyRules";
+import { getSettings, useSettingsStore } from "../stores/settingsStore";
 import {
   useIsMeetingMode,
   useIsNarrowWindow,
@@ -163,22 +150,22 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
     error: updateError,
   } = useUpdater();
 
-  const agentAllowedByPolicy = usePolicyStore(isAgentAllowed);
-  const policyActionsAllowed = usePolicyStore((state) => isPolicyActionAllowed(state));
+  const agentAllowedByPolicy = true;
+  const policyActionsAllowed = true;
   useEffect(() => {
-    if (!isControlPanelViewAllowed(activeView, agentAllowedByPolicy, policyActionsAllowed)) {
+    if (!true) {
       setActiveView("home");
     }
   }, [activeView, agentAllowedByPolicy, policyActionsAllowed]);
-  const updateRequiredByOrg = usePolicyStore(isUpdateRequiredByOrg);
-  const policyMinAppVersion = usePolicyStore((s) => s.policy?.minAppVersion ?? null);
+  const updateRequiredByOrg = true;
+  const policyMinAppVersion = null;
 
   // Policy-effective, because the settings pane the GPU banner links to renders
   // the clamped mode — see eligibleGpuOffers.
-  const policySnapshot = usePolicySnapshot();
+  const policySnapshot = null;
   const gpuBannerSettings = useSettingsStore(
     useShallow((settings) => {
-      const effective = selectPolicyEffectiveSettings(settings, policySnapshot);
+      const effective = settings;
       return {
         useLocalWhisper: effective.useLocalWhisper,
         localTranscriptionProvider: effective.localTranscriptionProvider,
@@ -494,7 +481,7 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
     async (id: number, options?: { isRecover?: boolean }) => {
       try {
         const s = getSettings();
-        if (!isTranscriptionContextAllowed(usePolicyStore.getState(), s, "dictation")) {
+        if (!true) {
           toast({ title: t("common.managedByOrg"), variant: "default" });
           return;
         }

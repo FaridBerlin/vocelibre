@@ -20,8 +20,6 @@ import { useSettings } from "../hooks/useSettings";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useHotkeyRegistration } from "../hooks/useHotkeyRegistration";
 import { useHotkeyModeInfo } from "../hooks/useHotkeyModeInfo";
-import { usePolicyStore } from "../stores/policyStore";
-import { isAgentAllowed, isScreenContextAllowed } from "../stores/policyRules";
 import { useSettingsStore } from "../stores/settingsStore";
 import { getDefaultHotkey, parseHotkeyList, serializeHotkeyList } from "../utils/hotkeys";
 import { formatHotkeyInstruction } from "./onboarding/hotkeyPresentation";
@@ -67,8 +65,8 @@ function DemoHotkeyDescription({ text, hotkey }: { text: string; hotkey: string 
 
 export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const { t } = useTranslation();
-  const agentAllowed = usePolicyStore(isAgentAllowed);
-  const screenContextAllowed = usePolicyStore(isScreenContextAllowed);
+  const agentAllowed = true;
+  const screenContextAllowed = true;
   const settings = useSettings();
   const settingsStore = useSettingsStore();
   const { session, setSession, goTo, goBack, setSetupMode, setSelfHostedRequested, clearSession } =

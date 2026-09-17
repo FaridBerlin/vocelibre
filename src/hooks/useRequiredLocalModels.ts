@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { usePolicySnapshot } from "./usePolicy";
 import { LOCAL_MODELS_CHANGED_EVENT } from "./useModelDownload";
-import { missingRequiredLocalModels, requiredLocalModelIds } from "../stores/policyRules";
 
 export interface RequiredLocalModelsState {
   /** Org-required model ids this build's registry knows how to download. */
@@ -22,11 +20,10 @@ export interface RequiredLocalModelsState {
  * required-models step and the ControlPanel fleet banner.
  */
 export function useRequiredLocalModels(): RequiredLocalModelsState {
-  const snapshot = usePolicySnapshot();
-  // Key on content: policy refreshes swap object identities every few minutes
-  // without changing the list, and the disk fan-out shouldn't rerun for that.
-  const requiredKey = useMemo(() => requiredLocalModelIds(snapshot).join("\n"), [snapshot]);
-  const required = useMemo(() => (requiredKey ? requiredKey.split("\n") : []), [requiredKey]);
+  // Org-mandated local models came from the workspace policy; with no
+  // workspace nothing is required and the banner never has anything to show.
+  const requiredKey = "";
+  const required = useMemo<string[]>(() => [], []);
   const [installed, setInstalled] = useState<string[] | null>(null);
 
   const refresh = useCallback(async (): Promise<void> => {
@@ -60,7 +57,7 @@ export function useRequiredLocalModels(): RequiredLocalModelsState {
     () =>
       required.length === 0 || installed === null
         ? []
-        : missingRequiredLocalModels(required, installed),
+        : required.filter((id) => !installed.includes(id)),
     [required, installed]
   );
 

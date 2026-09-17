@@ -1,8 +1,8 @@
 import { useCallback } from "react";
+import { useInferenceModeOptions } from "../../hooks/useInferenceModeOptions";
 import { useTranslation } from "react-i18next";
 import { Cloud, Key, Cpu, Network } from "lucide-react";
 import { useSettingsStore } from "../../stores/settingsStore";
-import { usePolicyModeOptions } from "../../hooks/usePolicy";
 import { InferenceModeSelector, SettingsRow } from "../ui/SettingsSection";
 import type { InferenceModeOption } from "../ui/SettingsSection";
 import { Toggle } from "../ui/toggle";
@@ -60,7 +60,7 @@ export function MeetingTranscriptionPanel() {
     modes: transcriptionModes,
     effectiveMode: effectiveTranscriptionMode,
     isModeAllowed,
-  } = usePolicyModeOptions<InferenceModeOption>(
+  } = useInferenceModeOptions<InferenceModeOption>(
     [
       {
         id: "local",
@@ -77,9 +77,7 @@ export function MeetingTranscriptionPanel() {
         badge: t("common.comingSoon"),
       },
     ],
-    "transcription",
-    meetingTranscriptionMode,
-    { byokProviders: MEETING_BYOK_PROVIDER_IDS }
+    meetingTranscriptionMode
   );
   const handleTranscriptionModeSelect = (mode: InferenceMode) => {
     if (!isModeAllowed(mode)) return;
