@@ -33,7 +33,6 @@ import { getModelFamilyConstraints } from "./ai/modelFamilyConstraints";
 import { detectEndpointDialect } from "./ai/thinkingSuppressionDialects";
 import { createStreamingThinkFilter } from "./ai/streamingThinkFilter";
 import { extractApiErrorMessage } from "./ai/apiErrorMessage";
-import { clearTinfoilClientCache } from "./ai/tinfoilClient";
 import { resolveChatRoute } from "../helpers/chatRouting";
 import type { InferenceMode } from "../types/electron";
 
@@ -1125,13 +1124,9 @@ class ReasoningService extends BaseReasoningService {
       if (provider !== "custom") {
         this.apiKeyCache.delete(provider);
       }
-      if (provider === "tinfoil") {
-        clearTinfoilClientCache();
-      }
       logger.logReasoning("API_KEY_CACHE_CLEARED", { provider });
     } else {
       this.apiKeyCache.clear();
-      clearTinfoilClientCache();
       logger.logReasoning("API_KEY_CACHE_CLEARED", { provider: "all" });
     }
   }

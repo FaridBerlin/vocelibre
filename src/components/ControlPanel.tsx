@@ -77,6 +77,7 @@ const toggleIconClass =
   "text-foreground/60 group-hover:text-foreground/75 dark:text-foreground/50 dark:group-hover:text-foreground/65 transition-colors duration-150";
 
 const SettingsModal = React.lazy(() => import("./SettingsModal"));
+const CalendarsView = React.lazy(() => import("./CalendarsView"));
 const PersonalNotesView = React.lazy(() => import("./notes/PersonalNotesView"));
 const DictionaryView = React.lazy(() => import("./DictionaryView"));
 const UploadAudioView = React.lazy(() => import("./notes/UploadAudioView"));
@@ -982,7 +983,13 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
                   setSettingsSection(section);
                   setShowSettings(true);
                 }}
+                onOpenCalendars={() => setActiveView("calendars")}
               />
+            )}
+            {activeView === "calendars" && (
+              <Suspense fallback={null}>
+                <CalendarsView />
+              </Suspense>
             )}
             {activeView === "chat" && agentAllowedByPolicy && (
               <Suspense fallback={null}>

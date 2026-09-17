@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  CalendarDays,
   Home,
   BarChart3,
   MessageSquare,
@@ -32,7 +33,8 @@ const rowLabelClass =
 const rowButtonClass =
   "group flex items-center gap-2.5 w-full h-8 px-2.5 rounded-md text-left outline-none hover:bg-foreground/4 dark:hover:bg-white/4 focus-visible:ring-1 focus-visible:ring-primary/30 transition-colors duration-150";
 
-export type ControlPanelView = "home" | "chat" | "personal-notes" | "dictionary" | "upload";
+export type ControlPanelView =
+  "home" | "chat" | "personal-notes" | "dictionary" | "upload" | "calendars";
 
 interface ControlPanelSidebarProps {
   activeView: ControlPanelView;
@@ -67,6 +69,7 @@ export default function ControlPanelSidebar({
       ? [{ id: "upload" as const, label: t("sidebar.upload"), icon: Upload }]
       : []),
     { id: "dictionary", label: t("sidebar.dictionary"), icon: BookOpen },
+    { id: "calendars", label: t("sidebar.calendars"), icon: CalendarDays },
   ];
 
   return (

@@ -127,29 +127,6 @@
       "slotConflict": "This hotkey is already used for {{slot}}."
     }
   },
-  "systemSettings": {
-    "microphone": "Please open your system settings to configure microphone permissions.",
-    "sound": "Please open your system sound settings (for example, pavucontrol).",
-    "accessibility": "Accessibility settings are not available on this platform.",
-    "systemAudio": "System audio settings are not available on this platform.",
-    "screenRecording": "Screen recording settings are not available on this platform.",
-    "loginItems": "Login item settings are not available on this platform."
-  },
-  "upgradePrompt": {
-    "paymentFailed": "We couldn't process your payment",
-    "weeklyLimit": "You've reached your weekly limit",
-    "pastDueDescription": "You're on the free plan for now — don't worry, you still get {{limit}} words per week.\nUpdate your payment method to get back to unlimited Pro.",
-    "limitDescription": "{{used}} of {{limit}} words used.\nYour transcription was saved and pasted.",
-    "updatePayment": "Update payment method",
-    "updatePaymentDescription": "Get back to unlimited Pro transcriptions.",
-    "upgradeToPro": "Upgrade to Pro",
-    "upgradeDescription": "Get unlimited transcriptions from as little as $8/month.",
-    "useApiKey": "Use your own API key",
-    "useApiKeyDescription": "Bring your own key for unlimited use.",
-    "switchToLocal": "Switch to local",
-    "switchToLocalDescription": "Offline transcription. No limits.",
-    "rollingWeeklyLimit": "Rolling weekly limit"
-  },
   "windowControls": {
     "minimize": "Minimize",
     "maximize": "Maximize",
@@ -747,85 +724,6 @@
     },
     "selfHosted": {
       "endpointHelp": "Point to an OpenAI-compatible server on your local network (e.g. Ollama, LM Studio, vLLM, or llama-server)."
-    },
-    "enterprise": {
-      "title": "Enterprise Providers",
-      "description": "Connect to cloud providers using your organization's credentials.",
-      "testConnection": "Test Connection",
-      "testing": "Testing...",
-      "testSuccess": "Connected",
-      "testFailed": "Connection failed",
-      "authMode": "Authentication",
-      "ssoProfile": "SSO Profile",
-      "accessKeys": "Access Keys",
-      "adc": "Application Default Credentials",
-      "apiKeyMode": "API Key",
-      "region": "Region",
-      "profile": "Profile Name",
-      "accessKeyId": "Access Key ID",
-      "secretAccessKey": "Secret Access Key",
-      "sessionToken": "Session Token (optional)",
-      "endpoint": "Endpoint URL",
-      "deploymentName": "Deployment Name",
-      "apiVersion": "API Version",
-      "projectId": "Project ID",
-      "location": "Location",
-      "customModelId": "Custom Model ID",
-      "customModelPlaceholder": "Enter model ID or deployment name",
-      "suggestedModels": "Suggested Models",
-      "browseModels": "Browse all models",
-      "loadingModels": "Fetching models...",
-      "allModels": "All Models in {{region}}",
-      "modelListError": "Could not load models.",
-      "bedrock": {
-        "ssoHelp": "Uses your AWS CLI SSO configuration. Ensure you have run 'aws sso login'.",
-        "keysHelp": "Enter your AWS IAM access keys."
-      },
-      "errors": {
-        "bedrock": {
-          "temporaryAccessExpired": "Temporary AWS access expired.",
-          "ssoExpired": "AWS SSO session expired.",
-          "credentialsRejected": "AWS credentials were rejected. Check the access key ID, secret, and session token.",
-          "accessDenied": "AWS Bedrock denied this request. Ask your AWS administrator to grant permission to invoke the selected model in region {{region}}.",
-          "modelNotFound": "AWS Bedrock could not find the selected model in region {{region}}. Check the model ID and whether it is available in that region.",
-          "configurationRejected": "AWS Bedrock rejected the model configuration for region {{region}}. Check the model ID, inference profile, and region.",
-          "notConfigured": "AWS Bedrock is not configured correctly. Check the region and AWS credentials.",
-          "serviceUnavailable": "AWS Bedrock is temporarily unavailable due to high demand. This is an AWS service issue, not a VoceLibre outage. Please try again in a few minutes.",
-          "throttled": "AWS Bedrock is temporarily limiting requests because it is receiving too many. Please wait a moment and try again. If this continues, ask your AWS administrator to check your Bedrock usage and quotas.",
-          "timeout": "AWS Bedrock did not respond in time. Please try again. If this continues, check your internet connection and AWS Bedrock service status.",
-          "network": "AWS Bedrock could not be reached. Check your internet connection and try again.",
-          "unknown": "AWS Bedrock error: {{error}}",
-          "actions": {
-            "refreshManagedAccess": "Sign out and sign back in to refresh company access, then retry.",
-            "reauthenticate": "Run the command below in your terminal to re-authenticate:"
-          }
-        }
-      },
-      "technicalDetails": {
-        "title": "Technical details",
-        "httpStatus": "HTTP status",
-        "awsException": "AWS exception",
-        "awsRequestId": "AWS request ID",
-        "underlyingError": "Underlying error",
-        "copy": "Copy technical details",
-        "copyCommand": "Copy recovery command"
-      },
-      "azure": {
-        "endpointHelp": "Your Azure OpenAI resource endpoint (e.g., https://myresource.openai.azure.com).",
-        "deploymentHelp": "The name of your model deployment in Azure OpenAI."
-      },
-      "vertex": {
-        "adcHelp": "Uses Application Default Credentials. Run: gcloud auth application-default login",
-        "apikeyHelp": "Vertex AI Express Mode API key from Google AI Studio."
-      }
-    },
-    "tinfoil": {
-      "modelRetiredTitle": "Model no longer available",
-      "modelRetired": "Tinfoil retired {{from}}. Switched to {{to}}.",
-      "refreshingModels": "Refreshing models…"
-    },
-    "corti": {
-      "euOnly": "Corti's models are only available in the EU region."
     }
   },
   "transcription": {
@@ -1124,29 +1022,6 @@
     "welcomeTitle": "Welcome to VoceLibre",
     "sessionExpired": "Session expired. Please restart the sign-up process."
   },
-  "calendar": {
-    "title": "Google Calendar",
-    "status": "Status",
-    "connected": "Connected",
-    "disconnected": "Disconnected",
-    "notConnectedDescription": "Connect to detect and record meetings",
-    "connectCta": {
-      "title": "Calendar Integration",
-      "description": "Auto-detect meetings and record transcriptions"
-    },
-    "connect": "Connect Google Calendar",
-    "connecting": "Connecting...",
-    "disconnect": "Disconnect",
-    "disconnecting": "Disconnecting...",
-    "sync": "Sync",
-    "syncing": "Syncing...",
-    "calendarsTitle": "Calendars",
-    "upcomingTitle": "Upcoming",
-    "noUpcoming": "No upcoming events",
-    "meetingStarting": "Meeting starting now",
-    "today": "Today",
-    "tomorrow": "Tomorrow"
-  },
   "upcoming": {
     "title": "Coming up",
     "transcriptions": "Transcriptions",
@@ -1231,90 +1106,11 @@
       "title": "What gets logged"
     }
   },
-  "apiKeysSection": {
-    "title": "API Keys",
-    "description": "Create keys to access the VoceLibre API programmatically.",
-    "docsLink": "API Docs",
-    "empty": "No API keys yet",
-    "createButton": "Create API Key",
-    "create": {
-      "title": "Create API Key",
-      "nameLabel": "Key Name",
-      "namePlaceholder": "e.g. My Integration",
-      "scopesLabel": "Permissions",
-      "expiryLabel": "Expiration",
-      "expiryOptions": {
-        "never": "Never expires",
-        "30days": "30 days",
-        "60days": "60 days",
-        "90days": "90 days",
-        "1year": "1 year"
-      },
-      "submit": "Create",
-      "cancel": "Cancel"
-    },
-    "created": {
-      "title": "API Key Created",
-      "warning": "Copy this key now. It won't be shown again.",
-      "copied": "Copied!",
-      "copyButton": "Copy to Clipboard",
-      "done": "Done"
-    },
-    "scopes": {
-      "notesRead": "Read notes",
-      "notesWrite": "Create & edit notes",
-      "transcriptionsRead": "Read transcriptions"
-    },
-    "revoke": {
-      "button": "Revoke",
-      "confirm": "Revoke this key? Any integrations using it will stop working.",
-      "success": "API key revoked"
-    },
-    "neverUsed": "Never used",
-    "lastUsed": "Last used {{time}}",
-    "maxKeysReached": "Maximum {{max}} keys allowed",
-    "errors": {
-      "loadFailed": "Failed to load API keys",
-      "createFailed": "Failed to create API key",
-      "revokeFailed": "Failed to revoke API key"
-    }
-  },
   "dictionarySuffix": "Dictionary Suffix",
-  "emailVerification": {
-    "checkEmailDescription": "We have sent a verification link to your email at",
-    "checkEmailTitle": "Verification email sent",
-    "errors": {
-      "resendFailed": "We couldn't resend the email. Please try again.",
-      "serverUnreachable": "Couldn't reach the server. Check your connection and try again."
-    },
-    "resendButton": "Resend verification email",
-    "resendIn": "Resend in {{seconds}}s",
-    "verifiedDescription": "Your account is all set.",
-    "verifiedTitle": "Verified",
-    "waiting": "Waiting for verification",
-    "backToSignIn": "Back to sign in"
-  },
   "errorBoundary": {
     "description": "An unexpected error occurred. Please reload to try again.",
     "reload": "Reload",
     "title": "Something went wrong"
-  },
-  "forgotPassword": {
-    "back": "Back",
-    "backToSignIn": "Back to sign in",
-    "emailPlaceholder": "Enter your email",
-    "goBack": "Go Back",
-    "notConfigured": "Authentication isn't set up yet.",
-    "sendResetLink": "Send Reset Link",
-    "sending": "Sending...",
-    "subtitle": "Enter your email and we'll send you a reset link",
-    "success": {
-      "description": "We sent a password reset link to",
-      "help": "Didn't receive the email? Check your spam folder or try again.",
-      "title": "Check your email",
-      "tryAnother": "Try another email"
-    },
-    "title": "Reset your password"
   },
   "actionPrompt": "Action Prompt",
   "hotkeyGuidance": {
@@ -2605,71 +2401,6 @@
         "large": "Best quality, slowest",
         "turbo": "Fast with good quality"
       },
-      "transcription": {
-        "openai_gpt_4o_mini_transcribe": "Fast and accurate transcription",
-        "openai_gpt_4o_transcribe": "Most accurate transcription",
-        "openai_whisper_1": "Original Whisper model",
-        "groq_whisper_large_v3": "High accuracy speech recognition",
-        "groq_whisper_large_v3_turbo": "216x real-time speed",
-        "mistral_voxtral_mini_latest": "Fast multilingual transcription",
-        "gemini_3_5_transcribe": "Google's Gemini speech-to-text",
-        "corti_transcribe": "Clinical-grade medical transcription",
-        "xai_grok_stt": "High-accuracy speech recognition by xAI",
-        "tinfoil_voxtral": "Verifiably private transcription"
-      },
-      "cloud": {
-        "openai_gpt_5_2": "Strong reasoning model",
-        "openai_gpt_5_mini": "Fast and cost-efficient",
-        "openai_gpt_5_nano": "Ultra-fast, low latency",
-        "openai_gpt_4_1": "Strong baseline, 1M context",
-        "openai_gpt_4_1_mini": "Smaller GPT-4.1 model",
-        "openai_gpt_4_1_nano": "Lowest latency GPT-4.1",
-        "anthropic_claude_fable_5": "Anthropic's most capable model, Mythos-class",
-        "anthropic_claude_sonnet_5": "Fast, capable agentic model at lower cost",
-        "anthropic_claude_sonnet_4_6": "Balanced performance",
-        "anthropic_claude_sonnet_4_5": "Previous Sonnet generation",
-        "anthropic_claude_haiku_4_5": "Fast with near-frontier intelligence",
-        "gemini_gemini_3_5_flash": "Latest fast, high-capability Gemini model",
-        "gemini_gemini_3_5_flash_lite": "Fastest, most cost-effective 3.5 model",
-        "gemini_gemini_3_1_pro_preview": "Next-gen flagship model for complex reasoning",
-        "gemini_gemini_3_1_flash_lite": "Frontier-class performance at low cost",
-        "gemini_gemini_3_flash_preview": "Ultra-fast, high-capability next-gen model",
-        "gemini_gemini_2_5_flash_lite": "Lowest latency and cost",
-        "gemini_gemma_4_31b_it": "Google's largest Gemma 4, 31B dense, 256K context",
-        "gemini_gemma_4_26b_a4b_it": "Google's Gemma 4 MoE, 4B active params, 256K context",
-        "groq_openai_gpt_oss_120b": "OpenAI's open-source flagship, 500 T/sec",
-        "groq_openai_gpt_oss_20b": "Fast open-source model, 1000 T/sec",
-        "groq_compound": "Groq's compound system, 450 T/sec",
-        "groq_compound_mini": "Fast compound system, 3x lower latency",
-        "openai_gpt_5_6_sol": "Flagship GPT-5.6 for complex coding and research",
-        "openai_gpt_5_6_terra": "Balanced GPT-5.6 for everyday work",
-        "openai_gpt_5_6_luna": "Fastest, lowest-cost GPT-5.6",
-        "openai_gpt_5_5": "Frontier model for complex reasoning",
-        "anthropic_claude_opus_5": "Most capable Opus model, 1M context",
-        "anthropic_claude_opus_4_8": "Powerful Opus model tuned for honesty and reliability",
-        "anthropic_claude_opus_4_7": "Powerful Opus model",
-        "anthropic_claude_opus_4_6": "Previous Opus generation, 1M context",
-        "anthropic_claude_opus_4_5": "Earlier Opus model",
-        "tinfoil_glm_5_3": "Private agentic coding model in secure enclaves, 1M context",
-        "tinfoil_gemma4_31b": "Private multilingual reasoning model with tool calling, 256K context",
-        "tinfoil_gpt_oss_120b": "Private open-weight reasoning model with tool use, 131K context",
-        "tinfoil_llama3_3_70b": "Private conversational model with tool calling, 128K context",
-        "corti_corti_s1_instant": "Fast healthcare model, no reasoning trace",
-        "corti_corti_s1": "Most capable clinical model with reasoning",
-        "corti_corti_s1_mini_instant": "Compact healthcare model, fastest and lowest cost",
-        "corti_corti_s1_mini": "Compact clinical model with reasoning at half the price"
-      },
-      "enterprise": {
-        "bedrock_claude_fable_5": "Most capable Claude model. Best for the hardest Agent Mode tasks.",
-        "bedrock_claude_haiku_4_5": "Fast and cheap. Great default for text cleanup.",
-        "bedrock_claude_sonnet_5": "Balanced workhorse. Best default for Agent Mode.",
-        "bedrock_claude_opus_4_8": "Max intelligence. Best for complex Agent Mode tasks.",
-        "bedrock_gpt_oss_120b": "Open-weight OpenAI model. Strong reasoning at low cost.",
-        "bedrock_deepseek_v3_2": "Open-weight frontier model. Great value for Agent Mode.",
-        "bedrock_qwen3_next_80b": "Sparse open-weight model. Fast and multilingual.",
-        "vertex_gemini_2_5_flash": "Fast multimodal model via Vertex",
-        "vertex_gemini_2_5_pro": "Advanced reasoning via Vertex"
-      },
       "local": {
         "qwen_qwen3_5_9b_q4_k_m": "Powerful hybrid model",
         "qwen_qwen3_5_4b_q4_k_m": "Balanced Qwen3.5 for general use",
@@ -2715,6 +2446,7 @@
     "notes": "Notes",
     "upload": "Upload",
     "dictionary": "Dictionary",
+    "calendars": "Calendar",
     "referral": "Get a free month",
     "settings": "Settings",
     "support": "Support",
@@ -2733,121 +2465,6 @@
     "chat": "Chat",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar"
-  },
-  "insights": {
-    "title": "Insights",
-    "description": "A private view of your dictation habits and momentum.",
-    "wordsSpoken": "Words spoken",
-    "currentStreak": "Current streak",
-    "wordsPerMinute": "Words per minute",
-    "dictations": "Dictations",
-    "allTime": "All time",
-    "days_one": "{{count}} day",
-    "days_other": "{{count}} days",
-    "longestStreak_one": "Longest: {{count}} day",
-    "longestStreak_other": "Longest: {{count}} days",
-    "wpmCoverage": "Based on {{count}}% of measured words",
-    "activity": "Speaking activity",
-    "activityDescription": "Words spoken over the last 6 months",
-    "activityLabel": "6-month speaking activity heatmap",
-    "activityLess": "Less",
-    "activityMore": "More",
-    "dayTooltip_one": "{{date}}: {{count}} word",
-    "dayTooltip_other": "{{date}}: {{count}} words",
-    "dataRetentionDisabled": "Data retention is off, so new dictations aren't counted in Insights — not on this device and not in your account. Counters already synced stay in your account.",
-    "onDevice": "On this device",
-    "synced": "Synced across devices",
-    "syncFallback": "Showing device data — sync unavailable",
-    "syncPrompt": "Sync content-free counters to combine local and cloud activity across devices.",
-    "enableSync": "Enable sync",
-    "claimTitle": "Include earlier dictations?",
-    "claimDescription_one": "{{count}} dictation on this device was recorded before you signed in. Including it sends only word counts, the date and exact time it happened, its duration, and the model type — never transcript content.",
-    "claimDescription_other": "{{count}} dictations on this device were recorded before you signed in. Including them sends only word counts, the date and exact time each one happened, durations, and model types — never transcript content.",
-    "claimInclude": "Include",
-    "claimSkip": "Not now",
-    "enableTitle": "Turn on Insights sync?",
-    "enableConfirm": "Turn on sync",
-    "enableDescription_one": "{{count}} dictation already recorded on this device will be uploaded to your account. Insights sync sends only word counts, the date and exact time each one happened, durations, and model types — never transcript content.",
-    "enableDescription_other": "{{count}} dictations already recorded on this device will be uploaded to your account. Insights sync sends only word counts, the date and exact time each one happened, durations, and model types — never transcript content.",
-    "emptyTitle": "No dictations yet",
-    "emptyBody": "Start dictating and your words, streaks, and daily activity will show up here.",
-    "loadError": "Insights couldn't be read from this device."
-  },
-  "workspaces": {
-    "switcher": {
-      "workspaces": "Workspaces",
-      "create": "Create workspace…"
-    },
-    "create": {
-      "title": "Create workspace",
-      "description": "A workspace brings your organization's members and billing together. Create team spaces inside it for shared notes.",
-      "nameLabel": "Workspace name",
-      "namePlaceholder": "Acme Corp",
-      "submit": "Create workspace",
-      "submitting": "Creating…",
-      "errorTitle": "Couldn't create workspace"
-    },
-    "created": {
-      "title": "Workspace created",
-      "description": "You're now the owner of {{name}}."
-    },
-    "invite": {
-      "title": "Invite to {{workspace}}",
-      "description": "Add teammates by email. They'll get a link to join.",
-      "emailLabel": "Email",
-      "emailPlaceholder": "teammate@example.com",
-      "roleLabel": "Role",
-      "seatUsage": "Using {{used}} of {{seats}} seats",
-      "seatCost": "If accepted, adds a seat to your plan · estimated prorated charge {{amount}}.",
-      "submit": "Send invite",
-      "submitting": "Sending…",
-      "sentTitle": "Invite sent",
-      "sentDescription": "We sent an invitation to {{email}}.",
-      "sentNoEmailTitle": "Invite created, but not emailed",
-      "sentNoEmailDescription": "{{email}} was invited, but the email couldn't be delivered. Resend it later or share the invite link another way.",
-      "errorTitle": "Couldn't send invitation",
-      "role": {
-        "admin": "Admin",
-        "member": "Member"
-      },
-      "roleDescription": {
-        "admin": "Manages members and billing",
-        "member": "Uses the workspace"
-      }
-    },
-    "join": {
-      "title": "Join your team",
-      "domainTitle": "Your team is on VoceLibre",
-      "description": "These workspaces have someone from your email domain.",
-      "invitedDescription": "You've been invited to a workspace.",
-      "invitedBy": "Invited by {{inviter}} as {{role}}",
-      "memberCount_one": "{{count}} member",
-      "memberCount_other": "{{count}} members",
-      "join": "Join",
-      "requestErrorTitle": "Could not send the request",
-      "requestedDescription": "An admin of {{workspace}} will review it.",
-      "requestedTitle": "Request sent",
-      "requested": "Requested",
-      "request": "Ask to join",
-      "notNow": "Not now",
-      "successTitle": "Joined",
-      "successDescription": "You're now a member of {{workspace}}.",
-      "errorTitle": "Could not join"
-    },
-    "accept": {
-      "title": "Join workspace",
-      "description": "{{inviter}} invited you to join {{workspace}} as a {{role}}.",
-      "loading": "Loading invitation…",
-      "accept": "Accept invitation",
-      "accepting": "Accepting…",
-      "signInToAccept": "Sign in to accept",
-      "switchAccount": "Switch account",
-      "successTitle": "You're in",
-      "successDescription": "You're a member of {{name}}. Manage it in Settings → Workspace.",
-      "errorTitle": "Couldn't accept invitation",
-      "sentTo": "Invitation sent to {{email}}",
-      "wrongAccount": "This invitation was sent to {{email}}. You're signed in as {{current}}."
-    }
   },
   "chat": {
     "newChat": "New chat",
@@ -2870,78 +2487,6 @@
     "searchTitle": "Search conversations",
     "searchDescription": "Search across all your conversations",
     "newChatEmpty": "Ask about your notes, transcripts, or anything else"
-  },
-  "referral": {
-    "title": "Refer and earn rewards",
-    "modalTitle": "Refer and earn rewards",
-    "subtitle": "Give a month. Get a month.",
-    "tabs": {
-      "refer": "Refer",
-      "pastInvites": "Past invites"
-    },
-    "howItWorks": {
-      "shareLink": "Share your invite link",
-      "theySignUp": "They sign up and get a ",
-      "freeMonthOfPro": "free month of Pro",
-      "youGet": "You get a ",
-      "freeMonth": "free month",
-      "whenTheyDictate": " when they dictate 2,000 words"
-    },
-    "inviteLink": {
-      "title": "Your invite link",
-      "copy": "Copy",
-      "copied": "Copied"
-    },
-    "sendInvites": {
-      "title": "Send invites",
-      "placeholder": "friend@example.com",
-      "send": "Send",
-      "sending": "Sending"
-    },
-    "stats": {
-      "referred": "Referred",
-      "converted": "Converted",
-      "monthsEarned": "Months earned"
-    },
-    "status": {
-      "converted": "Converted",
-      "opened": "Opened",
-      "failed": "Failed",
-      "sent": "Sent"
-    },
-    "friends": {
-      "title": "Friends",
-      "completed": "Completed",
-      "sentInvites": "Sent invites"
-    },
-    "empty": {
-      "title": "No invites sent yet",
-      "description": "Share your link or send an invite to get started"
-    },
-    "toasts": {
-      "copiedTitle": "Copied!",
-      "copiedDescription": "Referral link copied to clipboard",
-      "copyFailedTitle": "Copy Failed",
-      "copyFailedDescription": "Failed to copy link to clipboard",
-      "invalidEmailTitle": "Invalid Email",
-      "invalidEmailDescription": "Please enter a valid email address",
-      "inviteSentTitle": "Invite Sent!",
-      "inviteSentDescription": "Invitation sent to {{email}}",
-      "sendFailedTitle": "Send Failed",
-      "sendFailedDescription": "Failed to send invitation. Please try again."
-    },
-    "errors": {
-      "unableToLoad": "Unable to load referral data",
-      "unableToLoadStats": "Unable to load referral stats. Please try again later."
-    },
-    "tryAgain": "Try Again",
-    "card": {
-      "brand": "VoceLibre",
-      "signalId": "Signal ID",
-      "audioSignature": "Your audio signature",
-      "stop": "Stop",
-      "playSignal": "Play signal"
-    }
   },
   "notes": {
     "mutationErrors": {
@@ -3703,49 +3248,7 @@
       "connectFailedDescription": "Something went wrong while connecting to Calendar.app. Please restart VoceLibre and try again."
     },
     "sections": {
-      "calendar": "Calendar",
-      "api": "API",
-      "mcp": "MCP",
-      "cli": "CLI"
-    },
-    "api": {
-      "title": "API keys",
-      "description": "Manage API keys for programmatic access",
-      "proRequired": "Upgrade to a paid plan to access the API",
-      "manage": "Manage keys",
-      "viewPlans": "View Plans",
-      "dialogTitle": "API keys"
-    },
-    "mcp": {
-      "title": "Bring your notes to your AI tools",
-      "description": "Chat, search, and work with your notes inside Claude, ChatGPT, and Cursor.",
-      "step1": "In your AI tool, add VoceLibre MCP using the public URL",
-      "step2": "Create an API key above with the scopes you need.",
-      "step3": "Paste the key as the Authorization header to connect.",
-      "learnMore": "Learn more",
-      "viewPlans": "View Plans",
-      "copyUrl": "Copy MCP URL",
-      "proRequired": "Upgrade to a paid plan to connect VoceLibre to Claude, ChatGPT, and Cursor.",
-      "copied": "Copied"
-    },
-    "cli": {
-      "title": "Command-line access",
-      "description": "Give your agent access to your notes from the terminal.",
-      "installLabel": "Install",
-      "learnMore": "Read the docs",
-      "copyDocsLink": "Copy docs link",
-      "docsLinkCopied": "Docs link copied",
-      "viewPlans": "View Plans",
-      "local": {
-        "label": "Local",
-        "freeBadge": "Free",
-        "description": "Read your local notes directly. No login or API key — works while VoceLibre is running."
-      },
-      "cloud": {
-        "label": "Cloud",
-        "description": "Sync across machines using your API key.",
-        "proRequired": "Upgrade to a paid plan to use the CLI in cloud mode."
-      }
+      "calendar": "Calendar"
     },
     "plan": {
       "title": "Your Plan",
@@ -3761,77 +3264,6 @@
     "notABot": {
       "title": "VoceLibre is a meeting recorder, not a bot",
       "description": "VoceLibre captures audio directly from your system — it never joins your meetings as a participant. Just connect your calendar and take notes as normal."
-    }
-  },
-  "notesView": {
-    "searchPlaceholder": "Search notes…",
-    "newNote": "New Note",
-    "empty": {
-      "title": "No notes yet",
-      "description": "Create your first note to get started."
-    },
-    "searchEmpty": {
-      "title": "No results",
-      "description": "No notes found for \"{{query}}\"."
-    },
-    "noteType": {
-      "personal": "personal",
-      "meeting": "meeting",
-      "upload": "upload"
-    }
-  },
-  "noteEditor": {
-    "saved": "Saved",
-    "deleteNote": "Delete note",
-    "deleteConfirmTitle": "Delete note?",
-    "deleteConfirmDescription": "This note will be permanently deleted and cannot be recovered.",
-    "deleteConfirm": "Delete",
-    "share": {
-      "button": "Share",
-      "dialog": {
-        "title": "Share note",
-        "description": "Invite people by email or share a link to this note.",
-        "searchPlaceholder": "Search people, folders, or emails",
-        "noResults": "No matches found",
-        "emailLabel": "People, folders, or email",
-        "shareButton": "Share",
-        "createLink": "Create link",
-        "copyLink": "Copy link",
-        "copied": "Copied",
-        "owner": "Owner",
-        "editor": "Can edit",
-        "viewer": "Can view",
-        "teamAudience": "Everyone in this team space",
-        "pending": "Pending",
-        "accepted": "Has access",
-        "resend": "Resend invite",
-        "revoke": "Remove",
-        "invitationActions": "Invitation actions",
-        "resendSent": "Invitation sent",
-        "resendThrottled": "Invitation sent recently. Try again in a minute.",
-        "syncPrompt": "Sharing keeps a copy of this note in your VoceLibre cloud. Only you can see it until you choose who to share it with.",
-        "syncAndShare": "Sync note",
-        "visibility": {
-          "label": "Visibility",
-          "private": "Private",
-          "privateOption": "Private — only you",
-          "link": "Anyone with the link",
-          "domain": "Everyone at {{domain}} with the link",
-          "invited": "Only people invited"
-        },
-        "error": {
-          "invalidEmail": "Enter a valid email address",
-          "alreadyInvited": "{{email}} is already invited",
-          "inviteFailed": "Couldn't send the invitation. Try again.",
-          "visibilityFailed": "Couldn't update sharing. Try again.",
-          "copyFailed": "Couldn't copy the link. Try again.",
-          "revokeFailed": "Couldn't remove the invitation. Try again.",
-          "resendFailed": "Couldn't resend the invitation. Try again.",
-          "syncFailed": "Couldn't sync this note. Try again.",
-          "loadFailed": "Couldn't load share settings",
-          "retry": "Retry"
-        }
-      }
     }
   },
   "commandSearch": {
@@ -3857,11 +3289,6 @@
     "title": "VoceLibre Update Available",
     "body": "Version {{version}} is ready to download",
     "cta": "Update Now"
-  },
-  "permissionsGate": {
-    "title": "Permissions Required",
-    "description": "VoceLibre needs a few permissions to work on this computer.",
-    "continue": "Continue"
   },
   "embeddedChat": {
     "askPlaceholder": "Ask anything...",

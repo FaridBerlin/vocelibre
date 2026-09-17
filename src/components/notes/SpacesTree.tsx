@@ -2017,11 +2017,7 @@ export default function SpacesTree({
         {teamCapability && (
           <div role="none" className="group/section">
             <SectionHeader
-              label={
-                showWorkspaceGroups
-                  ? t("workspaces.switcher.workspaces")
-                  : t("notes.spaces.teamSpaces")
-              }
+              label={t("notes.spaces.teamSpaces")}
               className="mt-3"
               action={
                 <div className="flex items-center gap-px">

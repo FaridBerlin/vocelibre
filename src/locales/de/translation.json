@@ -127,29 +127,6 @@
       "slotConflict": "Diese Tastenkombination wird bereits für {{slot}} verwendet."
     }
   },
-  "systemSettings": {
-    "microphone": "Bitte öffnen Sie die Systemeinstellungen, um Mikrofonberechtigungen zu konfigurieren.",
-    "sound": "Bitte öffnen Sie die Sound-Einstellungen des Systems (z. B. pavucontrol).",
-    "accessibility": "Bedienungshilfen-Einstellungen sind auf dieser Plattform nicht verfügbar.",
-    "systemAudio": "Systemaudio-Einstellungen sind auf dieser Plattform nicht verfügbar.",
-    "screenRecording": "Einstellungen zur Bildschirmaufnahme sind auf dieser Plattform nicht verfügbar.",
-    "loginItems": "Einstellungen für Anmeldeobjekte sind auf dieser Plattform nicht verfügbar."
-  },
-  "upgradePrompt": {
-    "paymentFailed": "Ihre Zahlung konnte nicht verarbeitet werden",
-    "weeklyLimit": "Sie haben Ihr Wochenlimit erreicht",
-    "pastDueDescription": "Sie sind vorerst im kostenlosen Tarif – keine Sorge, Sie haben weiterhin {{limit}} Wörter pro Woche.\nAktualisieren Sie Ihre Zahlungsmethode, um wieder unbegrenztes Pro zu erhalten.",
-    "limitDescription": "{{used}} von {{limit}} Wörtern verwendet.\nIhre Transkription wurde gespeichert und eingefügt.",
-    "updatePayment": "Zahlungsmethode aktualisieren",
-    "updatePaymentDescription": "Zurück zu unbegrenzten Pro-Transkriptionen.",
-    "upgradeToPro": "Auf Pro upgraden",
-    "upgradeDescription": "Unbegrenzte Transkriptionen ab $8/Monat.",
-    "useApiKey": "Eigenen API-Schlüssel verwenden",
-    "useApiKeyDescription": "Verwenden Sie Ihren eigenen Schlüssel für unbegrenzte Nutzung.",
-    "switchToLocal": "Zu lokal wechseln",
-    "switchToLocalDescription": "Offline-Transkription. Keine Limits.",
-    "rollingWeeklyLimit": "Rollierendes Wochenlimit"
-  },
   "windowControls": {
     "minimize": "Minimieren",
     "maximize": "Maximieren",
@@ -747,85 +724,6 @@
     },
     "selfHosted": {
       "endpointHelp": "Zeige auf einen OpenAI-kompatiblen Server in deinem lokalen Netzwerk (z. B. Ollama, LM Studio, vLLM oder llama-server)."
-    },
-    "enterprise": {
-      "title": "Enterprise-Anbieter",
-      "description": "Verbinden Sie sich mit Cloud-Anbietern über die Zugangsdaten Ihrer Organisation.",
-      "testConnection": "Verbindung testen",
-      "testing": "Wird getestet…",
-      "testSuccess": "Verbunden",
-      "testFailed": "Verbindung fehlgeschlagen",
-      "authMode": "Authentifizierung",
-      "ssoProfile": "SSO-Profil",
-      "accessKeys": "Zugriffsschlüssel",
-      "adc": "Application Default Credentials",
-      "apiKeyMode": "API-Schlüssel",
-      "region": "Region",
-      "profile": "Profilname",
-      "accessKeyId": "Access Key ID",
-      "secretAccessKey": "Secret Access Key",
-      "sessionToken": "Session Token (optional)",
-      "endpoint": "Endpoint-URL",
-      "deploymentName": "Deployment-Name",
-      "apiVersion": "API-Version",
-      "projectId": "Projekt-ID",
-      "location": "Standort",
-      "customModelId": "Eigene Modell-ID",
-      "customModelPlaceholder": "Modell-ID oder Deployment-Name eingeben",
-      "suggestedModels": "Empfohlene Modelle",
-      "browseModels": "Alle Modelle durchsuchen",
-      "loadingModels": "Modelle werden geladen...",
-      "allModels": "Alle Modelle in {{region}}",
-      "modelListError": "Modelle konnten nicht geladen werden.",
-      "bedrock": {
-        "ssoHelp": "Verwendet Ihre AWS-CLI-SSO-Konfiguration. Stellen Sie sicher, dass Sie 'aws sso login' ausgeführt haben.",
-        "keysHelp": "Geben Sie Ihre AWS-IAM-Zugriffsschlüssel ein."
-      },
-      "errors": {
-        "bedrock": {
-          "temporaryAccessExpired": "Der temporäre AWS-Zugriff ist abgelaufen.",
-          "ssoExpired": "Die AWS-SSO-Sitzung ist abgelaufen.",
-          "credentialsRejected": "Die AWS-Anmeldedaten wurden abgelehnt. Prüfe Zugriffsschlüssel-ID, Geheimnis und Sitzungstoken.",
-          "accessDenied": "AWS Bedrock hat diese Anfrage abgelehnt. Bitte deinen AWS-Administrator um die Berechtigung, das ausgewählte Modell in der Region {{region}} aufzurufen.",
-          "modelNotFound": "AWS Bedrock konnte das ausgewählte Modell in der Region {{region}} nicht finden. Prüfe die Modell-ID und ob das Modell dort verfügbar ist.",
-          "configurationRejected": "AWS Bedrock hat die Modellkonfiguration für die Region {{region}} abgelehnt. Prüfe Modell-ID, Inferenzprofil und Region.",
-          "notConfigured": "AWS Bedrock ist nicht richtig konfiguriert. Prüfe Region und AWS-Anmeldedaten.",
-          "serviceUnavailable": "AWS Bedrock ist wegen hoher Nachfrage vorübergehend nicht verfügbar. Dies ist ein Problem des AWS-Dienstes und kein VoceLibre-Ausfall. Versuche es in einigen Minuten erneut.",
-          "throttled": "AWS Bedrock begrenzt Anfragen vorübergehend, weil zu viele eingehen. Warte kurz und versuche es erneut. Wenn das Problem anhält, bitte deinen AWS-Administrator, Bedrock-Nutzung und Kontingente zu prüfen.",
-          "timeout": "AWS Bedrock hat nicht rechtzeitig geantwortet. Versuche es erneut. Wenn das Problem anhält, prüfe deine Internetverbindung und den Status des AWS-Bedrock-Dienstes.",
-          "network": "AWS Bedrock konnte nicht erreicht werden. Prüfe deine Internetverbindung und versuche es erneut.",
-          "unknown": "AWS-Bedrock-Fehler: {{error}}",
-          "actions": {
-            "refreshManagedAccess": "Melde dich ab und wieder an, um den Unternehmenszugriff zu erneuern, und versuche es dann erneut.",
-            "reauthenticate": "Führe den folgenden Befehl im Terminal aus, um dich erneut zu authentifizieren:"
-          }
-        }
-      },
-      "technicalDetails": {
-        "title": "Technische Details",
-        "httpStatus": "HTTP-Status",
-        "awsException": "AWS-Ausnahme",
-        "awsRequestId": "AWS-Anfrage-ID",
-        "underlyingError": "Zugrunde liegender Fehler",
-        "copy": "Technische Details kopieren",
-        "copyCommand": "Wiederherstellungsbefehl kopieren"
-      },
-      "azure": {
-        "endpointHelp": "Endpoint-URL Ihrer Azure-OpenAI-Ressource (z. B. https://myresource.openai.azure.com).",
-        "deploymentHelp": "Name Ihres Modell-Deployments in Azure OpenAI."
-      },
-      "vertex": {
-        "adcHelp": "Verwendet Application Default Credentials. Führen Sie aus: gcloud auth application-default login",
-        "apikeyHelp": "API-Schlüssel für Vertex AI Express Mode aus Google AI Studio."
-      }
-    },
-    "tinfoil": {
-      "modelRetiredTitle": "Modell nicht mehr verfügbar",
-      "modelRetired": "Tinfoil hat {{from}} eingestellt. Zu {{to}} gewechselt.",
-      "refreshingModels": "Modelle werden aktualisiert…"
-    },
-    "corti": {
-      "euOnly": "Corti-Modelle sind nur in der EU-Region verfügbar."
     }
   },
   "transcription": {
@@ -1124,29 +1022,6 @@
     "welcomeTitle": "Willkommen bei VoceLibre",
     "sessionExpired": "Sitzung abgelaufen"
   },
-  "calendar": {
-    "title": "Google Kalender",
-    "status": "Status",
-    "connected": "Verbunden",
-    "disconnected": "Getrennt",
-    "notConnectedDescription": "Verbinden, um Meetings zu erkennen und aufzuzeichnen",
-    "connectCta": {
-      "title": "Kalender-Integration",
-      "description": "Meetings automatisch erkennen und Transkriptionen aufzeichnen"
-    },
-    "connect": "Google Kalender verbinden",
-    "connecting": "Verbinde...",
-    "disconnect": "Trennen",
-    "disconnecting": "Trennen...",
-    "sync": "Synchronisieren",
-    "syncing": "Synchronisiere...",
-    "calendarsTitle": "Kalender",
-    "upcomingTitle": "Anstehend",
-    "noUpcoming": "Keine anstehenden Ereignisse",
-    "meetingStarting": "Meeting beginnt jetzt",
-    "today": "Heute",
-    "tomorrow": "Morgen"
-  },
   "upcoming": {
     "title": "Demnächst",
     "transcriptions": "Transkriptionen",
@@ -1231,90 +1106,11 @@
       "title": "Was protokolliert wird"
     }
   },
-  "apiKeysSection": {
-    "title": "API-Schlüssel",
-    "description": "Erstellen Sie Schlüssel für den programmatischen Zugriff auf die VoceLibre-API.",
-    "docsLink": "API-Dokumentation",
-    "empty": "Noch keine API-Schlüssel",
-    "createButton": "API-Schlüssel erstellen",
-    "create": {
-      "title": "API-Schlüssel erstellen",
-      "nameLabel": "Schlüsselname",
-      "namePlaceholder": "z. B. Meine Integration",
-      "scopesLabel": "Berechtigungen",
-      "expiryLabel": "Ablauf",
-      "expiryOptions": {
-        "never": "Läuft nicht ab",
-        "30days": "30 Tage",
-        "60days": "60 Tage",
-        "90days": "90 Tage",
-        "1year": "1 Jahr"
-      },
-      "submit": "Erstellen",
-      "cancel": "Abbrechen"
-    },
-    "created": {
-      "title": "API-Schlüssel erstellt",
-      "warning": "Kopieren Sie diesen Schlüssel jetzt. Er wird nicht erneut angezeigt.",
-      "copied": "Kopiert!",
-      "copyButton": "In die Zwischenablage kopieren",
-      "done": "Fertig"
-    },
-    "scopes": {
-      "notesRead": "Notizen lesen",
-      "notesWrite": "Notizen erstellen und bearbeiten",
-      "transcriptionsRead": "Transkriptionen lesen"
-    },
-    "revoke": {
-      "button": "Widerrufen",
-      "confirm": "Diesen Schlüssel widerrufen? Alle Integrationen, die ihn verwenden, funktionieren dann nicht mehr.",
-      "success": "API-Schlüssel widerrufen"
-    },
-    "neverUsed": "Nie verwendet",
-    "lastUsed": "Zuletzt verwendet {{time}}",
-    "maxKeysReached": "Maximal {{max}} Schlüssel erlaubt",
-    "errors": {
-      "loadFailed": "API-Schlüssel konnten nicht geladen werden",
-      "createFailed": "API-Schlüssel konnte nicht erstellt werden",
-      "revokeFailed": "API-Schlüssel konnte nicht widerrufen werden"
-    }
-  },
   "dictionarySuffix": "Wörterbuch-Suffix",
-  "emailVerification": {
-    "checkEmailDescription": "Wir haben einen Bestätigungslink an Ihre E-Mail-Adresse gesendet:",
-    "checkEmailTitle": "Bestätigungs-E-Mail gesendet",
-    "errors": {
-      "resendFailed": "Die E-Mail konnte nicht erneut gesendet werden. Bitte versuchen Sie es erneut.",
-      "serverUnreachable": "Server nicht erreichbar. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."
-    },
-    "resendButton": "Bestätigungs-E-Mail erneut senden",
-    "resendIn": "Erneut senden in {{seconds}}s",
-    "verifiedDescription": "Ihr Konto ist eingerichtet.",
-    "verifiedTitle": "Bestätigt",
-    "waiting": "Warten auf Bestätigung",
-    "backToSignIn": "Zurück zur Anmeldung"
-  },
   "errorBoundary": {
     "description": "Ein unerwarteter Fehler ist aufgetreten. Bitte laden Sie die Seite neu.",
     "reload": "Neu laden",
     "title": "Etwas ist schiefgelaufen"
-  },
-  "forgotPassword": {
-    "back": "Zurück",
-    "backToSignIn": "Zurück zur Anmeldung",
-    "emailPlaceholder": "E-Mail-Adresse eingeben",
-    "goBack": "Zurück",
-    "notConfigured": "Authentifizierung ist noch nicht eingerichtet.",
-    "sendResetLink": "Link zum Zurücksetzen senden",
-    "sending": "Wird gesendet...",
-    "subtitle": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen",
-    "success": {
-      "description": "Wir haben einen Link zum Zurücksetzen des Passworts gesendet an",
-      "help": "Keine E-Mail erhalten? Prüfen Sie Ihren Spam-Ordner oder versuchen Sie es erneut.",
-      "title": "Prüfen Sie Ihre E-Mail",
-      "tryAnother": "Andere E-Mail-Adresse versuchen"
-    },
-    "title": "Passwort zurücksetzen"
   },
   "actionPrompt": "Aktions-Prompt",
   "hotkeyGuidance": {
@@ -2605,71 +2401,6 @@
         "large": "Beste Qualität, am langsamsten",
         "turbo": "Schnell mit guter Qualität"
       },
-      "transcription": {
-        "openai_gpt_4o_mini_transcribe": "Schnelle und genaue Transkription",
-        "openai_gpt_4o_transcribe": "Genaueste Transkription",
-        "openai_whisper_1": "Originales Whisper-Modell",
-        "groq_whisper_large_v3": "Hochpräzise Spracherkennung",
-        "groq_whisper_large_v3_turbo": "216x Echtzeitgeschwindigkeit",
-        "mistral_voxtral_mini_latest": "Schnelle mehrsprachige Transkription",
-        "gemini_3_5_transcribe": "Googles Gemini-Spracherkennung",
-        "corti_transcribe": "Medizinische Transkription in klinischer Qualität",
-        "xai_grok_stt": "Hochpräzise Spracherkennung von xAI",
-        "tinfoil_voxtral": "Nachweisbar private Transkription"
-      },
-      "cloud": {
-        "openai_gpt_5_2": "Starkes Reasoning-Modell",
-        "openai_gpt_5_mini": "Schnell und kosteneffizient",
-        "openai_gpt_5_nano": "Ultraschnell, niedrige Latenz",
-        "openai_gpt_4_1": "Starke Basis, 1M Kontext",
-        "openai_gpt_4_1_mini": "Kleineres GPT-4.1-Modell",
-        "openai_gpt_4_1_nano": "GPT-4.1 mit der niedrigsten Latenz",
-        "anthropic_claude_fable_5": "Leistungsstärkstes Modell von Anthropic, Mythos-Klasse",
-        "anthropic_claude_sonnet_5": "Schnelles, leistungsfähiges Agent-Modell zu geringeren Kosten",
-        "anthropic_claude_sonnet_4_6": "Ausgewogene Leistung",
-        "anthropic_claude_sonnet_4_5": "Vorherige Sonnet-Generation",
-        "anthropic_claude_haiku_4_5": "Schnell mit nahezu Frontier-Intelligenz",
-        "gemini_gemini_3_5_flash": "Neuestes schnelles, leistungsstarkes Gemini-Modell",
-        "gemini_gemini_3_5_flash_lite": "Schnellstes, kostengünstigstes 3.5-Modell",
-        "gemini_gemini_3_1_pro_preview": "Flaggschiff der nächsten Generation für komplexes Reasoning",
-        "gemini_gemini_3_1_flash_lite": "Leistung auf Frontier-Niveau zu geringen Kosten",
-        "gemini_gemini_3_flash_preview": "Ultraschnelles Modell der nächsten Generation mit hoher Leistungsfähigkeit",
-        "gemini_gemini_2_5_flash_lite": "Niedrigste Latenz und Kosten",
-        "gemini_gemma_4_31b_it": "Googles größtes Gemma 4, 31B dicht, 256K Kontext",
-        "gemini_gemma_4_26b_a4b_it": "Googles Gemma 4 MoE, 4B aktive Parameter, 256K Kontext",
-        "groq_openai_gpt_oss_120b": "OpenAIs Open-Source-Flaggschiff, 500 T/s",
-        "groq_openai_gpt_oss_20b": "Schnelles Open-Source-Modell, 1000 T/s",
-        "groq_compound": "Groqs Compound-System, 450 T/s",
-        "groq_compound_mini": "Schnelles Compound-System, 3x niedrigere Latenz",
-        "openai_gpt_5_6_sol": "Flaggschiff-GPT-5.6 für komplexes Coding und Forschung",
-        "openai_gpt_5_6_terra": "Ausgewogenes GPT-5.6 für die tägliche Arbeit",
-        "openai_gpt_5_6_luna": "Schnellstes und günstigstes GPT-5.6",
-        "openai_gpt_5_5": "Frontier-Modell für komplexes Reasoning",
-        "anthropic_claude_opus_5": "Leistungsstärkstes Opus-Modell, 1M Kontext",
-        "anthropic_claude_opus_4_8": "Leistungsstarkes Opus-Modell für Ehrlichkeit und Zuverlässigkeit",
-        "anthropic_claude_opus_4_7": "Leistungsstarkes Opus-Modell",
-        "anthropic_claude_opus_4_6": "Vorherige Opus-Generation, 1M Kontext",
-        "anthropic_claude_opus_4_5": "Früheres Opus-Modell",
-        "tinfoil_glm_5_3": "Privates agentisches Coding-Modell in sicheren Enklaven, 1M Kontext",
-        "tinfoil_gemma4_31b": "Privates mehrsprachiges Reasoning-Modell mit Tool-Aufrufen, 256K Kontext",
-        "tinfoil_gpt_oss_120b": "Privates Open-Weight-Reasoning-Modell mit Tool-Nutzung, 131K Kontext",
-        "tinfoil_llama3_3_70b": "Privates Konversationsmodell mit Tool-Aufrufen, 128K Kontext",
-        "corti_corti_s1_instant": "Schnelles Gesundheitsmodell, ohne Reasoning-Spur",
-        "corti_corti_s1": "Leistungsfähigstes klinisches Modell mit Reasoning",
-        "corti_corti_s1_mini_instant": "Kompaktes Gesundheitsmodell, am schnellsten und günstigsten",
-        "corti_corti_s1_mini": "Kompaktes klinisches Modell mit Reasoning zum halben Preis"
-      },
-      "enterprise": {
-        "bedrock_claude_fable_5": "Leistungsstärkstes Claude-Modell. Ideal für die schwierigsten Agent-Modus-Aufgaben.",
-        "bedrock_claude_haiku_4_5": "Schnell und günstig. Ideal zum Bereinigen von Text.",
-        "bedrock_claude_sonnet_5": "Ausgewogen. Empfohlener Standard für den Agent-Modus.",
-        "bedrock_claude_opus_4_8": "Höchste Intelligenz. Für komplexe Aufgaben im Agent-Modus.",
-        "bedrock_gpt_oss_120b": "Offenes OpenAI-Modell. Starkes Reasoning zu geringen Kosten.",
-        "bedrock_deepseek_v3_2": "Offenes Frontier-Modell. Starker Wert für den Agent-Modus.",
-        "bedrock_qwen3_next_80b": "Sparsames offenes Modell. Schnell und mehrsprachig.",
-        "vertex_gemini_2_5_flash": "Fast multimodal model via Vertex",
-        "vertex_gemini_2_5_pro": "Advanced reasoning via Vertex"
-      },
       "local": {
         "qwen_qwen3_5_9b_q4_k_m": "Leistungsstarkes Hybridmodell",
         "qwen_qwen3_5_4b_q4_k_m": "Ausgewogenes Qwen3.5 für allgemeine Nutzung",
@@ -2709,51 +2440,13 @@
       }
     }
   },
-  "insights": {
-    "title": "Statistiken",
-    "description": "Ein privater Blick auf Ihre Diktiergewohnheiten und Ihren Fortschritt.",
-    "wordsSpoken": "Gesprochene Wörter",
-    "currentStreak": "Aktuelle Serie",
-    "wordsPerMinute": "Wörter pro Minute",
-    "dictations": "Diktate",
-    "allTime": "Gesamt",
-    "days_one": "{{count}} Tag",
-    "days_other": "{{count}} Tage",
-    "longestStreak_one": "Längste: {{count}} Tag",
-    "longestStreak_other": "Längste: {{count}} Tage",
-    "wpmCoverage": "Basierend auf {{count}} % der gemessenen Wörter",
-    "activity": "Sprechaktivität",
-    "activityDescription": "Gesprochene Wörter der letzten 6 Monate",
-    "activityLabel": "Heatmap der Sprechaktivität über 6 Monate",
-    "activityLess": "Weniger",
-    "activityMore": "Mehr",
-    "dayTooltip_one": "{{date}}: {{count}} Wort",
-    "dayTooltip_other": "{{date}}: {{count}} Wörter",
-    "dataRetentionDisabled": "Die Datenaufbewahrung ist deaktiviert, daher werden neue Diktate in den Statistiken nicht gezählt – weder auf diesem Gerät noch in Ihrem Konto. Bereits synchronisierte Zähler bleiben in Ihrem Konto.",
-    "onDevice": "Auf diesem Gerät",
-    "synced": "Geräteübergreifend synchronisiert",
-    "syncFallback": "Gerätedaten werden angezeigt – Synchronisierung nicht verfügbar",
-    "syncPrompt": "Synchronisieren Sie inhaltsfreie Zähler, um lokale und Cloud-Aktivität geräteübergreifend zusammenzuführen.",
-    "enableSync": "Synchronisierung aktivieren",
-    "claimTitle": "Frühere Diktate einbeziehen?",
-    "claimDescription_one": "{{count}} Diktat wurde auf diesem Gerät vor Ihrer Anmeldung aufgezeichnet. Wird es einbezogen, werden nur Wortanzahl, Datum und genaue Uhrzeit der Aufnahme, Dauer und Modelltyp übertragen – nie Transkriptionsinhalte.",
-    "claimDescription_other": "{{count}} Diktate wurden auf diesem Gerät vor Ihrer Anmeldung aufgezeichnet. Werden sie einbezogen, werden nur Wortanzahl, Datum und genaue Uhrzeit der jeweiligen Aufnahme, Dauer und Modelltyp übertragen – nie Transkriptionsinhalte.",
-    "claimInclude": "Einbeziehen",
-    "claimSkip": "Jetzt nicht",
-    "enableTitle": "Insights-Synchronisierung aktivieren?",
-    "enableConfirm": "Synchronisierung aktivieren",
-    "enableDescription_one": "{{count}} bereits auf diesem Gerät aufgezeichnetes Diktat wird in Ihr Konto hochgeladen. Die Insights-Synchronisierung überträgt nur Wortanzahl, Datum und genaue Uhrzeit der jeweiligen Aufnahme, Dauer und Modelltyp – nie Transkriptionsinhalte.",
-    "enableDescription_other": "{{count}} bereits auf diesem Gerät aufgezeichnete Diktate werden in Ihr Konto hochgeladen. Die Insights-Synchronisierung überträgt nur Wortanzahl, Datum und genaue Uhrzeit der jeweiligen Aufnahme, Dauer und Modelltyp – nie Transkriptionsinhalte.",
-    "emptyTitle": "Noch keine Diktate",
-    "emptyBody": "Beginnen Sie zu diktieren – Ihre Wörter, Serien und tägliche Aktivität erscheinen dann hier.",
-    "loadError": "Insights konnten von diesem Gerät nicht gelesen werden."
-  },
   "sidebar": {
     "insights": "Statistiken",
     "home": "Startseite",
     "notes": "Notizen",
     "upload": "Hochladen",
     "dictionary": "Wörterbuch",
+    "calendars": "Kalender",
     "referral": "Gratis-Monat erhalten",
     "settings": "Einstellungen",
     "support": "Support",
@@ -2772,82 +2465,6 @@
     "chat": "Chat",
     "collapse": "Seitenleiste einklappen",
     "expand": "Seitenleiste ausklappen"
-  },
-  "workspaces": {
-    "switcher": {
-      "workspaces": "Workspaces",
-      "create": "Workspace erstellen…"
-    },
-    "create": {
-      "title": "Workspace erstellen",
-      "description": "Ein Workspace bündelt die Mitglieder und Abrechnung Ihrer Organisation. Darin erstellen Sie Team-Bereiche für gemeinsame Notizen.",
-      "nameLabel": "Workspace-Name",
-      "namePlaceholder": "Acme Corp",
-      "submit": "Workspace erstellen",
-      "submitting": "Erstelle…",
-      "errorTitle": "Workspace konnte nicht erstellt werden"
-    },
-    "created": {
-      "title": "Workspace erstellt",
-      "description": "Sie sind nun Inhaber von {{name}}."
-    },
-    "invite": {
-      "title": "Zu {{workspace}} einladen",
-      "description": "Fügen Sie Teammitglieder per E-Mail hinzu. Sie erhalten einen Beitrittslink.",
-      "emailLabel": "E-Mail",
-      "emailPlaceholder": "teammitglied@example.com",
-      "roleLabel": "Rolle",
-      "seatUsage": "{{used}} von {{seats}} Plätzen belegt",
-      "seatCost": "Bei Annahme wird deinem Tarif ein Platz hinzugefügt · geschätzte anteilige Kosten: {{amount}}.",
-      "submit": "Einladung senden",
-      "submitting": "Sende…",
-      "sentTitle": "Einladung gesendet",
-      "sentDescription": "Einladung an {{email}} gesendet.",
-      "sentNoEmailTitle": "Einladung erstellt, aber nicht per E-Mail gesendet",
-      "sentNoEmailDescription": "{{email}} wurde eingeladen, aber die E-Mail konnte nicht zugestellt werden. Senden Sie sie später erneut oder teilen Sie den Einladungslink anders.",
-      "errorTitle": "Einladung konnte nicht gesendet werden",
-      "role": {
-        "admin": "Administrator",
-        "member": "Mitglied"
-      },
-      "roleDescription": {
-        "admin": "Verwaltet Mitglieder und Abrechnung",
-        "member": "Nutzt den Workspace"
-      }
-    },
-    "join": {
-      "title": "Team beitreten",
-      "domainTitle": "Dein Team ist schon auf VoceLibre",
-      "description": "In diesen Workspaces ist jemand aus deiner E-Mail-Domain.",
-      "invitedDescription": "Du wurdest zu einem Workspace eingeladen.",
-      "invitedBy": "Eingeladen von {{inviter}} als {{role}}",
-      "memberCount_one": "{{count}} Mitglied",
-      "memberCount_other": "{{count}} Mitglieder",
-      "join": "Beitreten",
-      "requestErrorTitle": "Anfrage konnte nicht gesendet werden",
-      "requestedDescription": "Ein Admin von {{workspace}} sieht sie sich an.",
-      "requestedTitle": "Anfrage gesendet",
-      "requested": "Angefragt",
-      "request": "Zutritt anfragen",
-      "notNow": "Jetzt nicht",
-      "successTitle": "Beigetreten",
-      "successDescription": "Du bist jetzt Mitglied von {{workspace}}.",
-      "errorTitle": "Beitritt fehlgeschlagen"
-    },
-    "accept": {
-      "title": "Workspace beitreten",
-      "description": "{{inviter}} hat Sie eingeladen, {{workspace}} als {{role}} beizutreten.",
-      "loading": "Lade Einladung…",
-      "accept": "Einladung annehmen",
-      "accepting": "Annehmen…",
-      "signInToAccept": "Anmelden zum Annehmen",
-      "switchAccount": "Konto wechseln",
-      "successTitle": "Beigetreten",
-      "successDescription": "Sie sind jetzt Mitglied von {{name}}. Verwalten Sie ihn unter Einstellungen → Workspace.",
-      "errorTitle": "Einladung konnte nicht angenommen werden",
-      "sentTo": "Einladung gesendet an {{email}}",
-      "wrongAccount": "Diese Einladung wurde an {{email}} gesendet. Sie sind als {{current}} angemeldet."
-    }
   },
   "chat": {
     "newChat": "Neuer Chat",
@@ -2870,78 +2487,6 @@
     "searchTitle": "Unterhaltungen suchen",
     "searchDescription": "In allen Unterhaltungen suchen",
     "newChatEmpty": "Fragen Sie zu Ihren Notizen, Transkripten oder anderem"
-  },
-  "referral": {
-    "title": "Empfehlen und Belohnungen erhalten",
-    "modalTitle": "Freunde einladen",
-    "subtitle": "Schenke einen Monat. Erhalte einen Monat.",
-    "tabs": {
-      "refer": "Empfehlen",
-      "pastInvites": "Vergangene Einladungen"
-    },
-    "howItWorks": {
-      "shareLink": "Teile deinen Einladungslink",
-      "theySignUp": "Sie registrieren sich und erhalten einen ",
-      "freeMonthOfPro": "kostenlosen Monat Pro",
-      "youGet": "Du erhältst einen ",
-      "freeMonth": "kostenlosen Monat",
-      "whenTheyDictate": " wenn sie 2.000 Wörter diktieren"
-    },
-    "inviteLink": {
-      "title": "Dein Einladungslink",
-      "copy": "Kopieren",
-      "copied": "Kopiert"
-    },
-    "sendInvites": {
-      "title": "Einladungen senden",
-      "placeholder": "friend@example.com",
-      "send": "Senden",
-      "sending": "Wird gesendet"
-    },
-    "stats": {
-      "referred": "Empfohlen",
-      "converted": "Umgewandelt",
-      "monthsEarned": "Verdiente Monate"
-    },
-    "status": {
-      "converted": "Umgewandelt",
-      "opened": "Geöffnet",
-      "failed": "Fehlgeschlagen",
-      "sent": "Gesendet"
-    },
-    "friends": {
-      "title": "Freunde",
-      "completed": "Abgeschlossen",
-      "sentInvites": "Gesendete Einladungen"
-    },
-    "empty": {
-      "title": "Noch keine Einladungen gesendet",
-      "description": "Teile deinen Link oder sende eine Einladung, um loszulegen"
-    },
-    "toasts": {
-      "copiedTitle": "Kopiert!",
-      "copiedDescription": "Empfehlungslink in die Zwischenablage kopiert",
-      "copyFailedTitle": "Kopieren fehlgeschlagen",
-      "copyFailedDescription": "Link konnte nicht in die Zwischenablage kopiert werden",
-      "invalidEmailTitle": "Ungültige E-Mail",
-      "invalidEmailDescription": "Bitte gib eine gültige E-Mail-Adresse ein",
-      "inviteSentTitle": "Einladung gesendet!",
-      "inviteSentDescription": "Einladung an {{email}} gesendet",
-      "sendFailedTitle": "Senden fehlgeschlagen",
-      "sendFailedDescription": "Einladung konnte nicht gesendet werden. Bitte versuche es erneut."
-    },
-    "errors": {
-      "unableToLoad": "Empfehlungsdaten konnten nicht geladen werden",
-      "unableToLoadStats": "Empfehlungsstatistiken konnten nicht geladen werden. Bitte versuche es später erneut."
-    },
-    "tryAgain": "Erneut versuchen",
-    "card": {
-      "brand": "VoceLibre",
-      "signalId": "Signal ID",
-      "audioSignature": "Deine Audio-Signatur",
-      "stop": "Stopp",
-      "playSignal": "Signal abspielen"
-    }
   },
   "notes": {
     "mutationErrors": {
@@ -3703,49 +3248,7 @@
       "connectFailedDescription": "Beim Verbinden mit Calendar.app ist ein Fehler aufgetreten. Starte VoceLibre neu und versuche es erneut."
     },
     "sections": {
-      "calendar": "Kalender",
-      "api": "API",
-      "mcp": "MCP",
-      "cli": "CLI"
-    },
-    "api": {
-      "title": "API-Schlüssel",
-      "description": "Verwalte API-Schlüssel für programmatischen Zugriff",
-      "proRequired": "Upgrade auf einen kostenpflichtigen Plan, um die API zu nutzen",
-      "manage": "Schlüssel verwalten",
-      "viewPlans": "Pläne ansehen",
-      "dialogTitle": "API-Schlüssel"
-    },
-    "mcp": {
-      "title": "Bring deine Notizen in deine KI-Tools",
-      "description": "Chatte, suche und arbeite mit deinen Notizen in Claude, ChatGPT und Cursor.",
-      "step1": "Füge VoceLibre MCP in deinem KI-Tool mit der öffentlichen URL hinzu",
-      "step2": "Erstelle oben einen API-Schlüssel mit den benötigten Berechtigungen.",
-      "step3": "Füge den Schlüssel als Authorization-Header ein, um zu verbinden.",
-      "learnMore": "Mehr erfahren",
-      "viewPlans": "Pläne ansehen",
-      "copyUrl": "MCP-URL kopieren",
-      "proRequired": "Upgrade auf einen kostenpflichtigen Plan, um VoceLibre mit Claude, ChatGPT und Cursor zu verbinden.",
-      "copied": "Kopiert"
-    },
-    "cli": {
-      "title": "Kommandozeilen-Zugriff",
-      "description": "Gib deinem Agenten über das Terminal Zugriff auf deine Notizen.",
-      "installLabel": "Installieren",
-      "learnMore": "Dokumentation lesen",
-      "copyDocsLink": "Doku-Link kopieren",
-      "docsLinkCopied": "Doku-Link kopiert",
-      "viewPlans": "Pläne ansehen",
-      "local": {
-        "label": "Lokal",
-        "freeBadge": "Kostenlos",
-        "description": "Greife direkt auf deine lokalen Notizen zu. Kein Login oder API-Key — funktioniert, solange VoceLibre läuft."
-      },
-      "cloud": {
-        "label": "Cloud",
-        "description": "Synchronisiere geräteübergreifend mit deinem API-Key.",
-        "proRequired": "Upgrade auf einen kostenpflichtigen Plan, um die CLI im Cloud-Modus zu nutzen."
-      }
+      "calendar": "Kalender"
     },
     "plan": {
       "title": "Dein Plan",
@@ -3761,77 +3264,6 @@
     "notABot": {
       "title": "VoceLibre ist ein Meeting-Rekorder, kein Bot",
       "description": "VoceLibre erfasst Audio direkt von deinem System — es nimmt niemals als Teilnehmer an deinen Meetings teil. Verbinde einfach deinen Kalender und mach Notizen wie gewohnt."
-    }
-  },
-  "notesView": {
-    "searchPlaceholder": "Notizen durchsuchen…",
-    "newNote": "Neue Notiz",
-    "empty": {
-      "title": "Noch keine Notizen",
-      "description": "Erstellen Sie Ihre erste Notiz, um zu beginnen."
-    },
-    "searchEmpty": {
-      "title": "Keine Ergebnisse",
-      "description": "Keine Notizen für „{{query}}“ gefunden."
-    },
-    "noteType": {
-      "personal": "persönlich",
-      "meeting": "Meeting",
-      "upload": "Upload"
-    }
-  },
-  "noteEditor": {
-    "saved": "Gespeichert",
-    "deleteNote": "Notiz löschen",
-    "deleteConfirmTitle": "Notiz löschen?",
-    "deleteConfirmDescription": "Diese Notiz wird dauerhaft gelöscht und kann nicht wiederhergestellt werden.",
-    "deleteConfirm": "Löschen",
-    "share": {
-      "button": "Teilen",
-      "dialog": {
-        "title": "Notiz teilen",
-        "description": "Lade Personen per E-Mail ein oder teile einen Link zu dieser Notiz.",
-        "searchPlaceholder": "Personen, Ordner oder E-Mails suchen",
-        "noResults": "Keine Treffer gefunden",
-        "emailLabel": "Personen, Ordner oder E-Mail",
-        "shareButton": "Teilen",
-        "createLink": "Link erstellen",
-        "copyLink": "Link kopieren",
-        "copied": "Kopiert",
-        "owner": "Eigentümer",
-        "editor": "Kann bearbeiten",
-        "viewer": "Kann ansehen",
-        "teamAudience": "Alle in diesem Team-Bereich",
-        "pending": "Ausstehend",
-        "accepted": "Hat Zugriff",
-        "resend": "Einladung erneut senden",
-        "revoke": "Entfernen",
-        "invitationActions": "Einladungsaktionen",
-        "resendSent": "Einladung gesendet",
-        "resendThrottled": "Einladung wurde kürzlich gesendet. Versuche es in einer Minute erneut.",
-        "syncPrompt": "Beim Teilen wird eine Kopie dieser Notiz in deiner VoceLibre-Cloud gespeichert. Nur du kannst sie sehen, bis du auswählst, mit wem du sie teilst.",
-        "syncAndShare": "Notiz synchronisieren",
-        "visibility": {
-          "label": "Sichtbarkeit",
-          "private": "Privat",
-          "privateOption": "Privat — nur du",
-          "link": "Jeder mit dem Link",
-          "domain": "Alle bei {{domain}} mit dem Link",
-          "invited": "Nur eingeladene Personen"
-        },
-        "error": {
-          "invalidEmail": "Gib eine gültige E-Mail-Adresse ein",
-          "alreadyInvited": "{{email}} ist bereits eingeladen",
-          "inviteFailed": "Die Einladung konnte nicht gesendet werden. Versuche es erneut.",
-          "visibilityFailed": "Die Freigabe konnte nicht aktualisiert werden. Versuche es erneut.",
-          "copyFailed": "Der Link konnte nicht kopiert werden. Versuche es erneut.",
-          "revokeFailed": "Die Einladung konnte nicht entfernt werden. Versuche es erneut.",
-          "resendFailed": "Die Einladung konnte nicht erneut gesendet werden. Versuche es erneut.",
-          "syncFailed": "Die Notiz konnte nicht synchronisiert werden. Versuche es erneut.",
-          "loadFailed": "Freigabeeinstellungen konnten nicht geladen werden",
-          "retry": "Erneut versuchen"
-        }
-      }
     }
   },
   "commandSearch": {
@@ -3857,11 +3289,6 @@
     "title": "VoceLibre-Update verfügbar",
     "body": "Version {{version}} steht zum Download bereit",
     "cta": "Jetzt aktualisieren"
-  },
-  "permissionsGate": {
-    "title": "Berechtigungen erforderlich",
-    "description": "VoceLibre benötigt einige Berechtigungen, um auf diesem Computer zu funktionieren.",
-    "continue": "Weiter"
   },
   "embeddedChat": {
     "askPlaceholder": "Frag etwas...",

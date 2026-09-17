@@ -1,5 +1,4 @@
 import type { ModelDefinition } from "../models/ModelRegistry";
-import type { TinfoilCatalogModel } from "../models/tinfoilModels";
 import type { ManagedEnterpriseConfig } from "./enterpriseIdentity";
 import type { CalendarAvailabilityRequest, CalendarAvailabilityResult } from "./calendar";
 
@@ -1884,7 +1883,6 @@ declare global {
       }) => Promise<ProxyTranscriptionResult>;
       getTinfoilKey?: () => Promise<string | null>;
       saveTinfoilKey?: (key: string) => Promise<void>;
-      getTinfoilChatModels?: () => Promise<TinfoilCatalogModel[]>;
       proxyTinfoilTranscription?: (data: {
         audioBuffer: ArrayBuffer;
         language?: string;

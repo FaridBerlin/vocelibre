@@ -23,6 +23,7 @@ interface HistoryViewProps {
   deleteTranscription: (id: number) => void;
   clearAllTranscriptions: () => void;
   onOpenSettings: (section?: string) => void;
+  onOpenCalendars: () => void;
   onShowAudioInFolder: (id: number) => void;
   onRetryTranscription: (id: number, options?: { isRecover?: boolean }) => Promise<void>;
   showDiscarded: boolean;
@@ -42,6 +43,7 @@ export default function HistoryView({
   deleteTranscription,
   clearAllTranscriptions,
   onOpenSettings,
+  onOpenCalendars,
   onShowAudioInFolder,
   onRetryTranscription,
   showDiscarded,
@@ -339,7 +341,7 @@ export default function HistoryView({
                 events={events}
                 isLoading={eventsLoading}
                 isConnected={isConnected}
-                onConnectCalendar={() => onOpenSettings("general")}
+                onConnectCalendar={onOpenCalendars}
               />
             </div>
           </div>

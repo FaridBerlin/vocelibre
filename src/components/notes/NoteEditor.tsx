@@ -241,7 +241,6 @@ export default function NoteEditor({
     locallyOwned: true,
   });
   const shareCapabilities = noteCapabilities(notePermission);
-  const canShare = false;
   const canEditNote = shareCapabilities.canEdit;
   // Re-filing is owner-only on shared personal notes (a denied folder_id
   // PATCH would fork an unexpected Personal copy); team members keep
@@ -922,31 +921,6 @@ export default function NoteEditor({
                     </button>
                   )}
                 </div>
-              )}
-              {canShare && (
-                <button
-                  type="button"
-                  onClick={() => setShareDialogOpen(true)}
-                  className={cn(
-                    "shrink-0 h-6 w-6 flex items-center justify-center rounded-md",
-                    "bg-foreground/4 dark:bg-white/5",
-                    "hover:bg-foreground/8 dark:hover:bg-white/10",
-                    "active:bg-foreground/12 dark:active:bg-white/15",
-                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    "transition-colors duration-150"
-                  )}
-                  aria-label={t("noteEditor.share.button")}
-                >
-                  <Share2
-                    size={11}
-                    className={cn(
-                      "transition-colors",
-                      isShared
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-foreground/50 dark:text-foreground/40"
-                    )}
-                  />
-                </button>
               )}
               {(onExportNote || onExportTranscript) && (
                 <DropdownMenu>
