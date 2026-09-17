@@ -4,11 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Sparkles, Plus, ChevronRight, Zap, Loader2, Check, Monitor } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "../lib/utils";
-import {
-  selectPolicyEffectiveSettings,
-  selectResolvedLLMConfig,
-  useSettingsStore,
-} from "../../stores/settingsStore";
+import { selectResolvedLLMConfig, useSettingsStore } from "../../stores/settingsStore";
 import { useNotesOnboarding } from "../../hooks/useNotesOnboarding";
 import {
   useActions,
@@ -22,7 +18,6 @@ import { AlertDialog } from "../ui/dialog";
 import ReasoningModelSelector from "../ReasoningModelSelector";
 import { useSystemAudioPermission } from "../../hooks/useSystemAudioPermission";
 import { canManageSystemAudioInApp } from "../../utils/systemAudioAccess";
-import { usePolicySnapshot } from "../../hooks/usePolicy";
 
 interface NotesOnboardingProps {
   onComplete: () => void;
@@ -40,14 +35,9 @@ export default function NotesOnboarding({ onComplete }: NotesOnboardingProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [justCreated, setJustCreated] = useState(false);
 
-  const policyState = usePolicySnapshot();
+  const policyState = null;
   const cleanupConfig = useSettingsStore(
-    useShallow((settings) =>
-      selectResolvedLLMConfig(
-        selectPolicyEffectiveSettings(settings, policyState),
-        "dictationCleanup"
-      )
-    )
+    useShallow((settings) => selectResolvedLLMConfig(settings, "dictationCleanup"))
   );
   const setCleanupModel = useSettingsStore((s) => s.setCleanupModel);
   const setCleanupProvider = useSettingsStore((s) => s.setCleanupProvider);

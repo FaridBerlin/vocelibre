@@ -15,11 +15,13 @@ test("managed OpenWhispr Cloud does not advertise live transcription preview", a
   assert.equal(supportsLiveTranscriptionPreview("openwhispr", true), false);
 });
 
-test("BYOK preview availability follows the selected model's streaming capability", async () => {
+test("only local transcription advertises a live preview", async () => {
   const { supportsLiveTranscriptionPreview } = await load();
 
-  assert.equal(supportsLiveTranscriptionPreview("providers", true), true);
-  assert.equal(supportsLiveTranscriptionPreview("providers", false), false);
+  // Cloud/BYOK transcription is gone, so its streaming capability can no longer
+  // enable the preview regardless of what a caller passes.
+  assert.equal(supportsLiveTranscriptionPreview("local", false), true);
+  assert.equal(supportsLiveTranscriptionPreview("self-hosted", true), false);
 });
 
 test("batch-only self-hosted transcription does not advertise live preview", async () => {

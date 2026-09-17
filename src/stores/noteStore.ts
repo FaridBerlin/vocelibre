@@ -1,20 +1,11 @@
 import { create } from "zustand";
-import { syncService } from "../services/SyncService.js";
-import { resolveRendererCloudNoteCreateBatch } from "../services/noteCreateAck";
 import {
   createClearedAccountNoteState,
   invalidateKeyedLoadGenerations,
   removeNoteFromLists,
   teardownNoteContainers,
 } from "./noteListOps";
-import {
-  addNoteConflict,
-  clearNoteConflicts,
-  readNoteConflicts,
-  removeNoteConflictId,
-} from "../lib/noteConflictRegistry";
 import { findDefaultFolder } from "../components/notes/shared";
-import type { CloudNote } from "../services/NotesService.js";
 import type {
   FolderItem,
   NoteAccessState,
@@ -55,7 +46,6 @@ interface NoteState {
   shareByCloudId: Map<string, NoteShareCacheEntry>;
   // Cloud versions that arrived while the local row had unpushed edits,
   // keyed by client_note_id. Consumed by the editor's conflict banner.
-  noteConflicts: Record<string, CloudNote>;
 }
 
 const EXPANDED_STORAGE_KEY = "notesTree.expanded";
@@ -90,7 +80,6 @@ const useNoteStore = create<NoteState>()(() => ({
   isTreeLoading: true,
   migration: null,
   shareByCloudId: new Map<string, NoteShareCacheEntry>(),
-  noteConflicts: readNoteConflicts(),
 }));
 
 // Drive SyncService's faster pull off the open note. Keyed on activeNoteId (not
@@ -100,7 +89,6 @@ let syncedActiveNoteId: number | null = null;
 useNoteStore.subscribe((state) => {
   if (state.activeNoteId === syncedActiveNoteId) return;
   syncedActiveNoteId = state.activeNoteId;
-  syncService.setNoteOpen(state.activeNoteId != null);
 });
 
 let hasBoundIpcListeners = false;
@@ -185,15 +173,6 @@ function ensureIpcListeners() {
         if (previous && noteContainerKey(previous) !== noteContainerKey(note)) {
           loadFolders();
         }
-        // Sharing is per-note consent, and so is team-space membership: edits
-        // to a shared or team note must reach the cloud promptly even when
-        // the global backup toggle is off (teammates poll for them). A note
-        // that just LEFT a team also pushes promptly — the server row stays
-        // visible to teammates until its scope retraction lands (D6).
-        const spaceKind = useNoteStore.getState().spaces.find((s) => s.id === note.space_id)?.kind;
-        if (note.is_shared || spaceKind === "team" || (note.left_team && note.cloud_id)) {
-          syncService.debouncedPush("note", note.id);
-        }
       }
     });
     if (typeof dispose === "function") {
@@ -207,7 +186,6 @@ function ensureIpcListeners() {
       loadFolders();
       // Push the tombstone right away so a shared link stops serving now,
       // not at the next ambient pass ("manual" bypasses the throttle).
-      syncService.requestSyncAll("manual");
     });
     if (typeof dispose === "function") {
       disposers.push(dispose);
@@ -279,26 +257,6 @@ function ensureIpcListeners() {
       useNoteStore.setState({ notesByContainer: teardown.notesByContainer, ...extra });
       if (fallbackContext) void ensureContainerLoaded(contextContainerKey(fallbackContext));
       void loadFolders();
-    });
-    if (typeof dispose === "function") {
-      disposers.push(dispose);
-    }
-  }
-
-  // Conflict signals rebroadcast through the main process because the sync
-  // pull usually runs in the overlay window, not the one showing the editor.
-  // Broadcasts echo to the emitting window; both setters are idempotent.
-  if (window.electronAPI.onSyncEvent) {
-    const dispose = window.electronAPI.onSyncEvent(({ name, payload }) => {
-      if (name === "note-conflict") {
-        const data = payload as { clientNoteId?: string; cloudNote?: CloudNote } | undefined;
-        if (data?.clientNoteId && data.cloudNote) {
-          setNoteConflict(data.clientNoteId, data.cloudNote);
-        }
-      } else if (name === "note-conflict-clear") {
-        const data = payload as { clientNoteId?: string } | undefined;
-        if (data?.clientNoteId) clearNoteConflict(data.clientNoteId);
-      }
     });
     if (typeof dispose === "function") {
       disposers.push(dispose);
@@ -384,9 +342,8 @@ export function resetForAccountChange(): void {
   } catch {
     // In-memory state is still cleared below.
   }
-  clearNoteConflicts();
   useNoteStore.setState(
-    createClearedAccountNoteState<SpaceItem, FolderItem, NoteShareCacheEntry, CloudNote>()
+    createClearedAccountNoteState<SpaceItem, FolderItem, NoteShareCacheEntry, never>()
   );
 }
 
@@ -637,17 +594,6 @@ function handleSpacePurged(spaceId: number): void {
   });
   const shareByCloudId = new Map(state.shareByCloudId);
   purgedCloudIds.forEach((id) => shareByCloudId.delete(id));
-  const noteConflicts = Object.fromEntries(
-    Object.entries(state.noteConflicts).filter(
-      ([clientId, cloudNote]) =>
-        !purgedClientIds.has(clientId) &&
-        (purgedCloudSpaceId == null || cloudNote.space_id !== purgedCloudSpaceId)
-    )
-  );
-  Object.keys(state.noteConflicts).forEach((clientId) => {
-    if (!(clientId in noteConflicts)) removeNoteConflictId(clientId);
-  });
-
   const extra: Partial<NoteState> = {
     spaces: state.spaces.filter((s) => s.id !== spaceId),
     folders: state.folders.filter((f) => f.space_id !== spaceId),
@@ -656,7 +602,6 @@ function handleSpacePurged(spaceId: number): void {
     expandedContainers: teardown.expandedContainers,
     activeNoteId: teardown.activeNoteId,
     shareByCloudId,
-    noteConflicts,
   };
   const activeNote = state.activeNoteId != null ? findNoteInState(state, state.activeNoteId) : null;
   if (activeNote?.space_id === spaceId) {
@@ -700,7 +645,6 @@ export async function createFolder(
   const result = await window.electronAPI.createFolder(name, spaceId);
   if (result.success && result.folder) {
     await loadFolders();
-    syncService.debouncedPush("folder", result.folder.id);
   }
   return result;
 }
@@ -712,7 +656,6 @@ export async function renameFolder(
   const result = await window.electronAPI.renameFolder(id, name);
   if (result.success) {
     await loadFolders();
-    syncService.debouncedPush("folder", id);
   }
   return result;
 }
@@ -745,7 +688,6 @@ export async function deleteFolder(id: number): Promise<{ success: boolean; erro
       if (notes.length > 0) setActiveNoteId(notes[0].id);
     }
   }
-  syncService.requestSyncAll("manual");
   return result;
 }
 
@@ -766,7 +708,6 @@ export async function moveFolderToSpace(
   if (activeContext?.folderId === folderId && activeContext.spaceId !== spaceId) {
     useNoteStore.setState({ activeContext: { spaceId, folderId } });
   }
-  syncService.requestSyncAll("manual");
   return result;
 }
 
@@ -786,6 +727,20 @@ export async function updateSpaceMeta(
 /** Local purge (dev override); store cleanup happens via the space-purged broadcast. */
 export async function purgeSpace(id: number): Promise<{ success: boolean; error?: string }> {
   return (await window.electronAPI.purgeSpace?.(id)) ?? { success: false };
+}
+
+// Spaces live only in local SQLite now, so renaming and deleting are plain
+// local mutations — the server call and its rollback path are gone with the
+// cloud, and the store update rides on the same IPC the local mirror used.
+export async function renameSpace(
+  space: SpaceItem,
+  updates: { name: string; emoji: string | null }
+): Promise<{ success: boolean; error?: string }> {
+  return updateSpaceMeta(space.id, updates);
+}
+
+export async function deleteSpace(space: SpaceItem): Promise<{ success: boolean; error?: string }> {
+  return purgeSpace(space.id);
 }
 
 export function setActiveNoteId(id: number | null): void {
@@ -890,99 +845,6 @@ export function useActiveFolderId(): number | null {
 export function useActiveNote(): NoteItem | null {
   return useNoteStore((state) =>
     state.activeNoteId != null ? findNoteInState(state, state.activeNoteId) : null
-  );
-}
-
-export function useMigration(): { total: number; done: number } | null {
-  return useNoteStore((state) => state.migration);
-}
-
-export async function startMigration(): Promise<void> {
-  const gen = ++migrationGeneration;
-  const accountGen = accountGeneration;
-  const allNotes = (await window.electronAPI.getNotes(null, 9999, null)) ?? [];
-  if (gen !== migrationGeneration) return;
-  const unsynced = allNotes.filter((n) => !n.cloud_id);
-  if (unsynced.length === 0) return;
-
-  useNoteStore.setState({ migration: { total: unsynced.length, done: 0 } });
-
-  const { NotesService } = await import("../services/NotesService.js");
-  const CHUNK_SIZE = 50;
-
-  for (let i = 0; i < unsynced.length; i += CHUNK_SIZE) {
-    if (gen !== migrationGeneration) return;
-    const chunk = unsynced.slice(i, i + CHUNK_SIZE);
-    try {
-      const { created } = await NotesService.batchCreate(
-        chunk.map((n) => ({
-          client_note_id: n.client_note_id,
-          title: n.title,
-          content: n.content,
-          enhanced_content: n.enhanced_content,
-          enhancement_prompt: n.enhancement_prompt,
-          note_type: n.note_type,
-          source_file: n.source_file,
-          audio_duration_seconds: n.audio_duration_seconds,
-          created_at: n.created_at,
-          updated_at: n.updated_at,
-        }))
-      );
-      // A reset may invalidate the UI migration while the POST is in flight.
-      // Still run every response through the atomic identity/snapshot guard so
-      // a purged fork is untouched and its proven cloud orphan is cleaned up.
-      await resolveRendererCloudNoteCreateBatch(
-        chunk,
-        created,
-        (cloudId) => NotesService.delete(cloudId),
-        // Migration POSTs intentionally omit transcript/diarization fields,
-        // folder mapping, and space scope. Adopt the id/base but leave the row
-        // pending so SyncService follows with the complete PATCH.
-        {
-          settleIfUnchanged: false,
-          // Starting a newer migration supersedes only this run's progress.
-          // Both runs target the same account and idempotent cloud identity;
-          // only an account reset makes the response an orphan to delete.
-          requestStillCurrent: () => accountGen === accountGeneration,
-        }
-      );
-      if (gen !== migrationGeneration) return;
-      useNoteStore.setState((s) => ({
-        migration: s.migration
-          ? {
-              total: s.migration.total,
-              done: Math.min(s.migration.done + chunk.length, s.migration.total),
-            }
-          : null,
-      }));
-    } catch (err) {
-      console.error("Migration chunk failed:", err);
-    }
-  }
-
-  if (gen === migrationGeneration) useNoteStore.setState({ migration: null });
-}
-
-export function setNoteConflict(clientNoteId: string, cloudNote: CloudNote): void {
-  addNoteConflict(clientNoteId, cloudNote);
-  const { noteConflicts } = useNoteStore.getState();
-  useNoteStore.setState({ noteConflicts: { ...noteConflicts, [clientNoteId]: cloudNote } });
-}
-
-export function clearNoteConflict(clientNoteId: string): void {
-  // Unblock the push gate even when the in-memory banner state is gone
-  // (e.g. cleared in another window or dropped by a restart).
-  removeNoteConflictId(clientNoteId);
-  const { noteConflicts } = useNoteStore.getState();
-  if (!(clientNoteId in noteConflicts)) return;
-  const next = { ...noteConflicts };
-  delete next[clientNoteId];
-  useNoteStore.setState({ noteConflicts: next });
-}
-
-export function useNoteConflict(clientNoteId: string | null): CloudNote | null {
-  return useNoteStore((state) =>
-    clientNoteId ? (state.noteConflicts[clientNoteId] ?? null) : null
   );
 }
 

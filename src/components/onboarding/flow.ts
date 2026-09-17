@@ -1,12 +1,10 @@
 export const ONBOARDING_SESSION_KEY = "onboardingSessionV2";
 export const LEGACY_ONBOARDING_STEP_KEY = "onboardingCurrentStep";
-export const ONBOARDING_FLOW_VERSION = 2;
+export const ONBOARDING_FLOW_VERSION = 3;
 
 type OnboardingStorage = Pick<Storage, "setItem" | "removeItem">;
 
 export type OnboardingStepId =
-  | "auth"
-  | "required-models"
   | "permissions"
   | "languages"
   | "use-cases"
@@ -16,41 +14,27 @@ export type OnboardingStepId =
   | "assistant-hotkey"
   | "assistant-demo"
   | "notes"
-  | "setup-choice"
-  | "byok-dictation"
-  | "byok-assistant"
   | "local-dictation"
   | "local-assistant";
 
-export type OnboardingAuthPath = "account" | "guest" | null;
-export type OnboardingSetupMode = "cloud" | "byok" | "local" | null;
+// Accounts and cloud/BYOK setup were removed: there is one route, and the only
+// runtime to set up is a downloaded local model.
+export type OnboardingSetupMode = "local" | null;
 
 export interface OnboardingSession {
   version: typeof ONBOARDING_FLOW_VERSION;
   currentStepId: OnboardingStepId;
   history: OnboardingStepId[];
-  authPath: OnboardingAuthPath;
   setupMode: OnboardingSetupMode;
   selfHostedRequested: boolean;
 }
 
 export interface OnboardingRouteContext {
-  authPath: OnboardingAuthPath;
   setupMode: OnboardingSetupMode;
   agentAllowed: boolean;
-  /**
-   * Org-required local models are missing on disk. Inserts the blocking
-   * "required-models" step right after auth — account path only, since guests
-   * never fetch a policy. Callers latch this once the step is entered so a
-   * mid-download policy refresh can't yank the step from under the user.
-   */
-  requiredModelsPending?: boolean;
-  /** A confirmed Enterprise workspace is already provisioned outside onboarding. */
-  skipSetupChoice?: boolean;
 }
 
-const ACCOUNT_ROUTE: OnboardingStepId[] = [
-  "auth",
+const BASE_ROUTE: OnboardingStepId[] = [
   "permissions",
   "languages",
   "use-cases",
@@ -59,16 +43,9 @@ const ACCOUNT_ROUTE: OnboardingStepId[] = [
   "dictation-demo",
 ];
 
-const SETUP_ROUTES: Record<Exclude<OnboardingSetupMode, null | "cloud">, OnboardingStepId[]> = {
-  byok: ["byok-dictation", "byok-assistant"],
-  local: ["local-dictation", "local-assistant"],
-};
-
 // Canonical flow order, independent of any one route. reconcileStepWithRoute uses
 // it to clamp backwards instead of jumping to the end of the route.
 const STEP_ORDER: OnboardingStepId[] = [
-  "auth",
-  "required-models",
   "permissions",
   "languages",
   "use-cases",
@@ -78,9 +55,6 @@ const STEP_ORDER: OnboardingStepId[] = [
   "assistant-hotkey",
   "assistant-demo",
   "notes",
-  "setup-choice",
-  "byok-dictation",
-  "byok-assistant",
   "local-dictation",
   "local-assistant",
 ];
@@ -94,30 +68,27 @@ const KNOWN_STEPS = new Set<OnboardingStepId>(STEP_ORDER);
  * counter on.
  */
 export const COMPACT_STEPS: ReadonlySet<OnboardingStepId> = new Set<OnboardingStepId>([
-  "auth",
   "permissions",
 ]);
 
 const LEGACY_STEP_MAP: OnboardingStepId[] = [
-  "auth",
-  // The old flow put permissions after these two indexes, so a save at 1-2
-  // means the grants were never shown; the new route puts permissions first,
-  // and resuming past it would skip the mic/accessibility prompts entirely.
+  // A save from the pre-account flow at any of the first indexes means the
+  // grants were never shown, so resume at permissions rather than past it.
+  "permissions",
   "permissions",
   "permissions",
   "permissions",
   "dictation-hotkey",
   "assistant-hotkey",
   "notes",
-  "setup-choice",
+  "local-dictation",
 ];
 
 export function createOnboardingSession(): OnboardingSession {
   return {
     version: ONBOARDING_FLOW_VERSION,
-    currentStepId: "auth",
+    currentStepId: "permissions",
     history: [],
-    authPath: null,
     setupMode: null,
     selfHostedRequested: false,
   };
@@ -134,39 +105,15 @@ export function resetOnboardingProgress(storage: OnboardingStorage): void {
 }
 
 export function getOnboardingRoute(context: OnboardingRouteContext): OnboardingStepId[] {
-  if (context.authPath === null) return ["auth"];
+  const route = [
+    ...BASE_ROUTE,
+    ...(context.agentAllowed ? (["assistant-hotkey", "assistant-demo"] as OnboardingStepId[]) : []),
+    "notes" as const,
+  ];
 
-  const setupChoice = context.skipSetupChoice ? [] : (["setup-choice"] as OnboardingStepId[]);
-
-  const route =
-    context.authPath === "guest"
-      ? // Guests still need the permission grants and a hotkey they have seen:
-        // finalizeOnboarding registers dictationHotkey either way, and skipping
-        // these steps shipped users who neither granted the mic nor knew their
-        // trigger key.
-        ([
-          "auth",
-          "permissions",
-          "dictation-hotkey",
-          "activation-mode",
-          "setup-choice",
-        ] as OnboardingStepId[])
-      : [
-          ...ACCOUNT_ROUTE,
-          ...(context.agentAllowed
-            ? (["assistant-hotkey", "assistant-demo"] as OnboardingStepId[])
-            : []),
-          "notes" as const,
-          ...setupChoice,
-        ];
-
-  if (context.requiredModelsPending && context.authPath === "account") {
-    route.splice(route.indexOf("auth") + 1, 0, "required-models");
-  }
-
-  if (context.setupMode && context.setupMode !== "cloud") {
+  if (context.setupMode) {
     route.push(
-      ...SETUP_ROUTES[context.setupMode].filter(
+      ...(["local-dictation", "local-assistant"] as OnboardingStepId[]).filter(
         (stepId) => context.agentAllowed || !stepId.endsWith("assistant")
       )
     );
@@ -192,15 +139,8 @@ export function parseOnboardingSession(value: string | null): OnboardingSession 
       return null;
     }
 
-    const authPath = parsed.authPath;
     const setupMode = parsed.setupMode;
-    if (authPath !== null && authPath !== "account" && authPath !== "guest") return null;
-    if (
-      setupMode !== null &&
-      setupMode !== "cloud" &&
-      setupMode !== "byok" &&
-      setupMode !== "local"
-    ) {
+    if (setupMode !== null && setupMode !== "local") {
       return null;
     }
     if (
@@ -214,7 +154,6 @@ export function parseOnboardingSession(value: string | null): OnboardingSession 
       version: ONBOARDING_FLOW_VERSION,
       currentStepId: parsed.currentStepId,
       history: parsed.history.filter(isOnboardingStepId),
-      authPath,
       setupMode,
       selfHostedRequested: parsed.selfHostedRequested ?? false,
     };
@@ -223,24 +162,13 @@ export function parseOnboardingSession(value: string | null): OnboardingSession 
   }
 }
 
-/**
- * True while a persisted onboarding session sits on the blocking
- * required-models step. The background download tray uses this to keep its
- * hands off downloads that step owns: a tray row would duplicate the step's
- * own progress pill, and the tray's cancel cannot stick — the step
- * auto-restarts org-mandated downloads.
- */
-export function isRequiredModelsOnboardingStepActive(sessionValue: string | null): boolean {
-  return parseOnboardingSession(sessionValue)?.currentStepId === "required-models";
-}
-
 export function migrateLegacyOnboardingStep(value: string | null): OnboardingStepId {
-  if (!value) return "auth";
+  if (!value) return "permissions";
   if (isOnboardingStepId(value)) return value;
 
   const index = Number.parseInt(value, 10);
-  if (!Number.isFinite(index) || index < 0) return "auth";
-  return LEGACY_STEP_MAP[Math.min(index, LEGACY_STEP_MAP.length - 1)] ?? "auth";
+  if (!Number.isFinite(index) || index < 0) return "permissions";
+  return LEGACY_STEP_MAP[Math.min(index, LEGACY_STEP_MAP.length - 1)] ?? "permissions";
 }
 
 /**
@@ -259,7 +187,7 @@ export function reconcileStepWithRoute(
 ): OnboardingStepId {
   if (route.includes(stepId)) return stepId;
   const target = STEP_ORDER.indexOf(stepId);
-  if (target === -1 || route.length === 0) return route[0] ?? "auth";
+  if (target === -1 || route.length === 0) return route[0] ?? "permissions";
   return route.reduce((best, candidate) => {
     const bestDistance = Math.abs(STEP_ORDER.indexOf(best) - target);
     const candidateDistance = Math.abs(STEP_ORDER.indexOf(candidate) - target);
@@ -310,46 +238,3 @@ export function getOnboardingProgress(
 }
 
 /** Enterprise customers keep provider/model selection in Settings, outside onboarding. */
-export interface OnboardingWorkspaceEntitlement {
-  id: string;
-  plan?: string | null;
-  status?: string | null;
-}
-
-export function isEnterpriseWorkspaceEntitled(
-  workspace: Pick<OnboardingWorkspaceEntitlement, "plan" | "status"> | null | undefined
-): boolean {
-  return (
-    workspace?.plan === "enterprise" &&
-    (workspace.status === "active" || workspace.status === "trialing")
-  );
-}
-
-export function resolveEnterpriseWorkspaceForOnboarding<T extends OnboardingWorkspaceEntitlement>(
-  activeWorkspace: T | null | undefined,
-  workspaces: T[]
-): T | null {
-  if (activeWorkspace) {
-    return isEnterpriseWorkspaceEntitled(activeWorkspace) ? activeWorkspace : null;
-  }
-  return workspaces.find(isEnterpriseWorkspaceEntitled) ?? null;
-}
-
-export function shouldSkipOnboardingSetupChoice({
-  isSignedIn,
-  authPath,
-  setupMode,
-  activeWorkspace,
-}: {
-  isSignedIn: boolean;
-  authPath: OnboardingAuthPath;
-  setupMode: OnboardingSetupMode;
-  activeWorkspace: Pick<OnboardingWorkspaceEntitlement, "plan" | "status"> | null | undefined;
-}): boolean {
-  return (
-    isSignedIn &&
-    authPath === "account" &&
-    (setupMode === null || setupMode === "cloud") &&
-    isEnterpriseWorkspaceEntitled(activeWorkspace)
-  );
-}

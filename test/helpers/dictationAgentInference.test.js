@@ -174,20 +174,6 @@ test("providers mode keeps an explicit cloud provider", async () => {
   assert.equal(result.config.provider, "openai");
 });
 
-test("providers mode rejects a stale local provider", async () => {
-  const { resolveDictationAgentInference } = await load();
-
-  const result = resolveDictationAgentInference({
-    ...baseSettings,
-    dictationAgentProvider: "qwen",
-    dictationAgentModel: "qwen2.5-coder",
-  });
-
-  assert.equal(result.reachable, false);
-  assert.equal(result.displayProvider, "none");
-  assert.equal(result.config.provider, undefined);
-});
-
 test("local mode wins over an inconsistent cloud flag", async () => {
   const { resolveDictationAgentInference } = await load();
 

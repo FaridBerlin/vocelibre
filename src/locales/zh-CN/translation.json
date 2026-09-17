@@ -127,29 +127,6 @@
       "slotConflict": "此快捷键已用于{{slot}}。"
     }
   },
-  "systemSettings": {
-    "microphone": "请打开系统设置以配置麦克风权限。",
-    "sound": "请打开系统声音设置（例如 pavucontrol）。",
-    "accessibility": "此平台不支持辅助功能设置。",
-    "systemAudio": "系统音频设置在此平台上不可用。",
-    "screenRecording": "此平台不提供屏幕录制设置。",
-    "loginItems": "此平台不支持登录项设置。"
-  },
-  "upgradePrompt": {
-    "paymentFailed": "我们无法处理你的付款",
-    "weeklyLimit": "你已达到本周的使用上限",
-    "pastDueDescription": "你目前使用的是免费版——别担心，每周仍有 {{limit}} 个词的额度。\n更新支付方式即可恢复无限制的 Pro 版。",
-    "limitDescription": "已使用 {{used}} / {{limit}} 个词。\n你的转录已保存并粘贴。",
-    "updatePayment": "更新支付方式",
-    "updatePaymentDescription": "恢复无限制的 Pro 版转录。",
-    "upgradeToPro": "升级到 Pro",
-    "upgradeDescription": "无限转录，每月最低 $8 起。",
-    "useApiKey": "使用自己的 API Key",
-    "useApiKeyDescription": "使用你自己的密钥，无限制使用。",
-    "switchToLocal": "切换到本地模式",
-    "switchToLocalDescription": "离线转录，无使用限制。",
-    "rollingWeeklyLimit": "滚动周限额"
-  },
   "windowControls": {
     "minimize": "最小化",
     "maximize": "最大化",
@@ -682,11 +659,6 @@
       "description": "我们已将转录切换到 VoceLibre 云端，以获得更快、更准确的结果。你之前的设置已保存——随时可以在设置中切换回去。",
       "viewSettings": "查看设置"
     },
-    "aiCta": {
-      "title": "用 AI 提升你的转录质量",
-      "description": "在你说话的同时，自动修正语法、标点和格式。",
-      "enable": "启用 AI 增强"
-    },
     "loading": "加载中...",
     "gpu": {
       "bannerTitle": "GPU 加速可用",
@@ -748,84 +720,12 @@
     "selfHosted": {
       "endpointHelp": "指向本地网络中兼容 OpenAI 的服务器（例如 Ollama、LM Studio、vLLM 或 llama-server）。"
     },
-    "enterprise": {
-      "title": "企业级提供商",
-      "description": "使用你组织的凭据连接云端提供商。",
-      "testConnection": "测试连接",
-      "testing": "测试中…",
-      "testSuccess": "已连接",
-      "testFailed": "连接失败",
-      "authMode": "认证方式",
-      "ssoProfile": "SSO 配置文件",
-      "accessKeys": "访问密钥",
-      "adc": "Application Default Credentials",
-      "apiKeyMode": "API 密钥",
-      "region": "区域",
-      "profile": "配置文件名称",
-      "accessKeyId": "Access Key ID",
-      "secretAccessKey": "Secret Access Key",
-      "sessionToken": "Session Token（可选）",
-      "endpoint": "端点 URL",
-      "deploymentName": "部署名称",
-      "apiVersion": "API 版本",
-      "projectId": "项目 ID",
-      "location": "位置",
-      "customModelId": "自定义模型 ID",
-      "customModelPlaceholder": "输入模型 ID 或部署名称",
-      "suggestedModels": "推荐模型",
-      "browseModels": "浏览全部模型",
-      "loadingModels": "正在获取模型...",
-      "allModels": "{{region}} 的全部模型",
-      "modelListError": "无法加载模型。",
-      "bedrock": {
-        "ssoHelp": "使用你的 AWS CLI SSO 配置。请确保已运行 'aws sso login'。",
-        "keysHelp": "输入你的 AWS IAM 访问密钥。"
-      },
-      "errors": {
-        "bedrock": {
-          "temporaryAccessExpired": "AWS 临时访问权限已过期。",
-          "ssoExpired": "AWS SSO 会话已过期。",
-          "credentialsRejected": "AWS 拒绝了这些凭证。请检查访问密钥 ID、密钥和会话令牌。",
-          "accessDenied": "AWS Bedrock 拒绝了此请求。请让 AWS 管理员授予在区域 {{region}} 中调用所选模型的权限。",
-          "modelNotFound": "AWS Bedrock 在区域 {{region}} 中找不到所选模型。请检查模型 ID 以及该模型是否在此区域可用。",
-          "configurationRejected": "AWS Bedrock 拒绝了区域 {{region}} 的模型配置。请检查模型 ID、推理配置文件和区域。",
-          "notConfigured": "AWS Bedrock 配置不正确。请检查区域和 AWS 凭证。",
-          "serviceUnavailable": "由于需求过高，AWS Bedrock 暂时不可用。这是 AWS 服务问题，并非 VoceLibre 中断。请几分钟后重试。",
-          "throttled": "由于收到的请求过多，AWS Bedrock 正在暂时限制请求。请稍候再试。如果问题持续，请让 AWS 管理员检查 Bedrock 使用量和配额。",
-          "timeout": "AWS Bedrock 未及时响应。请重试。如果问题持续，请检查互联网连接和 AWS Bedrock 服务状态。",
-          "network": "无法连接到 AWS Bedrock。请检查互联网连接并重试。",
-          "unknown": "AWS Bedrock 错误：{{error}}",
-          "actions": {
-            "refreshManagedAccess": "请退出并重新登录以刷新公司访问权限，然后重试。",
-            "reauthenticate": "请在终端中运行以下命令以重新进行身份验证："
-          }
-        }
-      },
-      "technicalDetails": {
-        "title": "技术详情",
-        "httpStatus": "HTTP 状态",
-        "awsException": "AWS 异常",
-        "awsRequestId": "AWS 请求 ID",
-        "underlyingError": "底层错误",
-        "copy": "复制技术详情",
-        "copyCommand": "复制恢复命令"
-      },
-      "azure": {
-        "endpointHelp": "你的 Azure OpenAI 资源端点（例如 https://myresource.openai.azure.com）。",
-        "deploymentHelp": "Azure OpenAI 中的模型部署名称。"
-      },
-      "vertex": {
-        "adcHelp": "使用 Application Default Credentials。请执行：gcloud auth application-default login",
-        "apikeyHelp": "从 Google AI Studio 获取的 Vertex AI Express Mode API 密钥。"
-      }
-    },
-    "tinfoil": {
-      "modelRetiredTitle": "模型已不可用",
-      "modelRetired": "Tinfoil 已停用 {{from}}，已切换至 {{to}}。",
-      "refreshingModels": "正在刷新模型…"
-    },
-    "corti": {
-      "euOnly": "Corti 模型仅在欧盟地区可用。"
+    "technicalDetails": {
+      "title": "技术详情",
+      "httpStatus": "HTTP 状态",
+      "underlyingError": "底层错误",
+      "copy": "复制技术详情",
+      "copyCommand": "复制恢复命令"
     }
   },
   "transcription": {
@@ -1191,41 +1091,10 @@
     }
   },
   "dictionarySuffix": "词典后缀",
-  "emailVerification": {
-    "checkEmailDescription": "我们已向你的邮箱发送了验证链接：",
-    "checkEmailTitle": "验证邮件已发送",
-    "errors": {
-      "resendFailed": "无法重新发送邮件，请重试。",
-      "serverUnreachable": "无法连接到服务器，请检查网络连接后重试。"
-    },
-    "resendButton": "重新发送验证邮件",
-    "resendIn": "{{seconds}} 秒后可重新发送",
-    "verifiedDescription": "你的账户已准备就绪。",
-    "verifiedTitle": "已验证",
-    "waiting": "正在等待验证",
-    "backToSignIn": "返回登录"
-  },
   "errorBoundary": {
     "description": "发生了意外错误，请重新加载后重试。",
     "reload": "重新加载",
     "title": "出了点问题"
-  },
-  "forgotPassword": {
-    "back": "返回",
-    "backToSignIn": "返回登录",
-    "emailPlaceholder": "输入你的邮箱",
-    "goBack": "返回",
-    "notConfigured": "身份验证尚未配置。",
-    "sendResetLink": "发送重置链接",
-    "sending": "正在发送...",
-    "subtitle": "输入你的邮箱，我们将发送重置链接",
-    "success": {
-      "description": "我们已将密码重置链接发送至",
-      "help": "没有收到邮件？请检查垃圾邮件文件夹或重试。",
-      "title": "查看你的邮箱",
-      "tryAnother": "尝试其他邮箱"
-    },
-    "title": "重置密码"
   },
   "actionPrompt": "动作提示词",
   "hotkeyGuidance": {
@@ -1445,10 +1314,6 @@
       "speechToText": {
         "description": "听写与笔记录音引擎",
         "label": "语音转文字"
-      },
-      "llms": {
-        "description": "用于清理、笔记格式化和聊天的模型",
-        "label": "语言模型"
       },
       "privacyData": {
         "description": "隐私、权限与数据分析",
@@ -2512,71 +2377,6 @@
         "large": "最佳质量，最慢速度",
         "turbo": "快速且质量良好"
       },
-      "transcription": {
-        "openai_gpt_4o_mini_transcribe": "快速且准确的转录",
-        "openai_gpt_4o_transcribe": "最准确的转录",
-        "openai_whisper_1": "原始 Whisper 模型",
-        "groq_whisper_large_v3_turbo": "216 倍实时速度",
-        "groq_whisper_large_v3": "Large v3 模型，快速且精准",
-        "mistral_voxtral_mini_latest": "快速多语言转录",
-        "gemini_3_5_transcribe": "Google Gemini 语音转文字",
-        "corti_transcribe": "临床级医疗转录",
-        "xai_grok_stt": "xAI 高精度语音识别",
-        "tinfoil_voxtral": "可验证的私密转录"
-      },
-      "cloud": {
-        "openai_gpt_5_2": "强大的推理模型",
-        "openai_gpt_5_mini": "快速且经济",
-        "openai_gpt_5_nano": "超快速、低延迟",
-        "openai_gpt_4_1": "稳定基准，1M 上下文",
-        "openai_gpt_4_1_mini": "精简版 GPT-4.1",
-        "openai_gpt_4_1_nano": "最低延迟 GPT-4.1",
-        "anthropic_claude_fable_5": "Anthropic 最强大的模型，Mythos 级",
-        "anthropic_claude_sonnet_5": "快速且强大的智能体模型，成本更低",
-        "anthropic_claude_sonnet_4_6": "均衡性能",
-        "anthropic_claude_sonnet_4_5": "上一代 Sonnet",
-        "anthropic_claude_haiku_4_5": "快速且接近前沿水平",
-        "gemini_gemini_3_5_flash": "最新、快速且高能力的 Gemini 模型",
-        "gemini_gemini_3_5_flash_lite": "最快、最经济的 3.5 模型",
-        "gemini_gemini_3_1_pro_preview": "新一代旗舰模型，擅长复杂推理",
-        "gemini_gemini_3_1_flash_lite": "前沿级性能，成本更低",
-        "gemini_gemini_3_flash_preview": "超快速、高能力的新一代模型",
-        "gemini_gemini_2_5_flash_lite": "最低延迟和成本",
-        "gemini_gemma_4_31b_it": "Google 最大的 Gemma 4，31B 稠密，256K 上下文",
-        "gemini_gemma_4_26b_a4b_it": "Google Gemma 4 MoE，4B 活跃参数，256K 上下文",
-        "groq_openai_gpt_oss_120b": "OpenAI 开源旗舰，500 T/秒",
-        "groq_openai_gpt_oss_20b": "快速开源模型，1000 T/秒",
-        "groq_compound": "Groq Compound 系统，450 T/秒",
-        "groq_compound_mini": "快速 Compound 系统，3x 更低延迟",
-        "openai_gpt_5_6_sol": "旗舰 GPT-5.6，适用于复杂编码与研究",
-        "openai_gpt_5_6_terra": "均衡的 GPT-5.6，适合日常工作",
-        "openai_gpt_5_6_luna": "速度最快、成本最低的 GPT-5.6",
-        "openai_gpt_5_5": "复杂推理前沿模型",
-        "anthropic_claude_opus_5": "最强大的 Opus 模型，1M 上下文",
-        "anthropic_claude_opus_4_8": "强大的 Opus 模型，注重诚实与可靠",
-        "anthropic_claude_opus_4_7": "强大的 Opus 模型",
-        "anthropic_claude_opus_4_6": "上一代 Opus，1M 上下文",
-        "anthropic_claude_opus_4_5": "更早的 Opus 模型",
-        "tinfoil_glm_5_3": "安全飞地中的私密智能体编程模型，1M 上下文",
-        "tinfoil_gemma4_31b": "支持工具调用的私密多语言推理模型，256K 上下文",
-        "tinfoil_gpt_oss_120b": "支持工具使用的私密开源权重推理模型，131K 上下文",
-        "tinfoil_llama3_3_70b": "支持工具调用的私密对话模型，128K 上下文",
-        "corti_corti_s1_instant": "快速医疗模型，无推理过程",
-        "corti_corti_s1": "功能最强的临床模型，带推理",
-        "corti_corti_s1_mini_instant": "紧凑型医疗模型，最快且成本最低",
-        "corti_corti_s1_mini": "紧凑型临床模型，半价提供推理"
-      },
-      "enterprise": {
-        "bedrock_claude_fable_5": "最强大的 Claude 模型。最适合最具挑战性的智能助手模式任务。",
-        "bedrock_claude_haiku_4_5": "快速且低成本。适合文本清理。",
-        "bedrock_claude_sonnet_5": "均衡性能。推荐用作智能助手模式的默认模型。",
-        "bedrock_claude_opus_4_8": "最高智能。适用于复杂的智能助手模式任务。",
-        "bedrock_gpt_oss_120b": "OpenAI 开放权重模型。低成本下的强大推理能力。",
-        "bedrock_deepseek_v3_2": "开放权重前沿模型。智能助手模式的高性价比之选。",
-        "bedrock_qwen3_next_80b": "稀疏开放权重模型。快速且多语言。",
-        "vertex_gemini_2_5_flash": "通过 Vertex 提供的快速多模态模型",
-        "vertex_gemini_2_5_pro": "通过 Vertex 提供的高级推理模型"
-      },
       "local": {
         "qwen_qwen3_5_9b_q4_k_m": "强大的混合模型",
         "qwen_qwen3_5_4b_q4_k_m": "均衡的 Qwen3.5，通用用途",
@@ -2618,78 +2418,6 @@
         "segmentation": "用于说话人分离的语音边界检测",
         "embedding_en": "用于说话人识别的声纹提取"
       }
-    }
-  },
-  "referral": {
-    "modalTitle": "推荐计划",
-    "title": "推荐赚取奖励",
-    "subtitle": "送一个月，得一个月。",
-    "tabs": {
-      "refer": "推荐",
-      "pastInvites": "历史邀请"
-    },
-    "howItWorks": {
-      "shareLink": "分享你的邀请链接",
-      "theySignUp": "对方注册即可获得",
-      "freeMonthOfPro": "一个月免费 Pro",
-      "youGet": "你将获得",
-      "freeMonth": "一个月免费",
-      "whenTheyDictate": "当对方听写满 2,000 个词时"
-    },
-    "inviteLink": {
-      "title": "你的邀请链接",
-      "copy": "复制",
-      "copied": "已复制"
-    },
-    "sendInvites": {
-      "title": "发送邀请",
-      "placeholder": "friend@example.com",
-      "send": "发送",
-      "sending": "发送中"
-    },
-    "stats": {
-      "referred": "已推荐",
-      "converted": "已转化",
-      "monthsEarned": "已获得月数"
-    },
-    "status": {
-      "converted": "已转化",
-      "opened": "已打开",
-      "failed": "失败",
-      "sent": "已发送"
-    },
-    "empty": {
-      "title": "尚未发送任何邀请",
-      "description": "分享你的链接或发送邀请以开始使用"
-    },
-    "toasts": {
-      "copiedTitle": "已复制！",
-      "copiedDescription": "推荐链接已复制到剪贴板",
-      "copyFailedTitle": "复制失败",
-      "copyFailedDescription": "无法将链接复制到剪贴板",
-      "invalidEmailTitle": "邮箱地址无效",
-      "invalidEmailDescription": "请输入有效的邮箱地址",
-      "inviteSentTitle": "邀请已发送！",
-      "inviteSentDescription": "邀请已发送至 {{email}}",
-      "sendFailedTitle": "发送失败",
-      "sendFailedDescription": "邀请发送失败，请重试。"
-    },
-    "errors": {
-      "unableToLoad": "无法加载推荐数据",
-      "unableToLoadStats": "无法加载推荐统计数据，请稍后重试。"
-    },
-    "tryAgain": "重试",
-    "card": {
-      "brand": "VoceLibre",
-      "signalId": "Signal ID",
-      "audioSignature": "你的声纹签名",
-      "stop": "停止",
-      "playSignal": "播放信号"
-    },
-    "friends": {
-      "title": "好友",
-      "completed": "已完成",
-      "sentInvites": "已发出的邀请"
     }
   },
   "notes": {
@@ -3207,49 +2935,9 @@
     "importList": "导入列表",
     "agentDefault": "默认添加"
   },
-  "insights": {
-    "title": "统计",
-    "description": "私密查看你的听写习惯与坚持情况。",
-    "wordsSpoken": "已听写字数",
-    "currentStreak": "当前连续天数",
-    "wordsPerMinute": "每分钟字数",
-    "dictations": "听写次数",
-    "allTime": "全部时间",
-    "days_one": "{{count}} 天",
-    "days_other": "{{count}} 天",
-    "longestStreak_one": "最长：{{count}} 天",
-    "longestStreak_other": "最长：{{count}} 天",
-    "wpmCoverage": "基于 {{count}}% 已测量的字数",
-    "activity": "听写活跃度",
-    "activityDescription": "过去 6 个月内听写的字数",
-    "activityLabel": "6 个月听写活跃度热力图",
-    "activityLess": "较少",
-    "activityMore": "较多",
-    "dayTooltip_one": "{{date}}：{{count}} 字",
-    "dayTooltip_other": "{{date}}：{{count}} 字",
-    "dataRetentionDisabled": "数据保留已关闭，因此新的听写不会计入统计——本设备和你的账户都不会计数。已同步的计数会保留在你的账户中。",
-    "onDevice": "仅在本设备",
-    "synced": "已跨设备同步",
-    "syncFallback": "正在显示本设备数据 — 同步不可用",
-    "syncPrompt": "同步不含内容的计数，将本地与云端的活动跨设备合并。",
-    "enableSync": "启用同步",
-    "claimTitle": "包含更早的听写吗？",
-    "claimDescription_one": "本设备上有 {{count}} 次听写是在你登录前记录的。将其纳入只会发送字数、记录的日期和精确时间、时长和模型类型，不会发送转录内容。",
-    "claimDescription_other": "本设备上有 {{count}} 次听写是在你登录前记录的。将它们纳入只会发送字数、记录的日期和精确时间、时长和模型类型，不会发送转录内容。",
-    "claimInclude": "包含",
-    "claimSkip": "暂不开启",
-    "enableTitle": "要开启 Insights 同步吗？",
-    "enableConfirm": "开启同步",
-    "enableDescription_one": "本设备上已记录的 {{count}} 次听写将上传到你的账户。Insights 同步只会发送字数、记录的日期和精确时间、时长和模型类型，不会发送转录内容。",
-    "enableDescription_other": "本设备上已记录的 {{count}} 次听写将上传到你的账户。Insights 同步只会发送字数、记录的日期和精确时间、时长和模型类型，不会发送转录内容。",
-    "emptyTitle": "还没有听写记录",
-    "emptyBody": "开始听写后，你的字数、连续记录和每日活动会显示在这里。",
-    "loadError": "无法从本设备读取 Insights。"
-  },
   "sidebar": {
     "insights": "统计",
     "home": "首页",
-    "notes": "笔记",
     "upload": "上传",
     "dictionary": "词典",
     "referral": "获取免费一个月",
@@ -3538,49 +3226,7 @@
       "connectFailedDescription": "连接 Calendar.app 时出错。请重启 VoceLibre 后重试。"
     },
     "sections": {
-      "calendar": "日历",
-      "api": "API",
-      "mcp": "MCP",
-      "cli": "CLI"
-    },
-    "api": {
-      "title": "API 密钥",
-      "description": "管理用于程序访问的 API 密钥",
-      "proRequired": "升级到付费计划以访问 API",
-      "manage": "管理密钥",
-      "viewPlans": "查看套餐",
-      "dialogTitle": "API 密钥"
-    },
-    "mcp": {
-      "title": "将笔记带到你的 AI 工具中",
-      "description": "在 Claude、ChatGPT 和 Cursor 中与你的笔记一起聊天、搜索和工作。",
-      "step1": "在你的 AI 工具中，使用公开 URL 添加 VoceLibre MCP",
-      "step2": "在上方创建具有所需权限的 API 密钥。",
-      "step3": "将密钥粘贴为 Authorization 标头以连接。",
-      "learnMore": "了解更多",
-      "viewPlans": "查看套餐",
-      "copyUrl": "复制 MCP URL",
-      "proRequired": "升级到付费计划，以将 VoceLibre 连接到 Claude、ChatGPT 和 Cursor。",
-      "copied": "已复制"
-    },
-    "cli": {
-      "title": "命令行访问",
-      "description": "让你的智能助手通过终端访问你的笔记。",
-      "installLabel": "安装",
-      "learnMore": "查看文档",
-      "copyDocsLink": "复制文档链接",
-      "docsLinkCopied": "已复制文档链接",
-      "viewPlans": "查看套餐",
-      "local": {
-        "label": "本地",
-        "freeBadge": "免费",
-        "description": "直接读取你的本地笔记。无需登录或 API 密钥 — 在 VoceLibre 运行时即可使用。"
-      },
-      "cloud": {
-        "label": "云端",
-        "description": "使用 API 密钥在多台设备之间同步。",
-        "proRequired": "升级到付费计划以在云端模式下使用 CLI。"
-      }
+      "calendar": "日历"
     },
     "plan": {
       "title": "您的方案",
@@ -3597,29 +3243,6 @@
       "title": "VoceLibre 是会议录制工具，不是机器人",
       "description": "VoceLibre 直接从您的系统捕获音频 — 它不会以参与者身份加入您的会议。只需连接日历，正常记录笔记即可。"
     }
-  },
-  "calendar": {
-    "title": "Google 日历",
-    "status": "状态",
-    "connected": "已连接",
-    "disconnected": "未连接",
-    "notConnectedDescription": "连接以检测和录制会议",
-    "connectCta": {
-      "title": "日历集成",
-      "description": "自动检测会议并录制转录"
-    },
-    "connect": "连接 Google 日历",
-    "connecting": "连接中...",
-    "disconnect": "断开连接",
-    "disconnecting": "断开中...",
-    "sync": "同步",
-    "syncing": "同步中...",
-    "calendarsTitle": "日历",
-    "upcomingTitle": "即将到来",
-    "noUpcoming": "没有即将到来的事件",
-    "meetingStarting": "会议即将开始",
-    "today": "今天",
-    "tomorrow": "明天"
   },
   "upcoming": {
     "title": "即将开始",
@@ -3638,77 +3261,6 @@
     "connectCalendar": "连接您的日历",
     "connectCalendarDescription": "无需离开 VoceLibre 即可查看并加入您的会议。",
     "connectCalendarButton": "连接日历"
-  },
-  "notesView": {
-    "searchPlaceholder": "搜索笔记…",
-    "newNote": "新建笔记",
-    "empty": {
-      "title": "暂无笔记",
-      "description": "创建你的第一条笔记开始使用。"
-    },
-    "searchEmpty": {
-      "title": "无结果",
-      "description": "未找到与“{{query}}”匹配的笔记。"
-    },
-    "noteType": {
-      "personal": "个人",
-      "meeting": "会议",
-      "upload": "上传"
-    }
-  },
-  "noteEditor": {
-    "saved": "已保存",
-    "deleteNote": "删除笔记",
-    "deleteConfirmTitle": "删除笔记？",
-    "deleteConfirmDescription": "此笔记将被永久删除，无法恢复。",
-    "deleteConfirm": "删除",
-    "share": {
-      "button": "分享",
-      "dialog": {
-        "title": "分享笔记",
-        "description": "通过电子邮件邀请他人，或分享此笔记的链接。",
-        "searchPlaceholder": "搜索人员、文件夹或邮箱",
-        "noResults": "未找到匹配结果",
-        "emailLabel": "人员、文件夹或邮箱",
-        "shareButton": "分享",
-        "createLink": "创建链接",
-        "copyLink": "复制链接",
-        "copied": "已复制",
-        "owner": "所有者",
-        "editor": "可编辑",
-        "viewer": "可查看",
-        "teamAudience": "此团队空间中的所有人",
-        "pending": "待处理",
-        "accepted": "已获得访问权限",
-        "resend": "重新发送邀请",
-        "revoke": "移除",
-        "invitationActions": "邀请操作",
-        "resendSent": "邀请已发送",
-        "resendThrottled": "邀请刚刚发送过，请一分钟后再试。",
-        "syncPrompt": "分享会在你的 VoceLibre 云端保留此笔记的副本。在你选择分享对象之前，只有你能看到它。",
-        "syncAndShare": "同步笔记",
-        "visibility": {
-          "label": "可见性",
-          "private": "私密",
-          "privateOption": "私密 — 仅自己",
-          "link": "拥有链接的任何人",
-          "domain": "{{domain}} 内拥有链接的所有人",
-          "invited": "仅受邀者"
-        },
-        "error": {
-          "invalidEmail": "请输入有效的电子邮件地址",
-          "alreadyInvited": "{{email}} 已经被邀请",
-          "inviteFailed": "无法发送邀请。请重试。",
-          "visibilityFailed": "无法更新分享设置。请重试。",
-          "copyFailed": "无法复制链接。请重试。",
-          "revokeFailed": "无法移除邀请。请重试。",
-          "resendFailed": "无法重新发送邀请。请重试。",
-          "syncFailed": "无法同步此笔记。请重试。",
-          "loadFailed": "无法加载分享设置",
-          "retry": "重试"
-        }
-      }
-    }
   },
   "commandSearch": {
     "allSpaces": "所有空间",
@@ -3733,59 +3285,6 @@
     "title": "VoceLibre 有可用更新",
     "body": "版本 {{version}} 已可下载",
     "cta": "立即更新"
-  },
-  "permissionsGate": {
-    "title": "需要权限",
-    "description": "VoceLibre 需要一些权限才能在此电脑上正常运行。",
-    "continue": "继续"
-  },
-  "apiKeysSection": {
-    "title": "API 密钥",
-    "description": "创建密钥以编程方式访问 VoceLibre API。",
-    "docsLink": "API 文档",
-    "empty": "暂无 API 密钥",
-    "createButton": "创建 API 密钥",
-    "create": {
-      "title": "创建 API 密钥",
-      "nameLabel": "密钥名称",
-      "namePlaceholder": "例如：我的集成",
-      "scopesLabel": "权限",
-      "expiryLabel": "有效期",
-      "expiryOptions": {
-        "never": "永不过期",
-        "30days": "30 天",
-        "60days": "60 天",
-        "90days": "90 天",
-        "1year": "1 年"
-      },
-      "submit": "创建",
-      "cancel": "取消"
-    },
-    "created": {
-      "title": "API 密钥已创建",
-      "warning": "请立即复制此密钥，它将不会再次显示。",
-      "copied": "已复制！",
-      "copyButton": "复制到剪贴板",
-      "done": "完成"
-    },
-    "scopes": {
-      "notesRead": "读取笔记",
-      "notesWrite": "创建和编辑笔记",
-      "transcriptionsRead": "读取转录"
-    },
-    "revoke": {
-      "button": "撤销",
-      "confirm": "撤销此密钥？使用它的集成将停止工作。",
-      "success": "API 密钥已撤销"
-    },
-    "neverUsed": "从未使用",
-    "lastUsed": "上次使用 {{time}}",
-    "maxKeysReached": "最多允许 {{max}} 个密钥",
-    "errors": {
-      "loadFailed": "无法加载 API 密钥",
-      "createFailed": "无法创建 API 密钥",
-      "revokeFailed": "无法撤销 API 密钥"
-    }
   },
   "embeddedChat": {
     "askPlaceholder": "随便问点什么...",
@@ -3814,82 +3313,6 @@
       "others": "其他人"
     },
     "missingAudio": "[音频缺失 {{from}}-{{to}}]"
-  },
-  "workspaces": {
-    "switcher": {
-      "workspaces": "工作区",
-      "create": "创建工作区…"
-    },
-    "create": {
-      "title": "创建工作区",
-      "description": "工作区集中管理组织的成员和账单。你可以在其中创建团队空间来共享笔记。",
-      "nameLabel": "工作区名称",
-      "namePlaceholder": "Acme Corp",
-      "submit": "创建工作区",
-      "submitting": "创建中…",
-      "errorTitle": "无法创建工作区"
-    },
-    "created": {
-      "title": "工作区已创建",
-      "description": "你现在是 {{name}} 的所有者。"
-    },
-    "invite": {
-      "title": "邀请加入 {{workspace}}",
-      "description": "通过电子邮件添加同事。他们将收到加入链接。",
-      "emailLabel": "电子邮件",
-      "emailPlaceholder": "teammate@example.com",
-      "roleLabel": "角色",
-      "seatUsage": "已使用 {{used}}/{{seats}} 个席位",
-      "seatCost": "接受邀请后将为你的方案增加一个席位 · 预计按比例收取 {{amount}}。",
-      "submit": "发送邀请",
-      "submitting": "发送中…",
-      "sentTitle": "邀请已发送",
-      "sentDescription": "我们已向 {{email}} 发送邀请。",
-      "sentNoEmailTitle": "邀请已创建，但未发送邮件",
-      "sentNoEmailDescription": "已邀请 {{email}}，但邮件无法送达。请稍后重新发送，或通过其他方式分享邀请链接。",
-      "errorTitle": "无法发送邀请",
-      "role": {
-        "admin": "管理员",
-        "member": "成员"
-      },
-      "roleDescription": {
-        "admin": "管理成员和账单",
-        "member": "使用工作区"
-      }
-    },
-    "join": {
-      "title": "加入你的团队",
-      "domainTitle": "你的团队已在 VoceLibre",
-      "description": "这些工作区中有与你相同邮箱域名的成员。",
-      "invitedDescription": "有人邀请你加入一个工作区。",
-      "invitedBy": "{{inviter}} 邀请你担任{{role}}",
-      "memberCount_one": "{{count}} 位成员",
-      "memberCount_other": "{{count}} 位成员",
-      "join": "加入",
-      "requestErrorTitle": "无法发送申请",
-      "requestedDescription": "{{workspace}} 的管理员会进行审核。",
-      "requestedTitle": "申请已发送",
-      "requested": "已申请",
-      "request": "申请加入",
-      "notNow": "暂不",
-      "successTitle": "已加入",
-      "successDescription": "你现在是 {{workspace}} 的成员。",
-      "errorTitle": "无法加入"
-    },
-    "accept": {
-      "title": "加入工作区",
-      "description": "{{inviter}} 邀请你以{{role}}身份加入 {{workspace}}。",
-      "loading": "正在加载邀请…",
-      "accept": "接受邀请",
-      "accepting": "接受中…",
-      "signInToAccept": "登录以接受",
-      "switchAccount": "切换账号",
-      "successTitle": "你已加入",
-      "successDescription": "你已成为 {{name}} 的成员。可在设置 → 工作区中管理。",
-      "errorTitle": "无法接受邀请",
-      "sentTo": "邀请已发送至 {{email}}",
-      "wrongAccount": "此邀请发送给了 {{email}}，而你当前登录的是 {{current}}。"
-    }
   },
   "dictationTranslation": {
     "title": "听写翻译",

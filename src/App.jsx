@@ -14,8 +14,6 @@ import { useMainProcessNotifications } from "./hooks/useMainProcessNotifications
 import { useListeningEntrancePhase } from "./hooks/useListeningEntrancePhase";
 import { useWindowResizeCompensation } from "./hooks/useWindowResizeCompensation";
 import { useSettingsStore } from "./stores/settingsStore";
-import { isAgentAllowed } from "./stores/policyRules";
-import { usePolicyStore } from "./stores/policyStore";
 import { VoicePill } from "./components/dictation/VoicePill";
 import { AssistantPanel } from "./components/dictation/AssistantPanel";
 import { LiveTranscriptPanel } from "./components/dictation/LiveTranscriptPanel";
@@ -108,7 +106,7 @@ export default function App() {
   useWindowResizeCompensation();
   useMainProcessNotifications({ toast, dismiss, t });
 
-  const agentAllowed = usePolicyStore(isAgentAllowed);
+  const agentAllowed = true;
 
   const mainWindowResizeCoordinatorRef = useRef(null);
   useEffect(() => {

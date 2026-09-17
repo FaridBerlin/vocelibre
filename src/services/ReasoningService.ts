@@ -17,8 +17,6 @@ import { stripThinkingTags } from "../helpers/stripThinking.js";
 import { getLlmRequestTimeoutSeconds } from "../helpers/llmRequestTimeout.js";
 import { streamText, stepCountIs } from "ai";
 import { getAIModel } from "./ai/providers";
-import { createEnterpriseChatModel } from "./ai/enterpriseChatModel";
-import { getManagedScopeResolution } from "../stores/enterpriseIdentityStore";
 import type { InferenceScope } from "../config/inferenceScopes";
 import { PROVIDER_REGISTRY, type ProviderContext } from "./ai/inferenceProviders";
 import {
@@ -35,9 +33,7 @@ import { getModelFamilyConstraints } from "./ai/modelFamilyConstraints";
 import { detectEndpointDialect } from "./ai/thinkingSuppressionDialects";
 import { createStreamingThinkFilter } from "./ai/streamingThinkFilter";
 import { extractApiErrorMessage } from "./ai/apiErrorMessage";
-import { clearTinfoilClientCache } from "./ai/tinfoilClient";
 import { resolveChatRoute } from "../helpers/chatRouting";
-import { assertAgentAllowedByPolicy, assertReasoningAllowedByPolicy } from "./reasoningPolicy";
 import type { InferenceMode } from "../types/electron";
 
 export type ToolMetadata = Record<string, unknown> | Array<Record<string, unknown>>;
@@ -84,17 +80,14 @@ function resolveLlmDispatchMode(
   provider: string,
   config: Pick<ReasoningConfig, "lanUrl">
 ): InferenceMode {
+  // Only a downloaded local model and a self-hosted endpoint remain.
   if (config.lanUrl || provider === "lan") return "self-hosted";
-  if (provider === "openwhispr") return "openwhispr";
-  if (provider === "local") return "local";
-  if (isEnterpriseProvider(provider)) return "enterprise";
-  return "providers";
+  return "local";
 }
 
-function assertAgentSessionAllowedByPolicy(provider: string, mode: InferenceMode): void {
-  assertAgentAllowedByPolicy();
-  assertReasoningAllowedByPolicy(provider, mode);
-}
+// Org policy could forbid the agent or a provider/mode pair; with no workspace
+// there is nothing to enforce, so every session is allowed.
+function assertAgentSessionAllowedByPolicy(_provider: string, _mode: InferenceMode): void {}
 
 function logParamFallback(logEvent: string) {
   return (details: { status: number; stripped: string[] }) =>
@@ -108,7 +101,6 @@ class ReasoningService extends BaseReasoningService {
   private streamAbortController: AbortController | null = null;
   private activeRequestControllers = new Set<AbortController>();
   private activeCloudStream: { requestId: string; cancel: () => void } | null = null;
-  private cloudOperationGeneration = 0;
   private requestCancellationGeneration = 0;
 
   private readonly providerContext: ProviderContext;
@@ -146,25 +138,10 @@ class ReasoningService extends BaseReasoningService {
     config: T,
     fallbackScope: InferenceScope
   ): { model: string; provider: P; config: T; isManaged: boolean } {
+    // Enterprise managed providers were removed, so a scope's own selection
+    // always stands.
     const inferenceScope = config.inferenceScope || fallbackScope;
-    const managed = getManagedScopeResolution(inferenceScope, getSettings().enterpriseSetupMode);
-    if (managed.kind === "error") throw new Error(managed.message);
-    if (managed.kind !== "managed") {
-      return { model, provider, config: { ...config, inferenceScope }, isManaged: false };
-    }
-    return {
-      model: managed.model,
-      provider: managed.provider as P,
-      config: {
-        ...config,
-        inferenceScope,
-        provider: managed.provider,
-        lanUrl: undefined,
-        baseUrl: undefined,
-        customApiKey: undefined,
-      },
-      isManaged: true,
-    };
+    return { model, provider, config: { ...config, inferenceScope }, isManaged: false };
   }
 
   private async getApiKey(
@@ -446,13 +423,8 @@ class ReasoningService extends BaseReasoningService {
     const isImplicitCleanup =
       config.provider === undefined && config.baseUrl === undefined && config.lanUrl === undefined;
     const implicitProvider =
-      settings.cleanupMode === "openwhispr"
-        ? "openwhispr"
-        : settings.cleanupMode === "self-hosted"
-          ? "lan"
-          : settings.cleanupProvider || undefined;
-    const isImplicitCustomCleanup =
-      isImplicitCleanup && settings.cleanupMode === "providers" && implicitProvider === "custom";
+      settings.cleanupMode === "self-hosted" ? "lan" : settings.cleanupProvider || undefined;
+    const isImplicitCustomCleanup = false;
     const dispatchConfig: ReasoningConfig = isImplicitCleanup
       ? {
           ...config,
@@ -470,9 +442,6 @@ class ReasoningService extends BaseReasoningService {
     if (!providerId) {
       throw new Error("No reasoning provider selected");
     }
-    if (dispatchConfig.requiresAgent) assertAgentAllowedByPolicy();
-    assertReasoningAllowedByPolicy(providerId, resolveLlmDispatchMode(providerId, dispatchConfig));
-
     if (!trimmedModel && providerId !== "openwhispr" && providerId !== "lan") {
       throw new Error("No reasoning model selected");
     }
@@ -547,8 +516,7 @@ class ReasoningService extends BaseReasoningService {
       lanUrl: config.lanUrl,
       customApiKey: config.customApiKey,
     });
-    const mode: InferenceMode =
-      route.kind === "self-hosted" ? "self-hosted" : route.kind === "local" ? "local" : "providers";
+    const mode: InferenceMode = route.kind === "self-hosted" ? "self-hosted" : "local";
     assertAgentSessionAllowedByPolicy(provider, mode);
     const isLocalProvider = route.kind === "local";
     const isLanChat = route.kind === "self-hosted";
@@ -748,14 +716,7 @@ class ReasoningService extends BaseReasoningService {
       customApiKey: config.customApiKey,
       isEnterpriseProvider: isEnterpriseProvider(provider),
     });
-    const mode: InferenceMode =
-      route.kind === "self-hosted"
-        ? "self-hosted"
-        : route.kind === "enterprise"
-          ? "enterprise"
-          : route.kind === "local"
-            ? "local"
-            : "providers";
+    const mode: InferenceMode = route.kind === "self-hosted" ? "self-hosted" : "local";
     assertAgentSessionAllowedByPolicy(provider, mode);
     // Both streaming transports share this owner so cancellation survives
     // asynchronous server, key, and model setup.
@@ -817,11 +778,9 @@ class ReasoningService extends BaseReasoningService {
     // exemption below can't apply — honor the toggle directly.
     const openrouterDisableThinking = provider === "openrouter" && config.disableThinking === true;
     // Resolving a Tinfoil model refreshes the registry, so read model config after it.
-    const aiModel = isEnterprise
-      ? createEnterpriseChatModel(provider as EnterpriseProvider, model, config.inferenceScope)
-      : await getAIModel(aiProvider, model, apiKey, baseURL, {
-          disableThinking: openrouterDisableThinking,
-        });
+    const aiModel = await getAIModel(aiProvider, model, apiKey, baseURL, {
+      disableThinking: openrouterDisableThinking,
+    });
 
     if (abortController.signal.aborted) {
       yield { type: "done", finishReason: "stop" };
@@ -945,7 +904,6 @@ class ReasoningService extends BaseReasoningService {
 
   /** Aborts the chat/agent stream only (panel Esc, chat surface unmount). */
   cancelActiveStream(): void {
-    this.cloudOperationGeneration += 1;
     this.streamAbortController?.abort();
     this.streamAbortController = null;
     const activeCloudStream = this.activeCloudStream;
@@ -963,10 +921,6 @@ class ReasoningService extends BaseReasoningService {
     this.requestCancellationGeneration += 1;
     for (const controller of this.activeRequestControllers) controller.abort();
     this.activeRequestControllers.clear();
-    if (typeof window !== "undefined") {
-      window.electronAPI?.cancelCloudReason?.();
-      window.electronAPI?.cancelEnterpriseReasoning?.();
-    }
     this.cancelActiveStream();
   }
 
@@ -1072,131 +1026,9 @@ class ReasoningService extends BaseReasoningService {
     return { stream: generator, wasCancelled: () => cancelled };
   }
 
-  processTextStreamingCloud(
-    messages: Array<{ role: string; content: string | Array<unknown> }>,
-    config: {
-      systemPrompt: string;
-      tools?: Array<{ name: string; description: string; parameters: Record<string, unknown> }>;
-      executeToolCall?: (name: string, args: string) => Promise<ToolExecutionResult>;
-      screenContext?: { data: string; mediaType: string };
-    }
-  ): AsyncGenerator<AgentStreamChunk, void, unknown> {
-    // Capture synchronously so a cancel before the first next() is observed.
-    const operationGeneration = ++this.cloudOperationGeneration;
-    return this._processTextStreamingCloud(messages, config, operationGeneration);
-  }
-
-  private async *_processTextStreamingCloud(
-    messages: Array<{ role: string; content: string | Array<unknown> }>,
-    config: {
-      systemPrompt: string;
-      tools?: Array<{ name: string; description: string; parameters: Record<string, unknown> }>;
-      executeToolCall?: (name: string, args: string) => Promise<ToolExecutionResult>;
-      screenContext?: { data: string; mediaType: string };
-    },
-    operationGeneration: number
-  ): AsyncGenerator<AgentStreamChunk, void, unknown> {
-    assertAgentSessionAllowedByPolicy("openwhispr", "openwhispr");
-    const operationWasCancelled = (): boolean =>
-      operationGeneration !== this.cloudOperationGeneration;
-    const maxSteps = config.tools?.length ? ReasoningService.MAX_TOOL_STEPS : 1;
-    let currentMessages = [...messages];
-
-    for (let step = 0; step < maxSteps; step++) {
-      if (operationWasCancelled()) return;
-      // The screenshot rides every step of the tool loop so the model keeps
-      // its vision after tool results come back.
-      const ipcStream = this.streamFromIPC(currentMessages, {
-        systemPrompt: config.systemPrompt,
-        tools: config.tools,
-        screenContext: config.screenContext,
-      });
-
-      const pendingToolCalls: Array<{ id: string; name: string; arguments: string }> = [];
-
-      for await (const ev of ipcStream.stream) {
-        if (ev.type === "content") {
-          yield { type: "content", text: ev.text as string };
-        } else if (ev.type === "tool_call") {
-          const call = {
-            id: ev.id as string,
-            name: ev.name as string,
-            arguments: ev.arguments as string,
-          };
-          pendingToolCalls.push(call);
-          yield { type: "tool_calls", calls: [call] };
-        }
-      }
-
-      if (ipcStream.wasCancelled() || operationWasCancelled()) return;
-
-      if (pendingToolCalls.length === 0 || !config.executeToolCall) {
-        yield { type: "done", finishReason: "stop" };
-        return;
-      }
-
-      for (const call of pendingToolCalls) {
-        if (operationWasCancelled()) return;
-        let toolResult: ToolExecutionResult;
-        try {
-          toolResult = await config.executeToolCall(call.name, call.arguments);
-        } catch (error) {
-          const errMsg = `Error: ${(error as Error).message}`;
-          toolResult = { data: errMsg, displayText: errMsg };
-        }
-        if (operationWasCancelled()) return;
-        yield {
-          type: "tool_result",
-          callId: call.id,
-          toolName: call.name,
-          displayText: toolResult.displayText,
-          ...(toolResult.metadata ? { metadata: toolResult.metadata } : {}),
-        };
-
-        currentMessages = [
-          ...currentMessages,
-          {
-            role: "assistant",
-            content: [
-              {
-                type: "tool-call",
-                toolCallId: call.id,
-                toolName: call.name,
-                input: JSON.parse(call.arguments),
-              },
-            ],
-          },
-          {
-            role: "tool",
-            content: [
-              {
-                type: "tool-result",
-                toolCallId: call.id,
-                toolName: call.name,
-                output: { type: "text", value: toolResult.data },
-              },
-            ],
-          },
-        ];
-      }
-    }
-
-    if (operationWasCancelled()) return;
-    yield { type: "done", finishReason: "stop" };
-  }
-
   async isAvailable(): Promise<boolean> {
     try {
       const settings = getSettings();
-      // Mirrors processText's precedence: managed access outranks every manual route.
-      if (
-        getManagedScopeResolution("dictationCleanup", settings.enterpriseSetupMode).kind ===
-        "managed"
-      ) {
-        logger.logReasoning("API_KEY_CHECK", { managedEnterprise: true });
-        return true;
-      }
-
       if (isCloudCleanupMode()) {
         logger.logReasoning("API_KEY_CHECK", { cloudCleanupMode: true });
         return true;
@@ -1292,13 +1124,9 @@ class ReasoningService extends BaseReasoningService {
       if (provider !== "custom") {
         this.apiKeyCache.delete(provider);
       }
-      if (provider === "tinfoil") {
-        clearTinfoilClientCache();
-      }
       logger.logReasoning("API_KEY_CACHE_CLEARED", { provider });
     } else {
       this.apiKeyCache.clear();
-      clearTinfoilClientCache();
       logger.logReasoning("API_KEY_CACHE_CLEARED", { provider: "all" });
     }
   }

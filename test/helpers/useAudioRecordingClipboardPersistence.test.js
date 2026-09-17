@@ -38,12 +38,6 @@ const SETTINGS_STORE_SOURCE = `
 export const getSettings = () => globalThis.__clipboardPersistenceSettings;
 `;
 
-const POLICY_STORE_SOURCE = `
-export const usePolicyStore = {
-  getState: () => ({}),
-  subscribe: () => () => {},
-};
-`;
 
 const LOGGER_SOURCE = `
 const record = (level, message, meta, scope) => {
@@ -149,7 +143,6 @@ async function mountCompletionHarness(
     mockModules: {
       "/helpers/audioManager": FAKE_AUDIO_MANAGER_SOURCE,
       "/stores/settingsStore": SETTINGS_STORE_SOURCE,
-      "/stores/policyStore": POLICY_STORE_SOURCE,
       "/utils/logger": LOGGER_SOURCE,
       "react-i18next": TRANSLATION_SOURCE,
     },

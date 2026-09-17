@@ -8,7 +8,13 @@ Keep responses focused, brief, and concise. Keep disclaimers and caveats short, 
 
 ## Project Overview
 
-VoceLibre is an Electron-based desktop dictation application that uses whisper.cpp for speech-to-text transcription. It supports both local (privacy-focused) and cloud (OpenAI API) processing modes.
+VoceLibre is an Electron-based desktop dictation application that uses whisper.cpp for speech-to-text transcription.
+
+**There is no account, no backend and no cloud tier.** Transcription and AI
+reasoning run on downloaded local models, or on an OpenAI-compatible endpoint
+the user hosts themselves. Nothing in live code contacts an `openwhispr.com`
+host — a grep for it returns only the load-bearing identifiers listed under
+"The OpenWhispr → VoceLibre rename" below, which must not be changed.
 
 ## Architecture Overview
 
@@ -706,13 +712,72 @@ Live meeting transcription runs two streams (mic + system-audio tap) and must ke
 
 ## Development Guidelines
 
+### The OpenWhispr → VoceLibre rename — REQUIRED
+
+VoceLibre is a fork of OpenWhispr. **Display text was renamed; identifiers were
+deliberately not.** A grep for "openwhispr" therefore returns hundreds of live,
+correct hits. Do not "finish the rename."
+
+**Rename** — anything a user reads: UI copy, i18n values, dialog text, log
+prose, window and menu titles, docs.
+
+**Never rename** — any identifier that crosses a process, disk, or OS boundary,
+because the OS or an existing install already holds the old string and renaming
+it orphans state or silently breaks the contract:
+
+| Identifier | Where | Breaks if renamed |
+| --- | --- | --- |
+| `com.openwhispr.App` | D-Bus service/interface (GNOME, Hyprland, KDE) | `dbus-send` in every registered keybinding targets the old name |
+| `/org/gnome/settings-daemon/.../openwhispr*/` | gsettings keybinding paths | Existing GNOME shortcuts orphan; user sees a dead binding |
+| `openwhispr` | `COMPONENT_NAME` in `kdeShortcut.js` | KGlobalAccel loses the registration it matches on |
+| `~/.cache/openwhispr/` | model + Qdrant data on disk | Re-downloads every model (GBs) |
+| `openwhispr://` | deep-link protocol | Registered handler and OAuth callbacks stop resolving |
+| `OPENWHISPR_LOG_LEVEL`, `VITE_OPENWHISPR_API_URL` | env vars | Existing `.env` files and docs stop working |
+| `.bundle-migrated`, pre-Gizmo bundle ID | `postMigrationDetector.js` | Migration onboarding misfires |
+
+Historical cleanup paths (`removeRetiredAgentKeybinding`) must keep the **literal
+old string a previous build actually wrote**, never the current brand name.
+
+Where a lookup has to tolerate both, accept old and new (see
+`slotFromFriendlyName` in `kdeShortcut.js`) rather than picking one.
+
+### Native helper binaries — where they come from
+
+`scripts/download-*.js` fetch prebuilt native helpers from **this repo's own
+GitHub releases** (`FaridBerlin/vocelibre`). Every one of them builds from
+source in this repo, so nothing depends on the upstream project:
+
+| Binary | Source | Workflow |
+| --- | --- | --- |
+| `windows-key-listener.exe` | `resources/windows-key-listener.c` | `build-windows-key-listener.yml` |
+| `windows-mic-listener.exe` | `resources/windows-mic-listener.c` | `build-windows-mic-listener.yml` |
+| `windows-fast-paste.exe` | `resources/windows-fast-paste.c` | `build-windows-fast-paste.yml` |
+| `windows-system-audio-helper.exe` | `resources/windows-system-audio-helper.c` | `build-windows-system-audio-helper.yml` |
+| text monitor | `resources/{windows,linux}-text-monitor.c` | `build-{windows,linux}-text-monitor.yml` |
+| `meeting-aec-helper` | `native/meeting-aec-helper/` | `build-meeting-aec-helper.yml` |
+
+**These releases do not exist yet.** Run each workflow once from the Actions tab
+(they are `workflow_dispatch`, and `softprops/action-gh-release` publishes to
+whichever repo it runs in) to populate them. Until then the download scripts
+fail soft — they never fail a build — and the affected features degrade:
+Windows push-to-talk falls back to tap mode, mic detection falls back to
+polling, and system-audio capture falls back to the Chromium loopback path.
+
+**The one exception is whisper.cpp.** `scripts/download-whisper-cpp.js` points
+at `OpenWhispr/whisper.cpp`, a fork that publishes purpose-built
+`whisper-server-*` binaries. Upstream `ggml-org/whisper.cpp` ships **no binary
+assets at all**, so this cannot simply be repointed — doing so would break
+local transcription on every platform. To cut this last upstream tie, fork
+`ggml-org/whisper.cpp`, run its release build, and change `WHISPER_CPP_REPO`.
+
+
 ### Internationalization (i18n) — REQUIRED
 
 All user-facing strings **must** use the i18n system. Never hardcode UI text in components.
 
 **Setup**: react-i18next (v15) with i18next (v25). Translation files in `src/locales/{lang}/translation.json`.
 
-**Supported languages**: en, es, fr, de, pt, it, ru, zh-CN, zh-TW
+**Supported languages**: en, es, fr, de, pt, it, ja, ru, zh-CN, zh-TW
 
 **How to use**:
 
@@ -924,7 +989,7 @@ Raster UI assets live in `src/assets/` (onboarding ones are named `onboarding-*`
 
 - Streaming transcription support
 - Custom wake word detection
-- ~~Multi-language UI~~ (implemented — 9 languages via react-i18next)
+- ~~Multi-language UI~~ (implemented — 10 languages via react-i18next)
 - Cloud model selection
 - Batch transcription
 - Export formats beyond clipboard

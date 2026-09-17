@@ -4,8 +4,6 @@ import { useTranslation } from "react-i18next";
 import MemberAvatar from "../../MemberAvatar";
 import { groupItemsByDate } from "../../../utils/dateGrouping";
 import { formatRelativeTime } from "../../../utils/dateFormatting";
-import { useSpaceRoster } from "../../../hooks/useSpaceRoster";
-import { useAuth } from "../../../hooks/useAuth";
 import type { NoteItem, SpaceItem } from "../../../types/electron";
 
 interface OverviewNoteListProps {
@@ -24,9 +22,6 @@ export function OverviewNoteList({
   onAddExisting,
 }: OverviewNoteListProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const isTeamSpace = space.kind === "team";
-  const roster = useSpaceRoster(isTeamSpace ? space.cloud_space_id : null);
 
   const groups = useMemo(() => groupItemsByDate(notes, (n) => n.updated_at, t), [notes, t]);
 
@@ -65,12 +60,6 @@ export function OverviewNoteList({
             {group.label}
           </div>
           {group.items.map((note) => {
-            const authorId = isTeamSpace ? note.updated_by_user_id : null;
-            const member = authorId ? roster?.get(authorId) : undefined;
-            const isSelf = authorId != null && authorId === user?.id;
-            const authorName = isSelf
-              ? t("notes.overview.author.you")
-              : (member?.name ?? member?.email ?? null);
             return (
               <button
                 key={note.id}
@@ -84,19 +73,6 @@ export function OverviewNoteList({
                 <span className="text-[13px] text-foreground/85 truncate flex-1">
                   {note.title || t("notes.list.untitled")}
                 </span>
-                {authorName && (
-                  <span className="flex items-center gap-1.5 shrink-0">
-                    <MemberAvatar
-                      name={member?.name ?? authorName}
-                      email={member?.email ?? ""}
-                      image={member?.image}
-                      size="sm"
-                    />
-                    <span className="text-[11px] text-foreground/40 max-w-28 truncate">
-                      {authorName}
-                    </span>
-                  </span>
-                )}
                 <span className="text-[11px] text-foreground/35 dark:text-foreground/25 shrink-0 tabular-nums">
                   {formatRelativeTime(note.updated_at, t)}
                 </span>

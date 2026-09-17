@@ -8,23 +8,6 @@ const resolve = async (settings, extra = {}) => {
   return resolveTranscriptionRoute({ settings, ...extra });
 };
 
-const MANAGED_OPENAI_ONLY = {
-  status: "managed",
-  appVersion: "1.8.2",
-  policy: {
-    version: 1,
-    transcription: { allowedModes: ["providers"], allowedByokProviders: ["openai"] },
-    llm: { allowedModes: [], allowedByokProviders: [], allowedEnterpriseProviders: [] },
-    features: { agentEnabled: false, webSearchEnabled: false },
-    sharing: { externalLinkSharing: "disabled" },
-    dataRetention: {
-      audioRetentionMaxDays: null,
-      localHistoryMode: "user_choice",
-      cloudBackupAllowed: false,
-    },
-    minAppVersion: null,
-  },
-};
 
 test("self-hosted routes to the configured server and wins over stale flags", async () => {
   const route = await resolve({
@@ -240,41 +223,6 @@ test("openai and groq route to fixed endpoints with provider-validated models", 
   assert.equal(groqStale.endpoint, "https://api.groq.com/openai/v1/audio/transcriptions");
   assert.equal(groqStale.model, "whisper-large-v3-turbo", "mismatched model degrades to default");
   assert.deepEqual(groqStale.auth, { scheme: "bearer", keyRef: "groq" });
-});
-
-test("managed policy is a fail-closed floor", async () => {
-  const blocked = await resolve(
-    { transcriptionMode: "providers", cloudTranscriptionProvider: "groq" },
-    { policy: MANAGED_OPENAI_ONLY }
-  );
-  assert.equal(blocked.transport, "error");
-  assert.equal(blocked.code, "POLICY_RESTRICTED");
-
-  const allowed = await resolve(
-    { transcriptionMode: "providers", cloudTranscriptionProvider: "openai" },
-    { policy: MANAGED_OPENAI_ONLY }
-  );
-  assert.equal(allowed.transport, "http-batch");
-
-  // Managed orgs see the policy message for a broken custom endpoint, never
-  // the config hint (pins the Phase 1 precedence).
-  const managedCustom = await resolve(
-    {
-      transcriptionMode: "providers",
-      cloudTranscriptionProvider: "custom",
-      cloudTranscriptionBaseUrl: "",
-    },
-    {
-      policy: {
-        ...MANAGED_OPENAI_ONLY,
-        policy: {
-          ...MANAGED_OPENAI_ONLY.policy,
-          transcription: { allowedModes: ["providers"], allowedByokProviders: ["custom"] },
-        },
-      },
-    }
-  );
-  assert.equal(managedCustom.code, "POLICY_RESTRICTED");
 });
 
 test("request overrides win: explicit model and effective language", async () => {

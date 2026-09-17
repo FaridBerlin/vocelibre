@@ -4,11 +4,10 @@ Thanks for your interest in contributing. VoceLibre is an open-source,
 privacy-first voice-to-text app, and improvements from the community —
 bug reports, fixes, docs, features — are very welcome.
 
-VoceLibre is a fork of [OpenWhispr](https://github.com/OpenWhispr/openwhispr);
-their contributing guide at
-[docs.openwhispr.com/contributing](https://docs.openwhispr.com/contributing)
-still covers coding conventions and general workflow. This file is a short
-pointer with the repo-local details you may need along the way.
+VoceLibre is a fork of [OpenWhispr](https://github.com/OpenWhispr/openwhispr),
+with the cloud and account features removed — it runs entirely on your own
+machine. Coding conventions live in [`CLAUDE.md`](../CLAUDE.md); this file
+covers the repo-local details you may need along the way.
 
 ## Filing issues
 
@@ -29,7 +28,7 @@ Follow the process in [`SECURITY.md`](../SECURITY.md): use
 
 ## Contributing code
 
-See the [contributing guide](https://docs.openwhispr.com/contributing)
+See [`CLAUDE.md`](../CLAUDE.md)
 for the general workflow, coding conventions, and review expectations.
 The short version:
 

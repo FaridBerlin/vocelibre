@@ -24,7 +24,6 @@ const transcription = {
 const diarization = { enabled: true, localModelsReady: true, numSpeakers: 2 };
 
 const gateMocks = {
-  "/lib/auth": "export const withSessionRefresh = (fn) => fn();",
   "./settingsStore": "export const getSettings = () => ({});",
   "./policyStore": "export const usePolicyStore = { getState: () => ({}) };",
   "./policyRules": "export const isTranscriptionContextAllowed = () => true;",

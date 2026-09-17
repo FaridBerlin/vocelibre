@@ -140,7 +140,7 @@ export default function CompactPermissionsStep({
   };
 
   return (
-    <CompactOnboardingFrame showLegalNotice={false}>
+    <CompactOnboardingFrame>
       {/* Continue appears once the required permission (microphone) is granted.
           Portalled to body: inside the step wrapper it can never out-stack the
           shell's z-50 drag band (see OnboardingShell), so clicks would be

@@ -121,15 +121,17 @@ test("a wake-word command is banked without the address", async (t) => {
   assert.equal(manager.pendingAssistantConversation.transcript, "draft a reply");
 });
 
-test("a policy-restricted org never gets a panel command banked", async (t) => {
+// The org-policy guard is gone, but the invariant it protected is not: a
+// pre-flight check that throws must leave no pending conversation behind.
+test("a throwing pre-flight guard never leaves a panel command banked", async (t) => {
   const { createManager } = await loadAudioManager(t, {
     cachePrefix: "openwhispr-assistant-policy-",
     settingsKey: "__assistantPolicySettings",
   });
   const { manager } = managerWithCapture(createManager, null);
   manager.assertAgentAllowedByPolicy = () => {
-    const error = new Error("AI agent use is restricted by your organization.");
-    error.code = "POLICY_RESTRICTED";
+    const error = new Error("pre-flight restricted this command");
+    error.code = "PREFLIGHT_REJECTED";
     throw error;
   };
   await assert.rejects(

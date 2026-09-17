@@ -409,7 +409,7 @@ const Toast: React.FC<
                 type="button"
                 onClick={() => void copyRecoveryCommand()}
                 className="shrink-0 rounded-xs p-1 text-white/30 transition-colors hover:bg-white/6 hover:text-white/70"
-                aria-label={t("reasoning.enterprise.technicalDetails.copyCommand")}
+                aria-label={t("reasoning.technicalDetails.copyCommand")}
               >
                 {commandCopied ? <Check className="size-3" /> : <Copy className="size-3" />}
               </button>

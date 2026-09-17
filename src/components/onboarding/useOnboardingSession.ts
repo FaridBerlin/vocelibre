@@ -5,7 +5,6 @@ import {
   createOnboardingSession,
   migrateLegacyOnboardingStep,
   parseOnboardingSession,
-  type OnboardingAuthPath,
   type OnboardingSession,
   type OnboardingSetupMode,
   type OnboardingStepId,
@@ -21,15 +20,6 @@ function readInitialSession(): OnboardingSession {
   session.currentStepId = migrateLegacyOnboardingStep(
     localStorage.getItem(LEGACY_ONBOARDING_STEP_KEY)
   );
-  if (localStorage.getItem("authenticationSkipped") === "true") {
-    session.authPath = "guest";
-  } else if (session.currentStepId !== "auth") {
-    // A legacy save mid-flow means the auth step was already behind the user.
-    // Left null, getOnboardingRoute returns ["auth"] and the reconcile clamp
-    // overwrites the migrated step before anything can restore it — the one
-    // group the legacy map exists for would always restart from scratch.
-    session.authPath = "account";
-  }
   return session;
 }
 
@@ -62,10 +52,6 @@ export function useOnboardingSession() {
     });
   }, []);
 
-  const setAuthPath = useCallback((authPath: OnboardingAuthPath) => {
-    setSession((current) => ({ ...current, authPath }));
-  }, []);
-
   const setSetupMode = useCallback((setupMode: OnboardingSetupMode) => {
     setSession((current) => ({ ...current, setupMode }));
   }, []);
@@ -84,7 +70,6 @@ export function useOnboardingSession() {
     setSession,
     goTo,
     goBack,
-    setAuthPath,
     setSetupMode,
     setSelfHostedRequested,
     clearSession,

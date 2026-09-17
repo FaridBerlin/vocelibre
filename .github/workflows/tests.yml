@@ -2,6 +2,11 @@ name: Tests
 
 on:
   pull_request:
+  # Pushes straight to main skipped this job entirely, so the rebrand commits
+  # landed with no test, typecheck or locale result at all. Guard the branch
+  # itself, not just the PRs that are supposed to precede it.
+  push:
+    branches: [main]
 
 jobs:
   pr-quality:
@@ -16,7 +21,7 @@ jobs:
       - name: Build better-sqlite3 for the runner's node
         # --ignore-scripts skips the native build, so every DB-backed test
         # (snippetsDatabase, noteCloudUpsertGuard, …) silently skips without this.
-        run: npm rebuild better-sqlite3
+        run: npm run rebuild:node
       - name: Quality checks
         # format:check + typecheck — the same gate build-and-notarize runs, so
         # the two workflows can't disagree about whether a PR passed (#1735).
@@ -24,7 +29,13 @@ jobs:
       - name: Check translations
         run: npm run i18n:check
       - name: Audit dependencies
-        run: npm audit
+        # Print the full report, but only fail on critical. Every current high
+        # sits in a transitive build-time dep (@tiptap/*, onnxruntime-node ->
+        # adm-zip) with no fix published; blocking on those makes every run red
+        # and trains reviewers to scroll past the gate entirely.
+        run: |
+          npm audit || true
+          npm audit --audit-level=critical
       - name: Run tests
         # The gates above fail on drift that has nothing to do with the suite —
         # a stray format nit, a missing locale key, a fresh advisory. Without

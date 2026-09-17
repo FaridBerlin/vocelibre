@@ -21,7 +21,6 @@ class GoogleCalendarOAuth {
 
   startOAuthFlow() {
     return runOAuthLoopbackFlow({
-      errorParam: "gcal_error",
       buildAuthUrl: (redirectUri, state, codeChallenge) => {
         const params = new URLSearchParams({
           client_id: this.getClientId(),

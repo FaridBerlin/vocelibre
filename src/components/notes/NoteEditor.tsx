@@ -16,28 +16,18 @@ import {
   Share2,
   Users,
 } from "lucide-react";
-import ShareNoteDialog from "./ShareNoteDialog";
 import {
   canOrganizeNote,
   noteCapabilities,
   resolveNotePermission,
   type NoteAclState,
 } from "../../lib/notePermissions";
-import { ownsNote } from "../../lib/spacePermissions";
-import SpaceMembersDialog from "./SpaceMembersDialog";
 import {
   useShareCacheEntry,
-  useNoteConflict,
   useSpaces,
-  clearNoteConflict,
   navigateToContainer,
-  persistNoteShareState,
   updateNoteInStore,
-  updateShareCache,
 } from "../../stores/noteStore";
-import { NoteSharingService } from "../../services/NoteSharingService";
-import { fetchSpaceRoster } from "../../hooks/useSpaceRoster";
-import { useAuth } from "../../hooks/useAuth";
 import { RichTextEditor } from "../ui/RichTextEditor";
 import type { Editor } from "@tiptap/react";
 import { MeetingTranscriptChat, SelectionBar } from "./MeetingTranscriptChat";
@@ -235,40 +225,22 @@ export default function NoteEditor({
   const [isDiarizing, setIsDiarizing] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [membersDialogOpen, setMembersDialogOpen] = useState(false);
-  const [aclRetryVersion, setAclRetryVersion] = useState(0);
-  const [aclRequest, setAclRequest] = useState<{
-    cloudId: string;
-    state: Extract<NoteAclState, "loading" | "unavailable">;
-  } | null>(null);
-  const { isSignedIn, user } = useAuth();
-  const shareCache = useShareCacheEntry(note.cloud_id);
   const spaces = useSpaces();
   const space = useMemo(
     () => spaces.find((s) => s.id === note.space_id) ?? null,
     [spaces, note.space_id]
   );
-  const isTeamNote = space?.kind === "team";
-  // Persisted flag is the restart-safe truth; the live cache overlays it for
-  // the current session (it reflects server state before the flag persists).
-  const isShared = shareCache ? shareCache.share.visibility !== "private" : Boolean(note.is_shared);
-  const aclState: NoteAclState = shareCache
-    ? "loaded"
-    : !note.cloud_id || !isSignedIn
-      ? "unavailable"
-      : aclRequest?.cloudId === note.cloud_id
-        ? aclRequest.state
-        : "loading";
+  const isTeamNote = false;
+  const isShared = false;
+  // Notes live only on this machine now, so the editor always holds full
+  // ownership rights rather than resolving them against a server ACL.
   const notePermission = resolveNotePermission({
-    cachedPermission: shareCache?.access?.my_permission,
-    aclState,
+    cachedPermission: undefined,
+    aclState: "loaded" as NoteAclState,
     isTeamNote,
-    locallyOwned: ownsNote(note, user?.id),
+    locallyOwned: true,
   });
   const shareCapabilities = noteCapabilities(notePermission);
-  const canShare =
-    isSignedIn &&
-    (!note.cloud_id || isTeamNote || aclState === "loaded") &&
-    shareCapabilities.canShare;
   const canEditNote = shareCapabilities.canEdit;
   // Re-filing is owner-only on shared personal notes (a denied folder_id
   // PATCH would fork an unexpected Personal copy); team members keep
@@ -277,78 +249,6 @@ export default function NoteEditor({
     isTeamNote,
     hasCloudCopy: Boolean(note.cloud_id),
   });
-  useEffect(() => {
-    if (!isSignedIn || !note.cloud_id || shareCache) return;
-    const cloudId = note.cloud_id;
-    let cancelled = false;
-    setAclRequest({ cloudId, state: "loading" });
-    NoteSharingService.getShareSettings(cloudId)
-      .then((res) => {
-        if (cancelled) return;
-        updateShareCache(cloudId, (entry) => ({
-          share: res.share,
-          invitations: res.invitations,
-          access: res.access ?? entry?.access,
-          rawToken: entry?.rawToken ?? null,
-        }));
-        const serverShared = res.share.visibility !== "private";
-        if (serverShared !== Boolean(note.is_shared)) {
-          void persistNoteShareState(
-            note.id,
-            serverShared ? { is_shared: 1 } : { is_shared: 0, share_token: null }
-          ).catch((err) => console.error("Share flag persist failed:", err));
-        }
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setAclRequest({ cloudId, state: "unavailable" });
-        console.error("Failed to load note permissions:", err);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [aclRetryVersion, isSignedIn, note.cloud_id, note.id, note.is_shared, shareCache]);
-  useEffect(() => {
-    if (
-      !isSignedIn ||
-      !note.cloud_id ||
-      shareCache ||
-      aclRequest?.cloudId !== note.cloud_id ||
-      aclRequest.state !== "unavailable"
-    ) {
-      return;
-    }
-    const retryWhenOnline = () => setAclRetryVersion((version) => version + 1);
-    window.addEventListener("online", retryWhenOnline);
-    return () => window.removeEventListener("online", retryWhenOnline);
-  }, [aclRequest, isSignedIn, note.cloud_id, shareCache]);
-  // A newer cloud copy arrived while this note had unpushed edits (plan §7.3).
-  const conflict = useNoteConflict(note.client_note_id);
-  const [conflictEditorName, setConflictEditorName] = useState<string | null>(null);
-  const conflictEditorId =
-    conflict?.updated_by_user_id && user?.id && conflict.updated_by_user_id !== user.id
-      ? conflict.updated_by_user_id
-      : null;
-  const conflictSpaceId = space?.cloud_space_id ?? null;
-  useEffect(() => {
-    if (!conflictEditorId || !conflictSpaceId) {
-      setConflictEditorName(null);
-      return;
-    }
-    let cancelled = false;
-    fetchSpaceRoster(conflictSpaceId)
-      .then((roster) => {
-        if (cancelled) return;
-        const member = roster.find((m) => m.user_id === conflictEditorId);
-        setConflictEditorName(member ? (member.name ?? member.email) : null);
-      })
-      .catch(() => {
-        if (!cancelled) setConflictEditorName(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [conflictEditorId, conflictSpaceId]);
   const [diarizedSegments, setDiarizedSegments] = useState<TranscriptSegment[] | null>(null);
   const [speakerMappings, setSpeakerMappings] = useState<Record<string, string>>({});
   const [speakerProfiles, setSpeakerProfiles] = useState<
@@ -408,14 +308,14 @@ export default function NoteEditor({
     () =>
       collectKnownPeople(
         {
-          selfName: user?.name?.trim() || null,
-          selfEmail: user?.email?.trim() || null,
+          selfName: null,
+          selfEmail: null,
           participants: parsedParticipants,
         },
         speakerMappings,
         displaySegments
       ),
-    [user?.name, user?.email, parsedParticipants, speakerMappings, displaySegments]
+    [parsedParticipants, speakerMappings, displaySegments]
   );
 
   const refreshSpeakerProfiles = useCallback(() => {
@@ -775,33 +675,6 @@ export default function NoteEditor({
     }
   }, [chatMode]);
 
-  // Apply the newer cloud copy over the local edits, keeping the note's
-  // current local placement.
-  const handleConflictRefresh = useCallback(async () => {
-    if (!conflict) return;
-    // Cancel any queued autosave FIRST: a pending debounced save holds the
-    // pre-refresh buffer and would both block the editor resync and clobber
-    // the cloud copy in SQLite a second later.
-    onCancelPendingSaves?.(note.id);
-    const fresh = await window.electronAPI.upsertNoteFromCloud?.(
-      conflict as unknown as Record<string, unknown>,
-      note.folder_id,
-      note.space_id
-    );
-    clearNoteConflict(note.client_note_id);
-    // With no save pending, the owner's external-update resync applies the
-    // fresh copy to the visible editor buffer.
-    if (fresh) updateNoteInStore(fresh);
-  }, [conflict, note.client_note_id, note.folder_id, note.id, note.space_id, onCancelPendingSaves]);
-
-  // Keep the local edits, overwriting the cloud revision the user just saw.
-  // Advancing the base first is what lets the next push succeed instead of
-  // 409ing against the same conflict and re-raising the banner.
-  const handleConflictKeep = useCallback(() => {
-    if (conflict) void window.electronAPI.setNoteCloudBase?.(note.id, conflict.updated_at);
-    clearNoteConflict(note.client_note_id);
-  }, [conflict, note.id, note.client_note_id]);
-
   const noteDate = formatNoteDate(note.created_at);
   const shortDate = formatShortDate(note.created_at);
 
@@ -1049,31 +922,6 @@ export default function NoteEditor({
                   )}
                 </div>
               )}
-              {canShare && (
-                <button
-                  type="button"
-                  onClick={() => setShareDialogOpen(true)}
-                  className={cn(
-                    "shrink-0 h-6 w-6 flex items-center justify-center rounded-md",
-                    "bg-foreground/4 dark:bg-white/5",
-                    "hover:bg-foreground/8 dark:hover:bg-white/10",
-                    "active:bg-foreground/12 dark:active:bg-white/15",
-                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    "transition-colors duration-150"
-                  )}
-                  aria-label={t("noteEditor.share.button")}
-                >
-                  <Share2
-                    size={11}
-                    className={cn(
-                      "transition-colors",
-                      isShared
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-foreground/50 dark:text-foreground/40"
-                    )}
-                  />
-                </button>
-              )}
               {(onExportNote || onExportTranscript) && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -1140,43 +988,6 @@ export default function NoteEditor({
             </div>
           </div>
         </div>
-
-        {conflict && (
-          <div
-            className={cn(
-              "flex items-center gap-2 px-5 h-8 mt-2 shrink-0",
-              "bg-amber-400/5 dark:bg-amber-400/[0.07]",
-              "border-y border-amber-400/15 dark:border-amber-400/20",
-              "animate-in slide-in-from-top-2 duration-300"
-            )}
-          >
-            <span className="w-1 h-1 rounded-full bg-amber-400/60 shrink-0" />
-            <p className="text-[11px] text-foreground/50 flex-1 truncate">
-              {t("notes.spaces.conflictBanner")}
-              {conflictEditorName && (
-                <span className="text-foreground/30">
-                  {" "}
-                  {t("notes.spaces.editedBy", {
-                    name: conflictEditorName,
-                    time: formatRelativeTime(conflict.updated_at, t),
-                  })}
-                </span>
-              )}
-            </p>
-            <button
-              onClick={handleConflictRefresh}
-              className="text-[11px] font-medium text-foreground/50 hover:text-foreground/70 transition-colors shrink-0 px-1 -mx-1 rounded outline-none focus-visible:ring-1 focus-visible:ring-ring/30"
-            >
-              {t("notes.spaces.conflictRefresh")}
-            </button>
-            <button
-              onClick={handleConflictKeep}
-              className="text-[11px] font-medium text-foreground/35 hover:text-foreground/55 transition-colors shrink-0 px-1 -mx-1 rounded outline-none focus-visible:ring-1 focus-visible:ring-ring/30"
-            >
-              {t("notes.spaces.conflictKeep")}
-            </button>
-          </div>
-        )}
 
         <div className="flex-1 relative min-h-0">
           <div ref={contentScrollRef} className="h-full overflow-y-auto">
@@ -1300,16 +1111,6 @@ export default function NoteEditor({
           activeConversationId={embeddedChat.activeConversationId}
           onSwitchConversation={embeddedChat.switchConversation}
           onNewChat={embeddedChat.startNewChat}
-        />
-      )}
-      {canShare && (
-        <ShareNoteDialog open={shareDialogOpen} onOpenChange={setShareDialogOpen} note={note} />
-      )}
-      {isTeamNote && space?.cloud_space_id && (
-        <SpaceMembersDialog
-          space={space}
-          open={membersDialogOpen}
-          onOpenChange={setMembersDialogOpen}
         />
       )}
     </div>

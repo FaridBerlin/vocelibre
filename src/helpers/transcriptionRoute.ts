@@ -18,10 +18,6 @@ import {
   resolveSelfHostedTranscriptionModel,
 } from "./selfHostedTranscription.js";
 import {
-  isTranscriptionSelectionAllowed,
-  type PolicyDecisionSnapshot,
-} from "../stores/policyRules.ts";
-import {
   isTinfoilInferenceUrl,
   TINFOIL_PROXY_REQUIRED_ERROR,
   type TranscriptionProviderBaseUrl,
@@ -56,8 +52,6 @@ export interface TranscriptionRouteSettings {
 export interface TranscriptionRouteInput {
   /** Policy-EFFECTIVE, scope-resolved snapshot — the resolver never re-maps selections. */
   settings: TranscriptionRouteSettings;
-  /** Optional fail-closed floor; renderer callers pass the policy store state, main-process callers omit it. */
-  policy?: PolicyDecisionSnapshot | null;
   /** Provider registry, for the Tinfoil-host guard. Renderer passes ModelRegistry, main the raw JSON. */
   providers?: readonly TranscriptionProviderBaseUrl[];
   request?: {
@@ -176,28 +170,10 @@ function customEndpointError(managed: boolean): TranscriptionRoute {
 
 export function resolveTranscriptionRoute({
   settings,
-  policy,
   providers = [],
   request,
 }: TranscriptionRouteInput): TranscriptionRoute {
   const s = settings || {};
-  const managed = policy?.status === "managed";
-
-  // Fail-closed floor only: callers pass policy-effective settings, so a
-  // disallowed selection here means the policy layer was bypassed upstream.
-  if (
-    managed &&
-    !isTranscriptionSelectionAllowed(policy!, {
-      mode: (s.transcriptionMode || (s.useLocalWhisper ? "local" : "providers")) as never,
-      provider: s.cloudTranscriptionProvider || "",
-    })
-  ) {
-    return error(
-      "Transcription is restricted by your organization.",
-      "POLICY_RESTRICTED",
-      "common.policyTranscriptionRestricted"
-    );
-  }
 
   const language =
     request?.effectiveLanguage ??
@@ -285,7 +261,7 @@ export function resolveTranscriptionRoute({
       !base ||
       !isSecureHttpEndpoint(base)
     ) {
-      return customEndpointError(managed);
+      return customEndpointError(false);
     }
     if (isTinfoilInferenceUrl(base, providers)) {
       return error(TINFOIL_PROXY_REQUIRED_ERROR);

@@ -26,15 +26,7 @@ import {
   type ColorScheme,
   type ModelPickerStyles,
 } from "../utils/modelPickerStyles";
-import { useSettingsStore } from "../stores/settingsStore";
-import {
-  filterByokProviderOptionsByPolicy,
-  isProviderAllowedByPolicy,
-  reconcileCloudProviderSelection,
-  shouldPersistProviderFallback,
-  type TranscriptionPolicyContext,
-} from "../stores/policyRules";
-import { usePolicySnapshot } from "../hooks/usePolicy";
+import { useSettingsStore, type TranscriptionContext } from "../stores/settingsStore";
 import { getRemoteProviderIcon } from "../utils/providerIcons";
 import { createExternalLinkHandler } from "../utils/externalLinks";
 import { API_ENDPOINTS, normalizeBaseUrl } from "../config/constants";
@@ -195,7 +187,7 @@ function LocalModelCard({
 
 interface TranscriptionModelPickerProps {
   /** Settings scope whose provider/model keys this picker edits. */
-  transcriptionContext?: TranscriptionPolicyContext;
+  transcriptionContext?: TranscriptionContext;
   selectedCloudProvider: string;
   /**
    * Policy reconciliation only — a user-driven pick goes through
@@ -388,7 +380,6 @@ export default function TranscriptionModelPicker({
   const setTinfoilApiKey = useSettingsStore((s) => s.setTinfoilApiKey);
   const customTranscriptionApiKey = useSettingsStore((s) => s.customTranscriptionApiKey);
   const setCustomTranscriptionApiKey = useSettingsStore((s) => s.setCustomTranscriptionApiKey);
-  const isSignedIn = useSettingsStore((s) => s.isSignedIn);
   const effectiveLocal = mode === "local" ? true : mode === "cloud" ? false : useLocalWhisper;
   const [localModels, setLocalModels] = useState<LocalModel[]>([]);
   const [parakeetModels, setParakeetModels] = useState<LocalModel[]>([]);
@@ -458,19 +449,12 @@ export default function TranscriptionModelPicker({
   const { confirmDialog, showConfirmDialog, hideConfirmDialog } = useDialogs();
   const colorScheme: ColorScheme = variant === "settings" ? "purple" : "blue";
   const styles = useMemo(() => MODEL_PICKER_COLORS[colorScheme], [colorScheme]);
-  const policyState = usePolicySnapshot();
-  const providerAllowed = useCallback(
-    (providerId: string) => isProviderAllowedByPolicy(policyState, "transcription", providerId),
-    [policyState]
-  );
+  const providerAllowed = useCallback((providerId: string) => true, []);
   const availableCloudProviders = useMemo(
     () => (streamingOnly ? getStreamingTranscriptionProviders() : getTranscriptionProviders()),
     [streamingOnly]
   );
-  const cloudProviders = useMemo(
-    () => filterByokProviderOptionsByPolicy(availableCloudProviders, "transcription", policyState),
-    [availableCloudProviders, policyState]
-  );
+  const cloudProviders = useMemo(() => availableCloudProviders, [availableCloudProviders]);
   const cloudProviderTabs = useMemo(() => {
     const availableIds = new Set(availableCloudProviders.map((p) => p.id));
     if (!streamingOnly) availableIds.add("custom");
@@ -480,8 +464,8 @@ export default function TranscriptionModelPicker({
           ? { ...provider, name: t("transcription.customProvider") }
           : provider
     );
-    return filterByokProviderOptionsByPolicy(tabs, "transcription", policyState);
-  }, [availableCloudProviders, policyState, streamingOnly, t]);
+    return tabs;
+  }, [availableCloudProviders, streamingOnly, t]);
   const localProviderTabs = useMemo(
     () =>
       LOCAL_PROVIDER_TABS.map((provider) =>
@@ -558,44 +542,14 @@ export default function TranscriptionModelPicker({
     return queuedLoad;
   }, []);
 
-  const effectiveCloudSelection = useMemo(() => {
-    // Every provider's URL counts as known, including policy-blocked ones:
-    // otherwise a blocked provider's stored URL reads as a custom endpoint and
-    // reconciliation would keep pointing "custom" at what policy just denied.
-    const knownProviderUrls = new Set(
-      availableCloudProviders.map((provider) => normalizeBaseUrl(provider.baseUrl))
-    );
-    const normalizedBaseUrl = normalizeBaseUrl(cloudTranscriptionBaseUrl);
-    const hasCustomUrl = Boolean(
-      normalizedBaseUrl &&
-      normalizedBaseUrl !== normalizeBaseUrl(API_ENDPOINTS.TRANSCRIPTION_BASE) &&
-      !knownProviderUrls.has(normalizedBaseUrl)
-    );
-    // Reconcile null means the input needs no correction — echo the browsed
-    // input, not the committed pair, or browsing to the Custom tab (always
-    // reconciled as valid) would never display it.
-    return (
-      reconcileCloudProviderSelection({
-        selectedProvider: browsedCloudProvider ?? selectedCloudProvider,
-        selectedModel: selectedCloudModel,
-        allowedProviders: cloudProviders,
-        customAllowed: !streamingOnly && providerAllowed("custom"),
-        hasCustomUrl,
-      }) ?? {
-        provider: browsedCloudProvider ?? selectedCloudProvider,
-        model: selectedCloudModel,
-      }
-    );
-  }, [
-    availableCloudProviders,
-    cloudProviders,
-    cloudTranscriptionBaseUrl,
-    browsedCloudProvider,
-    selectedCloudProvider,
-    selectedCloudModel,
-    providerAllowed,
-    streamingOnly,
-  ]);
+  // Policy reconciliation is gone, so the browsed pair is always what shows.
+  const effectiveCloudSelection = useMemo(
+    () => ({
+      provider: browsedCloudProvider ?? selectedCloudProvider,
+      model: selectedCloudModel,
+    }),
+    [browsedCloudProvider, selectedCloudProvider, selectedCloudModel]
+  );
   const displayedCloudProvider = effectiveCloudSelection.provider;
   const displayedCloudModel = effectiveCloudSelection.model;
 
@@ -603,7 +557,7 @@ export default function TranscriptionModelPicker({
     if (
       effectiveLocal ||
       browsedCloudProvider ||
-      !shouldPersistProviderFallback(policyState, isSignedIn) ||
+      !true ||
       (effectiveCloudSelection.provider === selectedCloudProvider &&
         effectiveCloudSelection.model === selectedCloudModel)
     ) {
@@ -619,10 +573,8 @@ export default function TranscriptionModelPicker({
     effectiveCloudSelection,
     effectiveLocal,
     browsedCloudProvider,
-    isSignedIn,
     onCloudModelSelect,
     onCloudProviderSelect,
-    policyState,
     selectedCloudModel,
     selectedCloudProvider,
   ]);

@@ -23,15 +23,6 @@ const localIds = modelData.localProviders.map((p) => p.id);
 const cloudIds = modelData.cloudProviders.map((p) => p.id);
 const enterpriseIds = modelData.enterpriseProviders.map((p) => p.id);
 
-test("every selectable cloud and enterprise provider has an inference handler", () => {
-  const handlers = inferenceProviderIds();
-  assert.ok(cloudIds.length > 0 && enterpriseIds.length > 0, "catalogs are non-empty");
-
-  for (const id of [...cloudIds, ...enterpriseIds]) {
-    assert.ok(handlers.includes(id), `provider "${id}" is selectable but has no inference handler`);
-  }
-});
-
 test("local catalog ids never shadow an inference provider id", () => {
   // resolveInferenceProvider maps a local catalog id (qwen, gemma, …) to the
   // llama.cpp "local" provider by looking it up in the model registry, so a

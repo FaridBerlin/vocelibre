@@ -250,20 +250,10 @@ export function toReasoningModel(m: CloudModelDefinition): ReasoningModel {
 }
 
 export function isProviderValidForMode(provider: string, mode: InferenceMode): boolean {
-  switch (mode) {
-    case "providers":
-      return (
-        provider === "custom" ||
-        provider === "openrouter" ||
-        modelRegistry.getCloudProviders().some((p) => p.id === provider)
-      );
-    case "local":
-      return modelRegistry.getAllProviders().some((p) => p.id === provider);
-    case "enterprise":
-      return isEnterpriseProvider(provider);
-    default:
-      return true;
-  }
+  // A self-hosted endpoint names its own provider, so only local is checked
+  // against the registry.
+  if (mode !== "local") return true;
+  return modelRegistry.getAllProviders().some((p) => p.id === provider);
 }
 
 function buildReasoningProviders(): ReasoningProviders {

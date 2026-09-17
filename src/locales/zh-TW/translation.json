@@ -127,29 +127,6 @@
       "slotConflict": "此快捷鍵已用於{{slot}}。"
     }
   },
-  "systemSettings": {
-    "microphone": "請開啟系統設定來配置麥克風權限。",
-    "sound": "請開啟系統音效設定（例如 pavucontrol）。",
-    "accessibility": "此平台不支援輔助使用設定。",
-    "systemAudio": "系統音訊設定在此平台上不可用。",
-    "screenRecording": "此平台不提供螢幕錄製設定。",
-    "loginItems": "此平台不支援登入項目設定。"
-  },
-  "upgradePrompt": {
-    "paymentFailed": "我們無法處理你的付款",
-    "weeklyLimit": "你已達到每週使用上限",
-    "pastDueDescription": "你目前使用的是免費方案，別擔心，每週仍有 {{limit}} 字的額度。\n更新付款方式即可恢復無限制的 Pro 方案。",
-    "limitDescription": "已使用 {{used}} / {{limit}} 字。\n你的轉錄已儲存並貼上。",
-    "updatePayment": "更新付款方式",
-    "updatePaymentDescription": "恢復無限制的 Pro 轉錄。",
-    "upgradeToPro": "升級至 Pro",
-    "upgradeDescription": "無限轉錄，每月最低 $8 起。",
-    "useApiKey": "使用你自己的 API Key",
-    "useApiKeyDescription": "自備金鑰，無限使用。",
-    "switchToLocal": "切換至本機模式",
-    "switchToLocalDescription": "離線轉錄，無任何限制。",
-    "rollingWeeklyLimit": "滾動式每週額度"
-  },
   "windowControls": {
     "minimize": "最小化",
     "maximize": "最大化",
@@ -682,11 +659,6 @@
       "description": "我們已將轉錄切換至 OpenWhispr Cloud，提供更快、更準確的結果。你之前的設定已儲存，隨時可在設定中切換回來。",
       "viewSettings": "查看設定"
     },
-    "aiCta": {
-      "title": "用 AI 增強你的轉錄品質",
-      "description": "說話時自動修正文法、標點和格式。",
-      "enable": "啟用 AI 增強"
-    },
     "loading": "載入中...",
     "gpu": {
       "bannerTitle": "GPU 加速可用",
@@ -748,84 +720,12 @@
     "selfHosted": {
       "endpointHelp": "指向本地網路中相容 OpenAI 的伺服器（例如 Ollama、LM Studio、vLLM 或 llama-server）。"
     },
-    "enterprise": {
-      "title": "企業級提供商",
-      "description": "使用你組織的憑證連線到雲端提供商。",
-      "testConnection": "測試連線",
-      "testing": "測試中…",
-      "testSuccess": "已連線",
-      "testFailed": "連線失敗",
-      "authMode": "驗證方式",
-      "ssoProfile": "SSO 設定檔",
-      "accessKeys": "存取金鑰",
-      "adc": "Application Default Credentials",
-      "apiKeyMode": "API 金鑰",
-      "region": "區域",
-      "profile": "設定檔名稱",
-      "accessKeyId": "Access Key ID",
-      "secretAccessKey": "Secret Access Key",
-      "sessionToken": "Session Token（選用）",
-      "endpoint": "端點 URL",
-      "deploymentName": "部署名稱",
-      "apiVersion": "API 版本",
-      "projectId": "專案 ID",
-      "location": "位置",
-      "customModelId": "自訂模型 ID",
-      "customModelPlaceholder": "輸入模型 ID 或部署名稱",
-      "suggestedModels": "建議模型",
-      "browseModels": "瀏覽全部模型",
-      "loadingModels": "正在取得模型...",
-      "allModels": "{{region}} 的全部模型",
-      "modelListError": "無法載入模型。",
-      "bedrock": {
-        "ssoHelp": "使用你的 AWS CLI SSO 設定。請確保已執行 'aws sso login'。",
-        "keysHelp": "輸入你的 AWS IAM 存取金鑰。"
-      },
-      "errors": {
-        "bedrock": {
-          "temporaryAccessExpired": "AWS 暫時存取權限已過期。",
-          "ssoExpired": "AWS SSO 工作階段已過期。",
-          "credentialsRejected": "AWS 拒絕了這些憑證。請檢查存取金鑰 ID、密鑰和工作階段權杖。",
-          "accessDenied": "AWS Bedrock 拒絕了此請求。請讓 AWS 管理員授予在區域 {{region}} 中呼叫所選模型的權限。",
-          "modelNotFound": "AWS Bedrock 在區域 {{region}} 中找不到所選模型。請檢查模型 ID，以及該模型是否在此區域提供。",
-          "configurationRejected": "AWS Bedrock 拒絕了區域 {{region}} 的模型設定。請檢查模型 ID、推論設定檔和區域。",
-          "notConfigured": "AWS Bedrock 設定不正確。請檢查區域和 AWS 憑證。",
-          "serviceUnavailable": "由於需求過高，AWS Bedrock 暫時無法使用。這是 AWS 服務問題，並非 VoceLibre 中斷。請幾分鐘後再試。",
-          "throttled": "由於收到太多請求，AWS Bedrock 正在暫時限制請求。請稍候再試。如果問題持續，請讓 AWS 管理員檢查 Bedrock 使用量和配額。",
-          "timeout": "AWS Bedrock 未及時回應。請重試。如果問題持續，請檢查網際網路連線和 AWS Bedrock 服務狀態。",
-          "network": "無法連線到 AWS Bedrock。請檢查網際網路連線並重試。",
-          "unknown": "AWS Bedrock 錯誤：{{error}}",
-          "actions": {
-            "refreshManagedAccess": "請登出並重新登入以更新公司存取權限，然後重試。",
-            "reauthenticate": "請在終端機中執行以下命令以重新驗證身分："
-          }
-        }
-      },
-      "technicalDetails": {
-        "title": "技術詳細資料",
-        "httpStatus": "HTTP 狀態",
-        "awsException": "AWS 例外",
-        "awsRequestId": "AWS 請求 ID",
-        "underlyingError": "底層錯誤",
-        "copy": "複製技術詳細資料",
-        "copyCommand": "複製復原命令"
-      },
-      "azure": {
-        "endpointHelp": "你的 Azure OpenAI 資源端點（例如 https://myresource.openai.azure.com）。",
-        "deploymentHelp": "Azure OpenAI 中的模型部署名稱。"
-      },
-      "vertex": {
-        "adcHelp": "使用 Application Default Credentials。請執行：gcloud auth application-default login",
-        "apikeyHelp": "從 Google AI Studio 取得的 Vertex AI Express Mode API 金鑰。"
-      }
-    },
-    "tinfoil": {
-      "modelRetiredTitle": "模型已無法使用",
-      "modelRetired": "Tinfoil 已停用 {{from}}，已切換至 {{to}}。",
-      "refreshingModels": "正在重新整理模型…"
-    },
-    "corti": {
-      "euOnly": "Corti 模型僅在歐盟地區可用。"
+    "technicalDetails": {
+      "title": "技術詳細資料",
+      "httpStatus": "HTTP 狀態",
+      "underlyingError": "底層錯誤",
+      "copy": "複製技術詳細資料",
+      "copyCommand": "複製復原命令"
     }
   },
   "transcription": {
@@ -1191,41 +1091,10 @@
     }
   },
   "dictionarySuffix": "字典後綴",
-  "emailVerification": {
-    "checkEmailDescription": "我們已將驗證連結寄送至你的電子郵件：",
-    "checkEmailTitle": "驗證郵件已寄出",
-    "errors": {
-      "resendFailed": "無法重新寄送驗證信。請再試一次。",
-      "serverUnreachable": "無法連線到伺服器。請檢查你的網路連線後再試。"
-    },
-    "resendButton": "重新寄送驗證信",
-    "resendIn": "{{seconds}} 秒後可重新寄送",
-    "verifiedDescription": "你的帳號已設定完成。",
-    "verifiedTitle": "已驗證",
-    "waiting": "等待驗證中",
-    "backToSignIn": "返回登入"
-  },
   "errorBoundary": {
     "description": "發生意外錯誤。請重新載入後再試。",
     "reload": "重新載入",
     "title": "發生錯誤"
-  },
-  "forgotPassword": {
-    "back": "返回",
-    "backToSignIn": "返回登入",
-    "emailPlaceholder": "輸入你的電子郵件",
-    "goBack": "返回",
-    "notConfigured": "尚未設定驗證功能。",
-    "sendResetLink": "寄送重設連結",
-    "sending": "寄送中...",
-    "subtitle": "輸入你的電子郵件，我們會寄送重設連結給你",
-    "success": {
-      "description": "我們已寄送密碼重設連結至",
-      "help": "沒收到信？請檢查垃圾郵件資料夾，或再試一次。",
-      "title": "請查看你的電子郵件",
-      "tryAnother": "嘗試其他電子郵件"
-    },
-    "title": "重設你的密碼"
   },
   "actionPrompt": "動作提示詞",
   "hotkeyGuidance": {
@@ -1445,10 +1314,6 @@
       "speechToText": {
         "description": "聽寫與筆記錄音引擎",
         "label": "語音轉文字"
-      },
-      "llms": {
-        "description": "用於清理、筆記格式化和聊天的模型",
-        "label": "語言模型"
       },
       "privacyData": {
         "description": "隱私、權限與資料分析",
@@ -2512,71 +2377,6 @@
         "large": "最佳品質，速度最慢",
         "turbo": "速度快且品質佳"
       },
-      "transcription": {
-        "openai_gpt_4o_mini_transcribe": "快速且準確的轉錄",
-        "openai_gpt_4o_transcribe": "最高準確度的轉錄",
-        "openai_whisper_1": "原始 Whisper 模型",
-        "groq_whisper_large_v3_turbo": "216 倍即時速度",
-        "groq_whisper_large_v3": "Large v3 模型，快速且精準",
-        "mistral_voxtral_mini_latest": "快速多語言轉錄",
-        "gemini_3_5_transcribe": "Google Gemini 語音轉文字",
-        "corti_transcribe": "臨床級醫療轉錄",
-        "xai_grok_stt": "xAI 高精度語音辨識",
-        "tinfoil_voxtral": "可驗證的私密轉錄"
-      },
-      "cloud": {
-        "openai_gpt_5_2": "強大的推理模型",
-        "openai_gpt_5_mini": "快速且經濟實惠",
-        "openai_gpt_5_nano": "超快速，低延遲",
-        "openai_gpt_4_1": "穩健基礎，1M 上下文",
-        "openai_gpt_4_1_mini": "較小的 GPT-4.1 模型",
-        "openai_gpt_4_1_nano": "最低延遲的 GPT-4.1",
-        "anthropic_claude_fable_5": "Anthropic 最強大的模型，Mythos 級",
-        "anthropic_claude_sonnet_5": "快速且強大的智慧代理模型，成本更低",
-        "anthropic_claude_sonnet_4_6": "均衡表現",
-        "anthropic_claude_sonnet_4_5": "上一代 Sonnet 模型",
-        "anthropic_claude_haiku_4_5": "快速且接近頂尖智慧",
-        "gemini_gemini_3_5_flash": "最新、快速且高性能的 Gemini 模型",
-        "gemini_gemini_3_5_flash_lite": "最快、最經濟的 3.5 模型",
-        "gemini_gemini_3_1_pro_preview": "新一代旗艦模型，擅長複雜推理",
-        "gemini_gemini_3_1_flash_lite": "前沿級性能，成本更低",
-        "gemini_gemini_3_flash_preview": "超快速、高性能的新一代模型",
-        "gemini_gemini_2_5_flash_lite": "最低延遲和成本",
-        "gemini_gemma_4_31b_it": "Google 最大的 Gemma 4，31B 稠密，256K 上下文",
-        "gemini_gemma_4_26b_a4b_it": "Google Gemma 4 MoE，4B 活躍參數，256K 上下文",
-        "groq_openai_gpt_oss_120b": "OpenAI 開源旗艦，500 T/sec",
-        "groq_openai_gpt_oss_20b": "快速開源模型，1000 T/sec",
-        "groq_compound": "Groq Compound 系統，450 T/sec",
-        "groq_compound_mini": "快速 Compound 系統，3x 更低延遲",
-        "openai_gpt_5_6_sol": "旗艦 GPT-5.6，適用於複雜編碼與研究",
-        "openai_gpt_5_6_terra": "均衡的 GPT-5.6，適合日常工作",
-        "openai_gpt_5_6_luna": "速度最快、成本最低的 GPT-5.6",
-        "openai_gpt_5_5": "複雜推理前沿模型",
-        "anthropic_claude_opus_5": "最強大的 Opus 模型，1M 上下文",
-        "anthropic_claude_opus_4_8": "強大的 Opus 模型，注重誠實與可靠",
-        "anthropic_claude_opus_4_7": "強大的 Opus 模型",
-        "anthropic_claude_opus_4_6": "上一代 Opus 模型，1M 上下文",
-        "anthropic_claude_opus_4_5": "較早的 Opus 模型",
-        "tinfoil_glm_5_3": "安全飛地中的私密智能體程式設計模型，1M 上下文",
-        "tinfoil_gemma4_31b": "支援工具呼叫的私密多語言推理模型，256K 上下文",
-        "tinfoil_gpt_oss_120b": "支援工具使用的私密開放權重推理模型，131K 上下文",
-        "tinfoil_llama3_3_70b": "支援工具呼叫的私密對話模型，128K 上下文",
-        "corti_corti_s1_instant": "快速醫療模型，無推理過程",
-        "corti_corti_s1": "功能最強的臨床模型，帶推理",
-        "corti_corti_s1_mini_instant": "精簡型醫療模型，最快且成本最低",
-        "corti_corti_s1_mini": "精簡型臨床模型，半價提供推理"
-      },
-      "enterprise": {
-        "bedrock_claude_fable_5": "最強大的 Claude 模型。最適合最具挑戰性的智慧助手模式任務。",
-        "bedrock_claude_haiku_4_5": "快速且低成本。適合文字清理。",
-        "bedrock_claude_sonnet_5": "均衡效能。建議作為智慧助手模式的預設模型。",
-        "bedrock_claude_opus_4_8": "最高智能。適用於複雜的智慧助手模式任務。",
-        "bedrock_gpt_oss_120b": "OpenAI 開放權重模型。低成本下的強大推理能力。",
-        "bedrock_deepseek_v3_2": "開放權重前沿模型。智慧助手模式的高性價比之選。",
-        "bedrock_qwen3_next_80b": "稀疏開放權重模型。快速且多語言。",
-        "vertex_gemini_2_5_flash": "透過 Vertex 提供的快速多模態模型",
-        "vertex_gemini_2_5_pro": "透過 Vertex 提供的進階推理模型"
-      },
       "local": {
         "qwen_qwen3_5_9b_q4_k_m": "強大的混合模型",
         "qwen_qwen3_5_4b_q4_k_m": "均衡的 Qwen3.5，通用用途",
@@ -2618,78 +2418,6 @@
         "segmentation": "用於說話者分離的語音邊界偵測",
         "embedding_en": "用於說話者辨識的聲紋提取"
       }
-    }
-  },
-  "referral": {
-    "modalTitle": "推薦計畫",
-    "title": "推薦好友賺取獎勵",
-    "subtitle": "送一個月，得一個月。",
-    "tabs": {
-      "refer": "推薦",
-      "pastInvites": "過去的邀請"
-    },
-    "howItWorks": {
-      "shareLink": "分享您的邀請連結",
-      "theySignUp": "對方註冊即可獲得",
-      "freeMonthOfPro": "一個月免費 Pro",
-      "youGet": "您可獲得",
-      "freeMonth": "一個月免費",
-      "whenTheyDictate": "當對方聽寫滿 2,000 字時"
-    },
-    "inviteLink": {
-      "title": "您的邀請連結",
-      "copy": "複製",
-      "copied": "已複製"
-    },
-    "sendInvites": {
-      "title": "發送邀請",
-      "placeholder": "friend@example.com",
-      "send": "發送",
-      "sending": "發送中"
-    },
-    "stats": {
-      "referred": "已推薦",
-      "converted": "已轉換",
-      "monthsEarned": "已獲得月數"
-    },
-    "status": {
-      "converted": "已轉換",
-      "opened": "已開啟",
-      "failed": "失敗",
-      "sent": "已發送"
-    },
-    "empty": {
-      "title": "尚未發送任何邀請",
-      "description": "分享您的連結或發送邀請以開始使用"
-    },
-    "toasts": {
-      "copiedTitle": "已複製！",
-      "copiedDescription": "推薦連結已複製到剪貼簿",
-      "copyFailedTitle": "複製失敗",
-      "copyFailedDescription": "無法將連結複製到剪貼簿",
-      "invalidEmailTitle": "無效的電子郵件",
-      "invalidEmailDescription": "請輸入有效的電子郵件地址",
-      "inviteSentTitle": "邀請已發送！",
-      "inviteSentDescription": "邀請已發送至 {{email}}",
-      "sendFailedTitle": "發送失敗",
-      "sendFailedDescription": "無法發送邀請，請重試。"
-    },
-    "errors": {
-      "unableToLoad": "無法載入推薦資料",
-      "unableToLoadStats": "無法載入推薦統計資料，請稍後再試。"
-    },
-    "tryAgain": "重試",
-    "card": {
-      "brand": "VoceLibre",
-      "signalId": "Signal ID",
-      "audioSignature": "您的音訊簽名",
-      "stop": "停止",
-      "playSignal": "播放信號"
-    },
-    "friends": {
-      "title": "好友",
-      "completed": "已完成",
-      "sentInvites": "已發送的邀請"
     }
   },
   "notes": {
@@ -3207,49 +2935,9 @@
     "importList": "匯入清單",
     "agentDefault": "預設加入"
   },
-  "insights": {
-    "title": "統計",
-    "description": "私密檢視你的聽寫習慣與持續狀況。",
-    "wordsSpoken": "已聽寫字數",
-    "currentStreak": "目前連續天數",
-    "wordsPerMinute": "每分鐘字數",
-    "dictations": "聽寫次數",
-    "allTime": "全部時間",
-    "days_one": "{{count}} 天",
-    "days_other": "{{count}} 天",
-    "longestStreak_one": "最長：{{count}} 天",
-    "longestStreak_other": "最長：{{count}} 天",
-    "wpmCoverage": "根據 {{count}}% 已測量的字數",
-    "activity": "聽寫活躍度",
-    "activityDescription": "過去 6 個月內聽寫的字數",
-    "activityLabel": "6 個月聽寫活躍度熱圖",
-    "activityLess": "較少",
-    "activityMore": "較多",
-    "dayTooltip_one": "{{date}}：{{count}} 字",
-    "dayTooltip_other": "{{date}}：{{count}} 字",
-    "dataRetentionDisabled": "資料保留已關閉，因此新的聽寫不會計入統計——本裝置和你的帳戶都不會計數。已同步的計數會保留在你的帳戶中。",
-    "onDevice": "僅在本裝置",
-    "synced": "已跨裝置同步",
-    "syncFallback": "正在顯示本裝置資料 — 同步無法使用",
-    "syncPrompt": "同步不含內容的計數，將本機與雲端的活動跨裝置合併。",
-    "enableSync": "啟用同步",
-    "claimTitle": "要包含較早的聽寫嗎？",
-    "claimDescription_one": "本裝置上有 {{count}} 次聽寫是在你登入前記錄的。納入後只會傳送字數、記錄的日期與精確時間、時長與模型類型，不會傳送轉錄內容。",
-    "claimDescription_other": "本裝置上有 {{count}} 次聽寫是在你登入前記錄的。納入後只會傳送字數、記錄的日期與精確時間、時長與模型類型，不會傳送轉錄內容。",
-    "claimInclude": "包含",
-    "claimSkip": "暫不開啟",
-    "enableTitle": "要開啟 Insights 同步嗎？",
-    "enableConfirm": "開啟同步",
-    "enableDescription_one": "本裝置上已記錄的 {{count}} 次聽寫將上傳到你的帳戶。Insights 同步只會傳送字數、記錄的日期與精確時間、時長與模型類型，不會傳送轉錄內容。",
-    "enableDescription_other": "本裝置上已記錄的 {{count}} 次聽寫將上傳到你的帳戶。Insights 同步只會傳送字數、記錄的日期與精確時間、時長與模型類型，不會傳送轉錄內容。",
-    "emptyTitle": "尚無聽寫記錄",
-    "emptyBody": "開始聽寫後，你的字數、連續記錄與每日活動會顯示在這裡。",
-    "loadError": "無法從本裝置讀取 Insights。"
-  },
   "sidebar": {
     "insights": "統計",
     "home": "首頁",
-    "notes": "筆記",
     "upload": "上傳",
     "dictionary": "字典",
     "referral": "獲得一個月免費",
@@ -3538,49 +3226,7 @@
       "connectFailedDescription": "連線 Calendar.app 時發生錯誤。請重新啟動 VoceLibre 後再試一次。"
     },
     "sections": {
-      "calendar": "行事曆",
-      "api": "API",
-      "mcp": "MCP",
-      "cli": "CLI"
-    },
-    "api": {
-      "title": "API 金鑰",
-      "description": "管理用於程式存取的 API 金鑰",
-      "proRequired": "升級到付費方案以存取 API",
-      "manage": "管理金鑰",
-      "viewPlans": "查看方案",
-      "dialogTitle": "API 金鑰"
-    },
-    "mcp": {
-      "title": "將筆記帶到你的 AI 工具中",
-      "description": "在 Claude、ChatGPT 和 Cursor 中與你的筆記一起聊天、搜尋和工作。",
-      "step1": "在你的 AI 工具中，使用公開 URL 新增 VoceLibre MCP",
-      "step2": "在上方建立具有所需權限的 API 金鑰。",
-      "step3": "將金鑰貼上為 Authorization 標頭以連線。",
-      "learnMore": "瞭解更多",
-      "viewPlans": "查看方案",
-      "copyUrl": "複製 MCP URL",
-      "proRequired": "升級到付費方案，以將 VoceLibre 連接到 Claude、ChatGPT 和 Cursor。",
-      "copied": "已複製"
-    },
-    "cli": {
-      "title": "命令列存取",
-      "description": "讓你的智慧助手透過終端機存取你的筆記。",
-      "installLabel": "安裝",
-      "learnMore": "查看文件",
-      "copyDocsLink": "複製文件連結",
-      "docsLinkCopied": "已複製文件連結",
-      "viewPlans": "查看方案",
-      "local": {
-        "label": "本機",
-        "freeBadge": "免費",
-        "description": "直接讀取你的本機筆記。無需登入或 API 金鑰 — VoceLibre 執行時即可使用。"
-      },
-      "cloud": {
-        "label": "雲端",
-        "description": "使用 API 金鑰在多台裝置間同步。",
-        "proRequired": "升級到付費方案以在雲端模式下使用 CLI。"
-      }
+      "calendar": "行事曆"
     },
     "plan": {
       "title": "您的方案",
@@ -3597,29 +3243,6 @@
       "title": "VoceLibre 是會議錄製工具，不是機器人",
       "description": "VoceLibre 直接從您的系統擷取音訊 — 它不會以參與者身分加入您的會議。只需連接日曆，正常記錄筆記即可。"
     }
-  },
-  "calendar": {
-    "title": "Google 日曆",
-    "status": "狀態",
-    "connected": "已連接",
-    "disconnected": "未連接",
-    "notConnectedDescription": "連接以偵測和錄製會議",
-    "connectCta": {
-      "title": "日曆整合",
-      "description": "自動偵測會議並錄製轉錄"
-    },
-    "connect": "連接 Google 日曆",
-    "connecting": "連接中...",
-    "disconnect": "中斷連接",
-    "disconnecting": "中斷中...",
-    "sync": "同步",
-    "syncing": "同步中...",
-    "calendarsTitle": "日曆",
-    "upcomingTitle": "即將到來",
-    "noUpcoming": "沒有即將到來的事件",
-    "meetingStarting": "會議即將開始",
-    "today": "今天",
-    "tomorrow": "明天"
   },
   "upcoming": {
     "title": "即將開始",
@@ -3638,77 +3261,6 @@
     "connectCalendar": "連接您的日曆",
     "connectCalendarDescription": "無需離開 VoceLibre 即可查看並加入您的會議。",
     "connectCalendarButton": "連接日曆"
-  },
-  "notesView": {
-    "searchPlaceholder": "搜尋筆記…",
-    "newNote": "新建筆記",
-    "empty": {
-      "title": "尚無筆記",
-      "description": "建立你的第一則筆記開始使用。"
-    },
-    "searchEmpty": {
-      "title": "無結果",
-      "description": "找不到與「{{query}}」相符的筆記。"
-    },
-    "noteType": {
-      "personal": "個人",
-      "meeting": "會議",
-      "upload": "上傳"
-    }
-  },
-  "noteEditor": {
-    "saved": "已儲存",
-    "deleteNote": "刪除筆記",
-    "deleteConfirmTitle": "刪除筆記？",
-    "deleteConfirmDescription": "此筆記將被永久刪除，無法復原。",
-    "deleteConfirm": "刪除",
-    "share": {
-      "button": "分享",
-      "dialog": {
-        "title": "分享筆記",
-        "description": "透過電子郵件邀請成員，或分享此筆記的連結。",
-        "searchPlaceholder": "搜尋人員、資料夾或電子郵件",
-        "noResults": "找不到符合的結果",
-        "emailLabel": "人員、資料夾或電子郵件",
-        "shareButton": "分享",
-        "createLink": "建立連結",
-        "copyLink": "複製連結",
-        "copied": "已複製",
-        "owner": "擁有者",
-        "editor": "可編輯",
-        "viewer": "可檢視",
-        "teamAudience": "此團隊空間中的所有人",
-        "pending": "待處理",
-        "accepted": "已取得存取權",
-        "resend": "重新傳送邀請",
-        "revoke": "移除",
-        "invitationActions": "邀請操作",
-        "resendSent": "邀請已傳送",
-        "resendThrottled": "邀請剛剛已傳送，請一分鐘後再試。",
-        "syncPrompt": "分享後，這則筆記會在你的 VoceLibre 雲端保留一份副本。在你選擇分享對象之前，只有你能看到它。",
-        "syncAndShare": "同步筆記",
-        "visibility": {
-          "label": "可見性",
-          "private": "私人",
-          "privateOption": "私人 — 只有你",
-          "link": "任何擁有連結的人",
-          "domain": "{{domain}} 中擁有連結的所有人",
-          "invited": "僅限受邀者"
-        },
-        "error": {
-          "invalidEmail": "請輸入有效的電子郵件地址",
-          "alreadyInvited": "{{email}} 已被邀請",
-          "inviteFailed": "無法傳送邀請。請再試一次。",
-          "visibilityFailed": "無法更新分享設定。請再試一次。",
-          "copyFailed": "無法複製連結。請再試一次。",
-          "revokeFailed": "無法移除邀請。請再試一次。",
-          "resendFailed": "無法重新傳送邀請。請再試一次。",
-          "syncFailed": "無法同步此筆記。請再試一次。",
-          "loadFailed": "無法載入分享設定",
-          "retry": "重試"
-        }
-      }
-    }
   },
   "commandSearch": {
     "allSpaces": "所有空間",
@@ -3733,59 +3285,6 @@
     "title": "VoceLibre 有可用更新",
     "body": "版本 {{version}} 已可下載",
     "cta": "立即更新"
-  },
-  "permissionsGate": {
-    "title": "需要權限",
-    "description": "VoceLibre 需要一些權限才能在此電腦上正常運作。",
-    "continue": "繼續"
-  },
-  "apiKeysSection": {
-    "title": "API 金鑰",
-    "description": "建立金鑰以程式化方式存取 VoceLibre API。",
-    "docsLink": "API 文件",
-    "empty": "尚無 API 金鑰",
-    "createButton": "建立 API 金鑰",
-    "create": {
-      "title": "建立 API 金鑰",
-      "nameLabel": "金鑰名稱",
-      "namePlaceholder": "例如：我的整合",
-      "scopesLabel": "權限",
-      "expiryLabel": "有效期限",
-      "expiryOptions": {
-        "never": "永不過期",
-        "30days": "30 天",
-        "60days": "60 天",
-        "90days": "90 天",
-        "1year": "1 年"
-      },
-      "submit": "建立",
-      "cancel": "取消"
-    },
-    "created": {
-      "title": "API 金鑰已建立",
-      "warning": "請立即複製此金鑰，它將不會再次顯示。",
-      "copied": "已複製！",
-      "copyButton": "複製到剪貼簿",
-      "done": "完成"
-    },
-    "scopes": {
-      "notesRead": "讀取筆記",
-      "notesWrite": "建立與編輯筆記",
-      "transcriptionsRead": "讀取轉錄"
-    },
-    "revoke": {
-      "button": "撤銷",
-      "confirm": "撤銷此金鑰？使用它的整合將停止運作。",
-      "success": "API 金鑰已撤銷"
-    },
-    "neverUsed": "從未使用",
-    "lastUsed": "上次使用 {{time}}",
-    "maxKeysReached": "最多允許 {{max}} 個金鑰",
-    "errors": {
-      "loadFailed": "無法載入 API 金鑰",
-      "createFailed": "無法建立 API 金鑰",
-      "revokeFailed": "無法撤銷 API 金鑰"
-    }
   },
   "embeddedChat": {
     "askPlaceholder": "隨便問點什麼...",
@@ -3814,82 +3313,6 @@
       "others": "其他人"
     },
     "missingAudio": "[音訊缺失 {{from}}-{{to}}]"
-  },
-  "workspaces": {
-    "switcher": {
-      "workspaces": "工作區",
-      "create": "建立工作區…"
-    },
-    "create": {
-      "title": "建立工作區",
-      "description": "工作區集中管理組織的成員和帳單。你可以在其中建立團隊空間來分享筆記。",
-      "nameLabel": "工作區名稱",
-      "namePlaceholder": "Acme Corp",
-      "submit": "建立工作區",
-      "submitting": "建立中…",
-      "errorTitle": "無法建立工作區"
-    },
-    "created": {
-      "title": "工作區已建立",
-      "description": "你現在是 {{name}} 的擁有者。"
-    },
-    "invite": {
-      "title": "邀請加入 {{workspace}}",
-      "description": "透過電子郵件新增團隊成員，他們會收到加入連結。",
-      "emailLabel": "電子郵件",
-      "emailPlaceholder": "teammate@example.com",
-      "roleLabel": "角色",
-      "seatUsage": "已使用 {{used}} / {{seats}} 個席次",
-      "seatCost": "接受邀請後將為你的方案新增一個席位 · 預計按比例收取 {{amount}}。",
-      "submit": "傳送邀請",
-      "submitting": "傳送中…",
-      "sentTitle": "邀請已傳送",
-      "sentDescription": "我們已將邀請傳送至 {{email}}。",
-      "sentNoEmailTitle": "邀請已建立，但未傳送電子郵件",
-      "sentNoEmailDescription": "已邀請 {{email}}，但電子郵件無法送達。請稍後重新傳送，或以其他方式分享邀請連結。",
-      "errorTitle": "無法傳送邀請",
-      "role": {
-        "admin": "管理員",
-        "member": "成員"
-      },
-      "roleDescription": {
-        "admin": "管理成員與帳單",
-        "member": "使用工作區"
-      }
-    },
-    "join": {
-      "title": "加入你的團隊",
-      "domainTitle": "你的團隊已在 VoceLibre",
-      "description": "這些工作區中有與你相同電子郵件網域的成員。",
-      "invitedDescription": "有人邀請你加入一個工作區。",
-      "invitedBy": "{{inviter}} 邀請你擔任{{role}}",
-      "memberCount_one": "{{count}} 位成員",
-      "memberCount_other": "{{count}} 位成員",
-      "join": "加入",
-      "requestErrorTitle": "無法送出申請",
-      "requestedDescription": "{{workspace}} 的管理員會進行審核。",
-      "requestedTitle": "申請已送出",
-      "requested": "已申請",
-      "request": "申請加入",
-      "notNow": "暫不",
-      "successTitle": "已加入",
-      "successDescription": "你現在是 {{workspace}} 的成員。",
-      "errorTitle": "無法加入"
-    },
-    "accept": {
-      "title": "加入工作區",
-      "description": "{{inviter}} 邀請你以 {{role}} 的身分加入 {{workspace}}。",
-      "loading": "正在載入邀請…",
-      "accept": "接受邀請",
-      "accepting": "接受中…",
-      "signInToAccept": "登入以接受",
-      "switchAccount": "切換帳號",
-      "successTitle": "你已加入",
-      "successDescription": "你已成為 {{name}} 的成員。可前往「設定 → 工作區」進行管理。",
-      "errorTitle": "無法接受邀請",
-      "sentTo": "邀請已傳送至 {{email}}",
-      "wrongAccount": "此邀請是傳送給 {{email}} 的。你目前以 {{current}} 的身分登入。"
-    }
   },
   "dictationTranslation": {
     "title": "聽寫翻譯",

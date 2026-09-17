@@ -1,5 +1,4 @@
 import { API_ENDPOINTS, ensureV1Suffix } from "../../config/constants";
-import { usePolicyStore } from "../../stores/policyStore";
 import { getSettings } from "../../stores/settingsStore";
 import { isSecureHttpEndpoint } from "../../utils/urlUtils";
 import logger from "../../utils/logger";
@@ -10,12 +9,6 @@ import i18n from "../../i18n";
 function invalidCustomEndpoint(reason: string, attempted?: string): never {
   logger.logReasoning("OPENAI_BASE_REJECTED", { reason, attempted });
 
-  const policyStatus = usePolicyStore.getState().status;
-  if (policyStatus !== "idle" && policyStatus !== "unmanaged") {
-    throw Object.assign(new Error(i18n.t("common.policyAiProcessingRestricted")), {
-      code: "POLICY_RESTRICTED",
-    });
-  }
   throw Object.assign(new Error(i18n.t("reasoning.custom.endpointInvalid")), {
     code: "CUSTOM_ENDPOINT_INVALID",
   });
@@ -65,9 +58,15 @@ export function resolveConfiguredOpenAIBase(provider: string, configuredBaseUrl?
 // request bound for that same endpoint may borrow it — attaching it to another
 // scope's endpoint would send the credential to a host it was never entered for.
 export function canBorrowCleanupCustomKey(requestBaseUrl: string | undefined): boolean {
-  const cleanupBase = getSettings().cleanupCloudBaseUrl?.trim();
+  const settings = getSettings();
+  // The cleanup endpoint lives in cleanupRemoteUrl for the self-hosted mode and
+  // in cleanupCloudBaseUrl for a scope still tagged "custom"; either spelling
+  // identifies the same endpoint the shared key belongs to.
+  const cleanupBases = [settings.cleanupCloudBaseUrl, settings.cleanupRemoteUrl]
+    .map((value) => value?.trim())
+    .filter(Boolean);
   const requestBase = requestBaseUrl?.trim();
-  return !!requestBase && requestBase === cleanupBase;
+  return !!requestBase && cleanupBases.includes(requestBase);
 }
 
 export function resolveSelfHostedOpenAIBase(configuredBaseUrl: string): string {

@@ -74,6 +74,8 @@
     "format:check": "eslint . && cd src && eslint . && prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "lint": "eslint . && cd src && eslint .",
     "test": "node --import tsx --test \"test/**/*.test.js\"",
+    "rebuild:node": "npm rebuild better-sqlite3",
+    "rebuild:electron": "electron-rebuild -f -w better-sqlite3",
     "typecheck": "cd src && tsc --noEmit",
     "quality-check": "npm run format:check && npm run typecheck",
     "i18n:check": "node scripts/check-i18n.js",
@@ -89,10 +91,24 @@
     "desktop-app"
   ],
   "author": {
-    "name": "OpenWhispr Team",
-    "email": "support@openwhispr.com"
+    "name": "Farid Berlin",
+    "url": "https://github.com/FaridBerlin"
   },
+  "contributors": [
+    {
+      "name": "OpenWhispr Team",
+      "url": "https://github.com/OpenWhispr/openwhispr"
+    }
+  ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FaridBerlin/vocelibre.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FaridBerlin/vocelibre/issues"
+  },
+  "homepage": "https://github.com/FaridBerlin/vocelibre#readme",
   "devDependencies": {
     "@electron/notarize": "^3.0.1",
     "@eslint/js": "^9.39.4",

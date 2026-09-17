@@ -27,7 +27,6 @@ test("timestamps opt-in reaches the BYOK IPC call and segments flow back", async
   const vite = await createRendererServer(t, {
     cachePrefix: "openwhispr-file-timestamps-test-",
     mockModules: {
-      "/lib/auth": "export const withSessionRefresh = (fn) => fn();",
     },
   });
   const { transcribeFile, transcribeFileWithSpeakers } = await vite.ssrLoadModule(

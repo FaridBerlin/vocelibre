@@ -3,13 +3,10 @@ import { useTranslation } from "react-i18next";
 import App from "./App.jsx";
 import AgentDictationPillOverlay from "./components/dictation/AgentDictationPillOverlay.tsx";
 import MeetingNotificationOverlay from "./components/MeetingNotificationOverlay.tsx";
-import ReauthenticationScreen from "./components/ReauthenticationScreen.tsx";
 import UpdateNotificationOverlay from "./components/UpdateNotificationOverlay.tsx";
 import BackgroundModelDownloadTray from "./components/onboarding/BackgroundModelDownloadTray.tsx";
 import { LEGACY_ONBOARDING_STEP_KEY, ONBOARDING_SESSION_KEY } from "./components/onboarding/flow";
-import { useAuth } from "./hooks/useAuth";
 import { useTheme } from "./hooks/useTheme";
-import { usePolicyStore } from "./stores/policyStore";
 import { resolveSettledControlPanelWindowMode } from "./utils/controlPanelWindowMode.ts";
 import { isControlPanelWindow } from "./utils/windowContext.ts";
 
@@ -42,18 +39,11 @@ export default function AppRouter() {
 }
 
 function MainApp() {
-  const { isSignedIn, isGracePeriodOnly, isLoaded: authLoaded } = useAuth();
-  const policyStatus = usePolicyStore((state) => state.status);
-  const policyResolved =
-    !isSignedIn ||
-    policyStatus === "managed" ||
-    policyStatus === "unmanaged" ||
-    policyStatus === "error";
-  const isWaitingForPolicyStart = isSignedIn && !policyResolved;
-  const autoSyncReady = authLoaded && policyResolved;
+  // Accounts were removed: there is no session to wait on and no org policy to
+  // fetch, so the route resolves immediately.
+  const isWaitingForPolicyStart = false;
 
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [needsReauth, setNeedsReauth] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [postOnboardingSettingsSection, setPostOnboardingSettingsSection] = useState(undefined);
 
@@ -68,41 +58,13 @@ function MainApp() {
         import("./components/OnboardingFlow.tsx").catch(() => {});
       }
     }
-
-    // Sync starts only after auth settles, so a new bearer token cannot touch
-    // the previous account's rows while validation is still running. A failed
-    // (guest/offline) resolution also counts as settled: canSync() then no-ops
-    // because no validated auth context exists.
-    if (autoSyncReady) {
-      import("./services/SyncService.js")
-        .then(({ syncService }) => syncService.startAutoSync())
-        .catch(() => {});
-    }
-  }, [autoSyncReady, isControlPanel]);
+  }, [isControlPanel]);
 
   useEffect(() => {
-    if (!authLoaded) return;
-
-    const onboardingCompleted = localStorage.getItem("onboardingCompleted") === "true";
-    const authSkipped =
-      localStorage.getItem("authenticationSkipped") === "true" ||
-      localStorage.getItem("skipAuth") === "true";
-    const onboardingInProgress = isOnboardingInProgress();
-    const isReturningUser =
-      !onboardingCompleted && isSignedIn && !isGracePeriodOnly && !onboardingInProgress;
-
-    if (isReturningUser) {
-      localStorage.setItem("onboardingCompleted", "true");
-    }
-
     const resolved = localStorage.getItem("onboardingCompleted") === "true";
 
-    if (isControlPanel) {
-      if (!resolved) {
-        setShowOnboarding(true);
-      } else if (!isSignedIn && !authSkipped) {
-        setNeedsReauth(true);
-      }
+    if (isControlPanel && !resolved) {
+      setShowOnboarding(true);
     }
 
     if (isDictationPanel && !resolved) {
@@ -112,29 +74,23 @@ function MainApp() {
     }
 
     setIsLoading(false);
-  }, [authLoaded, isControlPanel, isDictationPanel, isGracePeriodOnly, isSignedIn]);
+  }, [isControlPanel, isDictationPanel]);
 
   useEffect(() => {
-    if (!isControlPanel || !authLoaded) return;
-    // Fast path: a user who already finished onboarding can never enter the
-    // compact flow only when their session or guest choice is still valid.
-    // Signed-out account users fall through so reauthentication can select the
-    // compact window without first flashing restored control-panel dimensions.
-    const completed = localStorage.getItem("onboardingCompleted") === "true";
-    const authSkipped =
-      localStorage.getItem("authenticationSkipped") === "true" ||
-      localStorage.getItem("skipAuth") === "true";
-    if (completed && !isOnboardingInProgress() && (isSignedIn || authSkipped)) {
+    if (!isControlPanel) return;
+    // Fast path: a user who already finished onboarding never enters the
+    // compact flow, so restore the control-panel dimensions straight away.
+    if (localStorage.getItem("onboardingCompleted") === "true" && !isOnboardingInProgress()) {
       void window.electronAPI?.setOnboardingWindowMode?.("restore");
     }
-  }, [authLoaded, isControlPanel, isSignedIn]);
+  }, [isControlPanel]);
 
   const settledControlPanelWindowMode = resolveSettledControlPanelWindowMode({
     isControlPanel,
     isLoading,
     isWaitingForPolicyStart,
     showOnboarding,
-    needsReauth,
+    needsReauth: false,
   });
 
   useEffect(() => {
@@ -149,13 +105,12 @@ function MainApp() {
     if (isLoading || isWaitingForPolicyStart) return;
 
     const onboardingCompleted = localStorage.getItem("onboardingCompleted") === "true";
-    const normalAppVisible =
-      onboardingCompleted && (!isControlPanel || (!showOnboarding && !needsReauth));
+    const normalAppVisible = onboardingCompleted && (!isControlPanel || !showOnboarding);
     // Main starts fail-closed. Only a renderer that has resolved the route and
     // actually committed the normal app may release global hotkeys and popup
     // surfaces; fresh installs and onboarding reloads keep them suppressed.
     void window.electronAPI?.setOnboardingActive?.(!normalAppVisible);
-  }, [isControlPanel, isLoading, isWaitingForPolicyStart, needsReauth, showOnboarding]);
+  }, [isControlPanel, isLoading, isWaitingForPolicyStart, showOnboarding]);
 
   const handleOnboardingComplete = (options) => {
     if (options?.openSettings) {
@@ -165,9 +120,6 @@ function MainApp() {
     localStorage.setItem("onboardingCompleted", "true");
   };
 
-  // isLoading clears once the onboarding effect has run, which itself waits
-  // for authLoaded — and authLoaded terminates even when the session cannot
-  // resolve (guest/offline presents as signed out).
   if (isLoading || isWaitingForPolicyStart) {
     return <LoadingFallback />;
   }
@@ -178,19 +130,6 @@ function MainApp() {
         <OnboardingFlow onComplete={handleOnboardingComplete} />
         <BackgroundModelDownloadTray />
       </Suspense>
-    );
-  }
-
-  if (isControlPanel && needsReauth) {
-    return (
-      <ReauthenticationScreen
-        onContinueWithoutAccount={() => {
-          localStorage.setItem("authenticationSkipped", "true");
-          localStorage.setItem("skipAuth", "true");
-          setNeedsReauth(false);
-        }}
-        onAuthComplete={() => setNeedsReauth(false)}
-      />
     );
   }
 

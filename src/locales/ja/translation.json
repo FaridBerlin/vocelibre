@@ -127,29 +127,6 @@
       "slotConflict": "このホットキーは既に{{slot}}で使用されています。"
     }
   },
-  "systemSettings": {
-    "microphone": "システム設定を開いてマイクの権限を設定してください。",
-    "sound": "システムのサウンド設定を開いてください（例: pavucontrol）。",
-    "accessibility": "このプラットフォームではアクセシビリティ設定を利用できません。",
-    "systemAudio": "システムオーディオの設定はこのプラットフォームでは利用できません。",
-    "screenRecording": "このプラットフォームでは画面収録の設定を利用できません。",
-    "loginItems": "ログイン項目の設定はこのプラットフォームでは利用できません。"
-  },
-  "upgradePrompt": {
-    "paymentFailed": "お支払いを処理できませんでした",
-    "weeklyLimit": "週間の利用上限に達しました",
-    "pastDueDescription": "現在は無料プランをご利用中です。ご安心ください、週 {{limit}} ワードまで引き続きご利用いただけます。\nお支払い方法を更新して、無制限の Pro に戻しましょう。",
-    "limitDescription": "{{used}} / {{limit}} ワード使用済み。\n文字起こしは保存・貼り付けされました。",
-    "updatePayment": "お支払い方法を更新",
-    "updatePaymentDescription": "無制限の Pro 文字起こしに戻りましょう。",
-    "upgradeToPro": "Pro にアップグレード",
-    "upgradeDescription": "月額 $8 から無制限の文字起こしを。",
-    "useApiKey": "自分の API キーを使用",
-    "useApiKeyDescription": "自分のキーで無制限に利用できます。",
-    "switchToLocal": "ローカルに切り替え",
-    "switchToLocalDescription": "オフライン文字起こし。制限なし。",
-    "rollingWeeklyLimit": "週間利用上限（ローリング）"
-  },
   "windowControls": {
     "minimize": "最小化",
     "maximize": "最大化",
@@ -682,11 +659,6 @@
       "description": "より高速で正確な文字起こしのために OpenWhispr Cloud に切り替えました。以前の設定は保存されています。設定からいつでも戻せます。",
       "viewSettings": "設定を表示"
     },
-    "aiCta": {
-      "title": "AI で文字起こしを向上させましょう",
-      "description": "話しながら文法、句読点、書式を自動的に修正します。",
-      "enable": "AI 補正を有効にする"
-    },
     "loading": "読み込み中...",
     "gpu": {
       "bannerTitle": "GPU アクセラレーションが利用可能",
@@ -748,84 +720,12 @@
     "selfHosted": {
       "endpointHelp": "ローカルネットワーク上の OpenAI 互換サーバーを指定します（例: Ollama、LM Studio、vLLM、llama-server）。"
     },
-    "enterprise": {
-      "title": "エンタープライズプロバイダー",
-      "description": "組織のクラウドプロバイダー認証情報を使用して接続します。",
-      "testConnection": "接続をテスト",
-      "testing": "テスト中…",
-      "testSuccess": "接続成功",
-      "testFailed": "接続失敗",
-      "authMode": "認証",
-      "ssoProfile": "SSO プロファイル",
-      "accessKeys": "アクセスキー",
-      "adc": "Application Default Credentials",
-      "apiKeyMode": "API キー",
-      "region": "リージョン",
-      "profile": "プロファイル名",
-      "accessKeyId": "Access Key ID",
-      "secretAccessKey": "Secret Access Key",
-      "sessionToken": "Session Token（任意）",
-      "endpoint": "エンドポイント URL",
-      "deploymentName": "デプロイメント名",
-      "apiVersion": "API バージョン",
-      "projectId": "プロジェクト ID",
-      "location": "ロケーション",
-      "customModelId": "カスタムモデル ID",
-      "customModelPlaceholder": "モデル ID またはデプロイメント名を入力",
-      "suggestedModels": "推奨モデル",
-      "browseModels": "すべてのモデルを表示",
-      "loadingModels": "モデルを取得中...",
-      "allModels": "{{region}} のすべてのモデル",
-      "modelListError": "モデルを読み込めませんでした。",
-      "bedrock": {
-        "ssoHelp": "AWS CLI の SSO 設定を使用します。'aws sso login' を実行済みであることを確認してください。",
-        "keysHelp": "AWS IAM のアクセスキーを入力してください。"
-      },
-      "errors": {
-        "bedrock": {
-          "temporaryAccessExpired": "AWS の一時アクセスの有効期限が切れました。",
-          "ssoExpired": "AWS SSO セッションの有効期限が切れました。",
-          "credentialsRejected": "AWS によって認証情報が拒否されました。アクセスキー ID、シークレット、セッショントークンを確認してください。",
-          "accessDenied": "AWS Bedrock がこのリクエストを拒否しました。リージョン {{region}} で選択したモデルを呼び出す権限を AWS 管理者に依頼してください。",
-          "modelNotFound": "AWS Bedrock はリージョン {{region}} で選択したモデルを見つけられませんでした。モデル ID とそのリージョンでの提供状況を確認してください。",
-          "configurationRejected": "AWS Bedrock はリージョン {{region}} のモデル設定を拒否しました。モデル ID、推論プロファイル、リージョンを確認してください。",
-          "notConfigured": "AWS Bedrock が正しく設定されていません。リージョンと AWS 認証情報を確認してください。",
-          "serviceUnavailable": "需要が高いため、AWS Bedrock は一時的に利用できません。これは VoceLibre の障害ではなく AWS サービス側の問題です。数分後にもう一度お試しください。",
-          "throttled": "リクエストが多すぎるため、AWS Bedrock は一時的にリクエストを制限しています。少し待ってから再試行してください。続く場合は、AWS 管理者に Bedrock の使用量とクォータの確認を依頼してください。",
-          "timeout": "AWS Bedrock が時間内に応答しませんでした。もう一度お試しください。続く場合は、インターネット接続と AWS Bedrock サービスの状態を確認してください。",
-          "network": "AWS Bedrock に接続できませんでした。インターネット接続を確認して、もう一度お試しください。",
-          "unknown": "AWS Bedrock エラー: {{error}}",
-          "actions": {
-            "refreshManagedAccess": "サインアウトして再度サインインし、会社のアクセスを更新してから再試行してください。",
-            "reauthenticate": "再認証するには、ターミナルで次のコマンドを実行してください:"
-          }
-        }
-      },
-      "technicalDetails": {
-        "title": "技術情報",
-        "httpStatus": "HTTP ステータス",
-        "awsException": "AWS 例外",
-        "awsRequestId": "AWS リクエスト ID",
-        "underlyingError": "原因となったエラー",
-        "copy": "技術情報をコピー",
-        "copyCommand": "復旧コマンドをコピー"
-      },
-      "azure": {
-        "endpointHelp": "Azure OpenAI リソースのエンドポイント（例: https://myresource.openai.azure.com）。",
-        "deploymentHelp": "Azure OpenAI 内のモデルデプロイメント名。"
-      },
-      "vertex": {
-        "adcHelp": "Application Default Credentials を使用します。次を実行してください: gcloud auth application-default login",
-        "apikeyHelp": "Google AI Studio で取得した Vertex AI Express Mode の API キー。"
-      }
-    },
-    "tinfoil": {
-      "modelRetiredTitle": "モデルが利用できません",
-      "modelRetired": "Tinfoil は {{from}} を提供終了しました。{{to}} に切り替えました。",
-      "refreshingModels": "モデルを更新しています…"
-    },
-    "corti": {
-      "euOnly": "Corti のモデルは EU リージョンでのみ利用できます。"
+    "technicalDetails": {
+      "title": "技術情報",
+      "httpStatus": "HTTP ステータス",
+      "underlyingError": "原因となったエラー",
+      "copy": "技術情報をコピー",
+      "copyCommand": "復旧コマンドをコピー"
     }
   },
   "transcription": {
@@ -1191,41 +1091,10 @@
     }
   },
   "dictionarySuffix": "辞書サフィックス",
-  "emailVerification": {
-    "checkEmailDescription": "確認リンクを次のメールアドレスに送信しました：",
-    "checkEmailTitle": "確認メールを送信しました",
-    "errors": {
-      "resendFailed": "メールを再送信できませんでした。もう一度お試しください。",
-      "serverUnreachable": "サーバーに接続できませんでした。接続を確認してもう一度お試しください。"
-    },
-    "resendButton": "確認メールを再送信",
-    "resendIn": "{{seconds}} 秒後に再送信可能",
-    "verifiedDescription": "アカウントの設定が完了しました。",
-    "verifiedTitle": "確認済み",
-    "waiting": "確認を待っています",
-    "backToSignIn": "サインインに戻る"
-  },
   "errorBoundary": {
     "description": "予期しないエラーが発生しました。再読み込みしてもう一度お試しください。",
     "reload": "再読み込み",
     "title": "問題が発生しました"
-  },
-  "forgotPassword": {
-    "back": "戻る",
-    "backToSignIn": "サインインに戻る",
-    "emailPlaceholder": "メールアドレスを入力",
-    "goBack": "戻る",
-    "notConfigured": "認証がまだ設定されていません。",
-    "sendResetLink": "リセットリンクを送信",
-    "sending": "送信中...",
-    "subtitle": "メールアドレスを入力するとリセットリンクを送信します",
-    "success": {
-      "description": "パスワードリセットリンクを送信しました",
-      "help": "メールが届きませんか？迷惑メールフォルダを確認するか、もう一度お試しください。",
-      "title": "メールを確認してください",
-      "tryAnother": "別のメールアドレスで試す"
-    },
-    "title": "パスワードをリセット"
   },
   "actionPrompt": "アクションプロンプト",
   "hotkeyGuidance": {
@@ -1445,10 +1314,6 @@
       "speechToText": {
         "description": "ディクテーションとノート録音用エンジン",
         "label": "音声認識"
-      },
-      "llms": {
-        "description": "クリーンアップ、ノートのフォーマット、チャット用のモデル",
-        "label": "言語モデル"
       },
       "privacyData": {
         "description": "プライバシー、権限、分析",
@@ -2512,71 +2377,6 @@
         "large": "最高品質、最も低速",
         "turbo": "高速で高品質"
       },
-      "transcription": {
-        "openai_gpt_4o_mini_transcribe": "高速で正確な文字起こし",
-        "openai_gpt_4o_transcribe": "最も正確な文字起こし",
-        "openai_whisper_1": "オリジナル Whisper モデル",
-        "groq_whisper_large_v3_turbo": "リアルタイムの 216 倍速",
-        "groq_whisper_large_v3": "Large v3 モデル、高速かつ高精度",
-        "mistral_voxtral_mini_latest": "高速多言語文字起こし",
-        "gemini_3_5_transcribe": "GoogleのGemini音声文字起こし",
-        "corti_transcribe": "臨床グレードの医療文字起こし",
-        "xai_grok_stt": "xAIによる高精度音声認識",
-        "tinfoil_voxtral": "検証可能なプライベート文字起こし"
-      },
-      "cloud": {
-        "openai_gpt_5_2": "強力な推論モデル",
-        "openai_gpt_5_mini": "高速で費用対効果が高い",
-        "openai_gpt_5_nano": "超高速、低レイテンシー",
-        "openai_gpt_4_1": "強力なベースライン、100 万トークンコンテキスト",
-        "openai_gpt_4_1_mini": "小型 GPT-4.1 モデル",
-        "openai_gpt_4_1_nano": "最低レイテンシーの GPT-4.1",
-        "anthropic_claude_fable_5": "Anthropic の最も高性能なモデル、Mythos クラス",
-        "anthropic_claude_sonnet_5": "低コストで高速かつ高性能なエージェントモデル",
-        "anthropic_claude_sonnet_4_6": "バランスの取れた性能",
-        "anthropic_claude_sonnet_4_5": "前世代の Sonnet モデル",
-        "anthropic_claude_haiku_4_5": "高速でフロンティアに近い知能",
-        "gemini_gemini_3_5_flash": "最新の高速で高性能な Gemini モデル",
-        "gemini_gemini_3_5_flash_lite": "最速かつ最も低コストの 3.5 モデル",
-        "gemini_gemini_3_1_pro_preview": "複雑な推論向けの次世代フラッグシップモデル",
-        "gemini_gemini_3_1_flash_lite": "フロンティア級の性能を低コストで",
-        "gemini_gemini_3_flash_preview": "超高速・高性能の次世代モデル",
-        "gemini_gemini_2_5_flash_lite": "最低レイテンシーとコスト",
-        "gemini_gemma_4_31b_it": "Google 最大の Gemma 4、31B デンス、256K コンテキスト",
-        "gemini_gemma_4_26b_a4b_it": "Google の Gemma 4 MoE、4B アクティブパラメータ、256K コンテキスト",
-        "groq_openai_gpt_oss_120b": "OpenAI のオープンソースフラッグシップ、500 T/秒",
-        "groq_openai_gpt_oss_20b": "高速オープンソースモデル、1000 T/秒",
-        "groq_compound": "Groq の Compound システム、450 T/秒",
-        "groq_compound_mini": "高速 Compound システム、3x 低レイテンシー",
-        "openai_gpt_5_6_sol": "複雑なコーディングと研究のためのフラッグシップ GPT-5.6",
-        "openai_gpt_5_6_terra": "日常業務向けのバランス型 GPT-5.6",
-        "openai_gpt_5_6_luna": "最速かつ最も低コストの GPT-5.6",
-        "openai_gpt_5_5": "複雑な推論のためのフロンティアモデル",
-        "anthropic_claude_opus_5": "最も高性能な Opus モデル、100 万トークンコンテキスト",
-        "anthropic_claude_opus_4_8": "誠実さと信頼性を重視した強力な Opus モデル",
-        "anthropic_claude_opus_4_7": "高性能な Opus モデル",
-        "anthropic_claude_opus_4_6": "前世代の Opus、100 万トークンコンテキスト",
-        "anthropic_claude_opus_4_5": "旧世代の Opus モデル",
-        "tinfoil_glm_5_3": "セキュアエンクレーブ内のプライベート・エージェント型コーディングモデル、1M コンテキスト",
-        "tinfoil_gemma4_31b": "ツール呼び出し対応のプライベート多言語推論モデル、256K コンテキスト",
-        "tinfoil_gpt_oss_120b": "ツール使用対応のプライベート・オープンウェイト推論モデル、131K コンテキスト",
-        "tinfoil_llama3_3_70b": "ツール呼び出し対応のプライベート会話モデル、128K コンテキスト",
-        "corti_corti_s1_instant": "高速なヘルスケアモデル、推論トレースなし",
-        "corti_corti_s1": "推論対応の最も高性能な臨床モデル",
-        "corti_corti_s1_mini_instant": "コンパクトなヘルスケアモデル、最速かつ最も低コスト",
-        "corti_corti_s1_mini": "推論対応のコンパクトな臨床モデルを半額で"
-      },
-      "enterprise": {
-        "bedrock_claude_fable_5": "最も高性能な Claude モデル。最も難しいエージェントモードのタスクに最適です。",
-        "bedrock_claude_haiku_4_5": "高速で低コスト。テキスト整形に最適です。",
-        "bedrock_claude_sonnet_5": "バランス型。エージェントモードの既定モデルに最適です。",
-        "bedrock_claude_opus_4_8": "最高性能。複雑なエージェントモードのタスクに最適です。",
-        "bedrock_gpt_oss_120b": "OpenAI のオープンウェイトモデル。低コストで高い推論力。",
-        "bedrock_deepseek_v3_2": "オープンウェイトのフロンティアモデル。エージェントモードに最適。",
-        "bedrock_qwen3_next_80b": "スパースなオープンウェイトモデル。高速で多言語対応。",
-        "vertex_gemini_2_5_flash": "Fast multimodal model via Vertex",
-        "vertex_gemini_2_5_pro": "Advanced reasoning via Vertex"
-      },
       "local": {
         "qwen_qwen3_5_9b_q4_k_m": "強力なハイブリッドモデル",
         "qwen_qwen3_5_4b_q4_k_m": "汎用向けバランス型 Qwen3.5",
@@ -3135,121 +2935,9 @@
     "importList": "リストをインポート",
     "agentDefault": "デフォルトで追加済み"
   },
-  "referral": {
-    "title": "紹介して特典をゲット",
-    "subtitle": "1か月あげて、1か月もらおう。",
-    "modalTitle": "友達を紹介",
-    "tabs": {
-      "refer": "紹介する",
-      "pastInvites": "過去の招待"
-    },
-    "howItWorks": {
-      "shareLink": "招待リンクを共有",
-      "theySignUp": "相手が登録すると",
-      "freeMonthOfPro": "Pro の無料 1 か月",
-      "youGet": "あなたも",
-      "freeMonth": "無料 1 か月",
-      "whenTheyDictate": "を獲得（相手が 2,000 語ディクテーションした時点で）"
-    },
-    "inviteLink": {
-      "title": "招待リンク",
-      "copy": "コピー",
-      "copied": "コピーしました"
-    },
-    "sendInvites": {
-      "title": "招待を送信",
-      "placeholder": "friend@example.com",
-      "send": "送信",
-      "sending": "送信中"
-    },
-    "stats": {
-      "referred": "紹介済み",
-      "converted": "登録済み",
-      "monthsEarned": "獲得した月数"
-    },
-    "status": {
-      "converted": "登録済み",
-      "opened": "開封済み",
-      "failed": "失敗",
-      "sent": "送信済み"
-    },
-    "friends": {
-      "title": "フレンド",
-      "completed": "完了",
-      "sentInvites": "送信済みの招待"
-    },
-    "empty": {
-      "title": "まだ招待を送信していません",
-      "description": "リンクを共有するか招待を送信して始めましょう"
-    },
-    "toasts": {
-      "copiedTitle": "コピーしました！",
-      "copiedDescription": "紹介リンクをクリップボードにコピーしました",
-      "copyFailedTitle": "コピーに失敗しました",
-      "copyFailedDescription": "リンクをクリップボードにコピーできませんでした",
-      "invalidEmailTitle": "無効なメールアドレス",
-      "invalidEmailDescription": "有効なメールアドレスを入力してください",
-      "inviteSentTitle": "招待を送信しました！",
-      "inviteSentDescription": "{{email}} に招待を送信しました",
-      "sendFailedTitle": "送信に失敗しました",
-      "sendFailedDescription": "招待の送信に失敗しました。もう一度お試しください。"
-    },
-    "errors": {
-      "unableToLoad": "紹介データを読み込めませんでした",
-      "unableToLoadStats": "紹介統計を読み込めませんでした。後でもう一度お試しください。"
-    },
-    "tryAgain": "再試行",
-    "card": {
-      "brand": "VoceLibre",
-      "signalId": "Signal ID",
-      "audioSignature": "あなたの音声シグネチャー",
-      "stop": "停止",
-      "playSignal": "シグナルを再生"
-    }
-  },
-  "insights": {
-    "title": "統計",
-    "description": "ディクテーションの習慣と継続状況をプライベートに確認できます。",
-    "wordsSpoken": "話した単語数",
-    "currentStreak": "現在の連続日数",
-    "wordsPerMinute": "1分あたりの単語数",
-    "dictations": "ディクテーション数",
-    "allTime": "全期間",
-    "days_one": "{{count}} 日",
-    "days_other": "{{count}} 日",
-    "longestStreak_one": "最長: {{count}} 日",
-    "longestStreak_other": "最長: {{count}} 日",
-    "wpmCoverage": "計測できた単語の {{count}}% に基づく",
-    "activity": "発話アクティビティ",
-    "activityDescription": "過去6か月間に話した単語数",
-    "activityLabel": "6か月間の発話アクティビティのヒートマップ",
-    "activityLess": "少ない",
-    "activityMore": "多い",
-    "dayTooltip_one": "{{date}}: {{count}} 語",
-    "dayTooltip_other": "{{date}}: {{count}} 語",
-    "dataRetentionDisabled": "データ保持が無効なため、新しいディクテーションは統計に集計されません。このデバイスでもアカウントでも加算されません。すでに同期済みのカウントはアカウントに残ります。",
-    "onDevice": "このデバイス上",
-    "synced": "デバイス間で同期済み",
-    "syncFallback": "デバイスのデータを表示中 — 同期は利用できません",
-    "syncPrompt": "内容を含まないカウンターを同期して、ローカルとクラウドのアクティビティをデバイス間でまとめます。",
-    "enableSync": "同期を有効にする",
-    "claimTitle": "以前のディクテーションを含めますか？",
-    "claimDescription_one": "サインイン前にこのデバイスで記録されたディクテーションが {{count}} 件あります。含めると、送信されるのは単語数、日付と記録された正確な時刻、長さ、モデルの種類だけで、文字起こしの内容は送信されません。",
-    "claimDescription_other": "サインイン前にこのデバイスで記録されたディクテーションが {{count}} 件あります。含めると、送信されるのは単語数、日付と記録された正確な時刻、長さ、モデルの種類だけで、文字起こしの内容は送信されません。",
-    "claimInclude": "含める",
-    "claimSkip": "今はしない",
-    "enableTitle": "Insights の同期をオンにしますか？",
-    "enableConfirm": "同期をオンにする",
-    "enableDescription_one": "このデバイスで記録済みのディクテーション {{count}} 件がアカウントにアップロードされます。Insights の同期で送信されるのは単語数、日付と記録された正確な時刻、長さ、モデルの種類だけで、文字起こしの内容は送信されません。",
-    "enableDescription_other": "このデバイスで記録済みのディクテーション {{count}} 件がアカウントにアップロードされます。Insights の同期で送信されるのは単語数、日付と記録された正確な時刻、長さ、モデルの種類だけで、文字起こしの内容は送信されません。",
-    "emptyTitle": "まだディクテーションがありません",
-    "emptyBody": "ディクテーションを始めると、単語数・連続記録・日々のアクティビティがここに表示されます。",
-    "loadError": "このデバイスから Insights を読み取れませんでした。"
-  },
   "sidebar": {
     "insights": "統計",
     "home": "ホーム",
-    "notes": "ノート",
     "upload": "アップロード",
     "dictionary": "辞書",
     "referral": "1か月無料を取得",
@@ -3538,49 +3226,7 @@
       "connectFailedDescription": "Calendar.app への接続中にエラーが発生しました。VoceLibre を再起動してもう一度お試しください。"
     },
     "sections": {
-      "calendar": "カレンダー",
-      "api": "API",
-      "mcp": "MCP",
-      "cli": "CLI"
-    },
-    "api": {
-      "title": "APIキー",
-      "description": "プログラムからのアクセス用にAPIキーを管理",
-      "proRequired": "APIを利用するには有料プランへのアップグレードが必要です",
-      "manage": "キーを管理",
-      "viewPlans": "プランを表示",
-      "dialogTitle": "APIキー"
-    },
-    "mcp": {
-      "title": "メモをAIツールに持ち込みましょう",
-      "description": "Claude、ChatGPT、Cursor内でメモを使ってチャット、検索、作業ができます。",
-      "step1": "AIツールで、公開URLを使用してOpenWhispr MCPを追加します",
-      "step2": "上のセクションで必要なスコープを持つAPIキーを作成します。",
-      "step3": "キーを Authorization ヘッダーとして貼り付けて接続します。",
-      "learnMore": "詳細",
-      "viewPlans": "プランを表示",
-      "copyUrl": "MCP URLをコピー",
-      "proRequired": "VoceLibre を Claude、ChatGPT、Cursor に接続するには、有料プランへのアップグレードが必要です。",
-      "copied": "コピーしました"
-    },
-    "cli": {
-      "title": "コマンドラインアクセス",
-      "description": "ターミナルからエージェントにメモへのアクセスを許可します。",
-      "installLabel": "インストール",
-      "learnMore": "ドキュメントを読む",
-      "copyDocsLink": "ドキュメントリンクをコピー",
-      "docsLinkCopied": "ドキュメントリンクをコピーしました",
-      "viewPlans": "プランを表示",
-      "local": {
-        "label": "ローカル",
-        "freeBadge": "無料",
-        "description": "ローカルのメモに直接アクセスできます。ログインや API キーは不要 — VoceLibre の起動中に利用できます。"
-      },
-      "cloud": {
-        "label": "クラウド",
-        "description": "API キーを使ってデバイス間で同期します。",
-        "proRequired": "クラウドモードで CLI を利用するには有料プランへのアップグレードが必要です。"
-      }
+      "calendar": "カレンダー"
     },
     "plan": {
       "title": "プラン",
@@ -3597,29 +3243,6 @@
       "title": "VoceLibre はミーティング録音ツールであり、ボットではありません",
       "description": "VoceLibre はシステムから直接オーディオをキャプチャします — 参加者としてミーティングに参加することはありません。カレンダーを接続して、通常通りノートを取るだけです。"
     }
-  },
-  "calendar": {
-    "title": "Google カレンダー",
-    "status": "ステータス",
-    "connected": "接続済み",
-    "disconnected": "未接続",
-    "notConnectedDescription": "接続してミーティングを検出・録音する",
-    "connectCta": {
-      "title": "カレンダー連携",
-      "description": "ミーティングを自動検出し、文字起こしを記録する"
-    },
-    "connect": "Google カレンダーを接続",
-    "connecting": "接続中...",
-    "disconnect": "切断",
-    "disconnecting": "切断中...",
-    "sync": "同期",
-    "syncing": "同期中...",
-    "calendarsTitle": "カレンダー",
-    "upcomingTitle": "今後の予定",
-    "noUpcoming": "今後の予定はありません",
-    "meetingStarting": "ミーティングが開始されます",
-    "today": "今日",
-    "tomorrow": "明日"
   },
   "upcoming": {
     "title": "今後の予定",
@@ -3638,77 +3261,6 @@
     "connectCalendar": "カレンダーを接続",
     "connectCalendarDescription": "VoceLibre を離れずに会議を確認して参加できます。",
     "connectCalendarButton": "カレンダーを接続"
-  },
-  "notesView": {
-    "searchPlaceholder": "ノートを検索…",
-    "newNote": "新しいノート",
-    "empty": {
-      "title": "ノートがまだありません",
-      "description": "最初のノートを作成してください。"
-    },
-    "searchEmpty": {
-      "title": "結果なし",
-      "description": "「{{query}}」に一致するノートが見つかりませんでした。"
-    },
-    "noteType": {
-      "personal": "個人",
-      "meeting": "会議",
-      "upload": "アップロード"
-    }
-  },
-  "noteEditor": {
-    "saved": "保存済み",
-    "deleteNote": "ノートを削除",
-    "deleteConfirmTitle": "ノートを削除しますか？",
-    "deleteConfirmDescription": "このノートは完全に削除され、復元できません。",
-    "deleteConfirm": "削除",
-    "share": {
-      "button": "共有",
-      "dialog": {
-        "title": "ノートを共有",
-        "description": "メールで招待するか、このノートへのリンクを共有します。",
-        "searchPlaceholder": "ユーザー、フォルダー、メールを検索",
-        "noResults": "一致する結果が見つかりません",
-        "emailLabel": "ユーザー、フォルダー、メール",
-        "shareButton": "共有",
-        "createLink": "リンクを作成",
-        "copyLink": "リンクをコピー",
-        "copied": "コピーしました",
-        "owner": "オーナー",
-        "editor": "編集可能",
-        "viewer": "閲覧可能",
-        "teamAudience": "このチームスペースの全員",
-        "pending": "保留中",
-        "accepted": "アクセス権あり",
-        "resend": "招待を再送信",
-        "revoke": "削除",
-        "invitationActions": "招待の操作",
-        "resendSent": "招待を送信しました",
-        "resendThrottled": "招待を送信したばかりです。1分ほど待ってからお試しください。",
-        "syncPrompt": "共有すると、このノートのコピーが VoceLibre クラウドに保存されます。共有相手を選ぶまでは、あなた以外は閲覧できません。",
-        "syncAndShare": "ノートを同期",
-        "visibility": {
-          "label": "公開範囲",
-          "private": "非公開",
-          "privateOption": "非公開 — 自分のみ",
-          "link": "リンクを持つ全員",
-          "domain": "{{domain}} の全員（リンクを持つ人）",
-          "invited": "招待された人のみ"
-        },
-        "error": {
-          "invalidEmail": "有効なメールアドレスを入力してください",
-          "alreadyInvited": "{{email}} はすでに招待されています",
-          "inviteFailed": "招待を送信できませんでした。もう一度お試しください。",
-          "visibilityFailed": "共有設定を更新できませんでした。もう一度お試しください。",
-          "copyFailed": "リンクをコピーできませんでした。もう一度お試しください。",
-          "revokeFailed": "招待を削除できませんでした。もう一度お試しください。",
-          "resendFailed": "招待を再送信できませんでした。もう一度お試しください。",
-          "syncFailed": "このノートを同期できませんでした。もう一度お試しください。",
-          "loadFailed": "共有設定を読み込めませんでした",
-          "retry": "再試行"
-        }
-      }
-    }
   },
   "commandSearch": {
     "allSpaces": "すべてのスペース",
@@ -3733,59 +3285,6 @@
     "title": "VoceLibre のアップデートあり",
     "body": "バージョン {{version}} がダウンロード可能です",
     "cta": "今すぐ更新"
-  },
-  "permissionsGate": {
-    "title": "権限が必要です",
-    "description": "VoceLibre がこのコンピュータで動作するために、いくつかの権限が必要です。",
-    "continue": "続行"
-  },
-  "apiKeysSection": {
-    "title": "APIキー",
-    "description": "アカウントへのプログラムアクセス用のキーを管理",
-    "docsLink": "APIドキュメント",
-    "empty": "APIキーはまだありません",
-    "createButton": "キーを作成",
-    "create": {
-      "title": "APIキーを作成",
-      "nameLabel": "キー名",
-      "namePlaceholder": "例: マイインテグレーション",
-      "scopesLabel": "権限",
-      "expiryLabel": "有効期限",
-      "expiryOptions": {
-        "never": "無期限",
-        "30days": "30日間",
-        "60days": "60日間",
-        "90days": "90日間",
-        "1year": "1年"
-      },
-      "submit": "作成",
-      "cancel": "キャンセル"
-    },
-    "created": {
-      "title": "キーが作成されました",
-      "warning": "このキーを今すぐコピーしてください。再度表示されることはありません。",
-      "copied": "コピー済み",
-      "copyButton": "クリップボードにコピー",
-      "done": "完了"
-    },
-    "scopes": {
-      "notesRead": "ノートの読み取り",
-      "notesWrite": "ノートの作成と編集",
-      "transcriptionsRead": "文字起こしの読み取り"
-    },
-    "revoke": {
-      "button": "取り消し",
-      "confirm": "このAPIキーを取り消しますか？このキーを使用しているインテグレーションは機能しなくなります。",
-      "success": "APIキーが取り消されました"
-    },
-    "neverUsed": "未使用",
-    "lastUsed": "{{time}}に使用",
-    "maxKeysReached": "キーの上限（{{max}}個）に達しました",
-    "errors": {
-      "loadFailed": "APIキーを読み込めませんでした",
-      "createFailed": "APIキーを作成できませんでした",
-      "revokeFailed": "APIキーを取り消せませんでした"
-    }
   },
   "embeddedChat": {
     "askPlaceholder": "何でも聞いてください...",
@@ -3814,82 +3313,6 @@
       "others": "他の人"
     },
     "missingAudio": "[音声欠落 {{from}}-{{to}}]"
-  },
-  "workspaces": {
-    "switcher": {
-      "workspaces": "ワークスペース",
-      "create": "ワークスペースを作成…"
-    },
-    "create": {
-      "title": "ワークスペースを作成",
-      "description": "ワークスペースには組織のメンバーと請求がまとまります。その中に共有ノート用のチームスペースを作成できます。",
-      "nameLabel": "ワークスペース名",
-      "namePlaceholder": "Acme Corp",
-      "submit": "ワークスペースを作成",
-      "submitting": "作成中…",
-      "errorTitle": "ワークスペースを作成できませんでした"
-    },
-    "created": {
-      "title": "ワークスペースを作成しました",
-      "description": "{{name}} のオーナーになりました。"
-    },
-    "invite": {
-      "title": "{{workspace}} に招待",
-      "description": "メールアドレスでチームメイトを追加します。参加用のリンクが送信されます。",
-      "emailLabel": "メールアドレス",
-      "emailPlaceholder": "teammate@example.com",
-      "roleLabel": "役割",
-      "seatUsage": "{{seats}} シート中 {{used}} シートを使用中",
-      "seatCost": "承諾されるとプランに 1 席追加され、日割りの見積額 {{amount}} が請求されます。",
-      "submit": "招待を送信",
-      "submitting": "送信中…",
-      "sentTitle": "招待を送信しました",
-      "sentDescription": "{{email}} に招待を送信しました。",
-      "sentNoEmailTitle": "招待を作成しましたが、メールは送信されませんでした",
-      "sentNoEmailDescription": "{{email}} を招待しましたが、メールを配信できませんでした。後で再送信するか、別の方法で招待リンクを共有してください。",
-      "errorTitle": "招待を送信できませんでした",
-      "role": {
-        "admin": "管理者",
-        "member": "メンバー"
-      },
-      "roleDescription": {
-        "admin": "メンバーと請求を管理できます",
-        "member": "ワークスペースを利用できます"
-      }
-    },
-    "join": {
-      "title": "チームに参加",
-      "domainTitle": "あなたのチームはすでに VoceLibre にいます",
-      "description": "これらのワークスペースに、あなたと同じメールドメインのメンバーがいます。",
-      "invitedDescription": "ワークスペースに招待されています。",
-      "invitedBy": "{{inviter}} が {{role}} として招待しました",
-      "memberCount_one": "メンバー {{count}} 人",
-      "memberCount_other": "メンバー {{count}} 人",
-      "join": "参加",
-      "requestErrorTitle": "リクエストを送信できませんでした",
-      "requestedDescription": "{{workspace}} の管理者が確認します。",
-      "requestedTitle": "リクエストを送信しました",
-      "requested": "リクエスト済み",
-      "request": "参加をリクエスト",
-      "notNow": "後で",
-      "successTitle": "参加しました",
-      "successDescription": "{{workspace}} のメンバーになりました。",
-      "errorTitle": "参加できませんでした"
-    },
-    "accept": {
-      "title": "ワークスペースに参加",
-      "description": "{{inviter}} さんから、{{workspace}} に{{role}}として参加するよう招待されています。",
-      "loading": "招待を読み込み中…",
-      "accept": "招待を承諾",
-      "accepting": "承諾中…",
-      "signInToAccept": "サインインして承諾",
-      "switchAccount": "アカウントを切り替える",
-      "successTitle": "参加しました",
-      "successDescription": "{{name}} のメンバーになりました。設定 → ワークスペースで管理できます。",
-      "errorTitle": "招待を承諾できませんでした",
-      "sentTo": "{{email}} に送信された招待です",
-      "wrongAccount": "この招待は {{email}} 宛てに送信されました。現在 {{current}} でサインインしています。"
-    }
   },
   "dictationTranslation": {
     "title": "音声入力翻訳",

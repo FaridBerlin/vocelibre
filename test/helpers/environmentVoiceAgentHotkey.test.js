@@ -116,7 +116,7 @@ test("device cleanup clears persisted settings and encrypted secret files", asyn
     path.join(os.tmpdir(), "openwhispr-device-settings-cleanup-")
   );
   const environmentSnapshot = new Map(
-    ["OPENAI_API_KEY", "START_MINIMIZED"].map((name) => [
+    ["CHAT_AGENT_CUSTOM_API_KEY", "START_MINIMIZED"].map((name) => [
       name,
       { present: Object.hasOwn(process.env, name), value: process.env[name] },
     ])
@@ -135,13 +135,13 @@ test("device cleanup clears persisted settings and encrypted secret files", asyn
   const secureKeysDirectory = path.join(userDataDirectory, "secure-keys");
   fs.mkdirSync(secureKeysDirectory, { recursive: true });
   fs.writeFileSync(path.join(userDataDirectory, ".env"), "START_MINIMIZED=true\n");
-  fs.writeFileSync(path.join(secureKeysDirectory, "OPENAI_API_KEY.enc"), "secret");
-  process.env.OPENAI_API_KEY = "test-key";
+  fs.writeFileSync(path.join(secureKeysDirectory, "CHAT_AGENT_CUSTOM_API_KEY.enc"), "secret");
+  process.env.CHAT_AGENT_CUSTOM_API_KEY = "test-key";
   process.env.START_MINIMIZED = "true";
 
   await environmentManager.clearAllPersistedData();
 
-  assert.equal(process.env.OPENAI_API_KEY, undefined);
+  assert.equal(process.env.CHAT_AGENT_CUSTOM_API_KEY, undefined);
   assert.equal(process.env.START_MINIMIZED, undefined);
   assert.equal(fs.existsSync(path.join(userDataDirectory, ".env")), false);
   assert.equal(fs.existsSync(secureKeysDirectory), false);

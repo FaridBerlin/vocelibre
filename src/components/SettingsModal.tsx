@@ -1,10 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { usePolicyStore } from "../stores/policyStore";
 import {
   Sliders,
   Mic,
-  Brain,
   UserCircle,
   Wrench,
   Keyboard,
@@ -14,22 +12,21 @@ import {
 } from "lucide-react";
 import SidebarModal, { type SidebarItem } from "./ui/SidebarModal";
 import SettingsPage, { AccountAvatar, SettingsSectionType } from "./SettingsPage";
-import { useAuth } from "../hooks/useAuth";
 
 export type { SettingsSectionType };
 
-// The old AI Models sidebar had four items (transcription, meetings,
-// intelligence, agentMode) — they now collapse into two: speechToText + llms.
-// Legacy deep-links land on the matching sub-tab via LEGACY_SUB_TAB.
-// "dictationAgent" is a live deep-link (the Home GPU banner), not a legacy alias.
+const KNOWN_SECTIONS = new Set<SettingsSectionType>([
+  "general",
+  "hotkeys",
+  "speechToText",
+  "privacyData",
+  "system",
+]);
+
+// AI Models is now a single item: speechToText. Deep-links that used to open the
+// language-model page have no destination left, so they resolve to "general"
+// through KNOWN_SECTIONS rather than leaving the modal on a blank panel.
 const SECTION_ALIASES: Record<string, SettingsSectionType> = {
-  aiModels: "llms",
-  agentConfig: "llms",
-  agentMode: "llms",
-  dictationAgent: "llms",
-  intelligence: "llms",
-  meetings: "llms",
-  prompts: "llms",
   transcription: "speechToText",
   uploadTranscription: "speechToText",
   softwareUpdates: "system",
@@ -41,13 +38,6 @@ const SECTION_ALIASES: Record<string, SettingsSectionType> = {
 const LEGACY_SUB_TAB: Record<string, string> = {
   transcription: "dictation",
   uploadTranscription: "upload",
-  dictationAgent: "dictationAgent",
-  meetings: "noteFormatting",
-  intelligence: "dictationCleanup",
-  agentMode: "chatIntelligence",
-  agentConfig: "chatIntelligence",
-  aiModels: "dictationCleanup",
-  prompts: "dictationCleanup",
 };
 
 interface SettingsModalProps {
@@ -58,31 +48,9 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ open, onOpenChange, initialSection }: SettingsModalProps) {
   const { t } = useTranslation();
-  const { isSignedIn, user } = useAuth();
-  const policyManaged = usePolicyStore((s) => s.managed);
+  const policyManaged = false;
   const sidebarItems: SidebarItem<SettingsSectionType>[] = useMemo(() => {
     const items: SidebarItem<SettingsSectionType>[] = [
-      {
-        id: "account",
-        label: t("settingsModal.sections.account.label"),
-        icon: UserCircle,
-        description: t("settingsModal.sections.account.description"),
-        group: t("settingsModal.groups.account"),
-      },
-      {
-        id: "plansBilling",
-        label: t("settingsModal.sections.plansBilling.label"),
-        icon: CreditCard,
-        description: t("settingsModal.sections.plansBilling.description"),
-        group: t("settingsModal.groups.account"),
-      },
-      {
-        id: "workspace" as const,
-        label: t("settingsModal.sections.workspace.label"),
-        icon: Users,
-        description: t("settingsModal.sections.workspace.description"),
-        group: t("settingsModal.groups.account"),
-      },
       {
         id: "general",
         label: t("settingsModal.sections.general.label"),
@@ -105,13 +73,6 @@ export default function SettingsModal({ open, onOpenChange, initialSection }: Se
         group: t("settingsModal.groups.aiModels"),
       },
       {
-        id: "llms",
-        label: t("settingsModal.sections.llms.label"),
-        icon: Brain,
-        description: t("settingsModal.sections.llms.description"),
-        group: t("settingsModal.groups.aiModels"),
-      },
-      {
         id: "privacyData",
         label: t("settingsModal.sections.privacyData.label"),
         icon: Shield,
@@ -126,12 +87,15 @@ export default function SettingsModal({ open, onOpenChange, initialSection }: Se
         group: t("settingsModal.groups.system"),
       },
     ];
-    return isSignedIn ? items : items.filter((item) => item.id !== "workspace");
-  }, [t, isSignedIn]);
+    return items;
+  }, [t]);
 
   const resolveSection = (section: string | undefined): SettingsSectionType => {
-    if (!section) return "account";
-    return (SECTION_ALIASES[section] ?? section) as SettingsSectionType;
+    if (!section) return "general";
+    const resolved = SECTION_ALIASES[section] ?? section;
+    return KNOWN_SECTIONS.has(resolved as SettingsSectionType)
+      ? (resolved as SettingsSectionType)
+      : "general";
   };
 
   const [activeSection, setActiveSection] = React.useState<SettingsSectionType>(() =>
@@ -164,19 +128,6 @@ export default function SettingsModal({ open, onOpenChange, initialSection }: Se
       sidebarItems={sidebarItems}
       activeSection={activeSection}
       onSectionChange={handleSectionChange}
-      header={
-        isSignedIn && user ? (
-          <div className="flex flex-col items-center gap-2 pb-2 text-center">
-            <AccountAvatar image={user.image} name={user.name || t("settingsPage.account.user")} />
-            <div className="min-w-0 w-full">
-              <p className="text-[13px] font-semibold text-foreground truncate">
-                {user.name || t("settingsPage.account.user")}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-            </div>
-          </div>
-        ) : undefined
-      }
     >
       {policyManaged && (
         <div className="mx-4 mt-4 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200">

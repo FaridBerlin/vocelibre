@@ -74,8 +74,6 @@ async function renderChatStreaming(
   }
 
   const { useSettingsStore } = await vite.ssrLoadModule("/stores/settingsStore.ts");
-  const { usePolicyStore } = await vite.ssrLoadModule("/stores/policyStore.ts");
-  usePolicyStore.setState({ status: "unmanaged", appVersion: "1.8.3", policy: null });
   // A self-hosted (LAN) chat agent with no tools in play: 4B+ in the model
   // name makes it tool-eligible by the size heuristic, but the fixture
   // fetch never emits a tool call, so it stays on the plain-content path.
@@ -411,44 +409,3 @@ test("cancelling a tool-ineligible raw stream after reading starts shows no erro
   assert.equal(getResponseContentCalls(), 0, "a user cancellation must not announce an error");
 });
 
-test("cloud screen context is sent without claiming the screenshot is already attached", async (t) => {
-  let streamEndListener;
-  let streamOptions;
-  const electronAPI = {
-    onAgentStreamChunk() {
-      return () => {};
-    },
-    onAgentStreamError() {
-      return () => {};
-    },
-    onAgentStreamEnd(listener) {
-      streamEndListener = listener;
-      return () => {};
-    },
-    startAgentStream(requestId, _messages, options) {
-      streamOptions = options;
-      streamEndListener({ requestId });
-    },
-    cancelAgentStream() {},
-  };
-  const { captured } = await renderChatStreaming(t, {
-    electronAPI,
-    settings: {
-      chatAgentMode: "openwhispr",
-      chatAgentCloudMode: "openwhispr",
-      isSignedIn: true,
-    },
-  });
-
-  await captured.sendToAI(
-    "What is on screen?",
-    [{ id: "user-1", role: "user", content: "What is on screen?", isStreaming: false }],
-    { attachment: { image: "base64-image", mediaType: "image/png" } }
-  );
-
-  assert.deepEqual(streamOptions.screenContext, {
-    data: "base64-image",
-    mediaType: "image/png",
-  });
-  assert.doesNotMatch(streamOptions.systemPrompt, /SCREEN CONTEXT:/);
-});

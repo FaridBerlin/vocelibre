@@ -1,30 +1,16 @@
 import type { InferenceProvider } from "./types";
-import { anthropicProvider } from "./anthropic";
-import { geminiProvider } from "./gemini";
-import { groqProvider } from "./groq";
 import { localProvider } from "./local";
-import { enterpriseProvider } from "./enterprise";
-import { openwhisprProvider } from "./openwhispr";
 import { lanProvider } from "./lan";
-import { openaiProvider } from "./openai";
-import { tinfoilProvider } from "./tinfoil";
-import { cortiProvider } from "./corti";
 
+// Cloud and BYOK providers were removed. What remains runs on the user's own
+// hardware: a downloaded GGUF model through llama-server, or an OpenAI-compatible
+// endpoint they host themselves.
 export const PROVIDER_REGISTRY: Readonly<Record<string, InferenceProvider>> = Object.freeze({
-  openai: openaiProvider,
-  custom: openaiProvider,
-  openrouter: openaiProvider,
-  anthropic: anthropicProvider,
-  gemini: geminiProvider,
-  groq: groqProvider,
-  tinfoil: tinfoilProvider,
-  corti: cortiProvider,
   local: localProvider,
-  bedrock: enterpriseProvider,
-  azure: enterpriseProvider,
-  vertex: enterpriseProvider,
-  openwhispr: openwhisprProvider,
   lan: lanProvider,
+  // A "custom" scope is the same self-hosted OpenAI-compatible server, stored
+  // under baseUrl instead of lanUrl.
+  custom: lanProvider,
 });
 
 export type { InferenceProvider, ProviderContext, ProviderCallParams } from "./types";

@@ -32,8 +32,6 @@ import {
   transcriptionErrorKey,
   MEETINGS_FOLDER_NAME,
 } from "./shared";
-import { useAuth } from "../../hooks/useAuth";
-import { useUsage } from "../../hooks/useUsage";
 import { useSettings } from "../../hooks/useSettings";
 import { useStartOnboarding } from "../../hooks/useStartOnboarding";
 import {
@@ -45,7 +43,6 @@ import {
 import {
   useSettingsStore,
   selectIsCloudCleanupMode,
-  selectPolicyEffectiveSettings,
   selectResolvedUploadTranscription,
   getSettings,
 } from "../../stores/settingsStore";
@@ -66,9 +63,6 @@ import { MAX_SPEAKER_COUNT } from "../../constants/speakerDetection.json";
 import BatchQueueView from "./BatchQueueView";
 import { generateNoteTitle } from "../../utils/generateTitle";
 import { getBaseLanguageCode } from "../../utils/languageSupport";
-import { isTranscriptionContextAllowed } from "../../stores/policyRules";
-import { usePolicyStore } from "../../stores/policyStore";
-import { usePolicySnapshot, useTranscriptionContextAllowed } from "../../hooks/usePolicy";
 import { byokFileSizeLimit, resolveTranscriptionRoute } from "../../helpers/transcriptionRoute";
 import { saveUploadNote, uploadTitleFallback } from "../../services/uploadNotes";
 import { UploadCompleteWarnings, UploadModelSettingsButton } from "./UploadAudioFeedback";
@@ -259,11 +253,9 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
 
   const [providerReady, setProviderReady] = useState<boolean | null>(null);
 
-  const { isSignedIn } = useAuth();
-  const usage = useUsage();
-  // The server enforces the free-tier size limit regardless, so an unresolved
-  // entitlement should not block a payer's upload.
-  const isProUser = usage?.hasPaidAccessOptimistic ?? false;
+  // No account and no paid tier: uploads are limited only by what the local
+  // model can process.
+  const isProUser = true;
 
   const apiKeys = useSettings();
   const {
@@ -275,7 +267,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
     tinfoilApiKey,
     customTranscriptionApiKey,
   } = apiKeys;
-  const policyState = usePolicySnapshot();
+  const policyState = null;
 
   const {
     useLocalWhisper,
@@ -288,12 +280,8 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
     cloudTranscriptionBaseUrl,
     cloudTranscriptionMode,
     transcriptionMode,
-  } = useSettingsStore(
-    useShallow((settings) =>
-      selectResolvedUploadTranscription(selectPolicyEffectiveSettings(settings, policyState))
-    )
-  );
-  const uploadAllowedByPolicy = useTranscriptionContextAllowed("upload");
+  } = useSettingsStore(useShallow((settings) => selectResolvedUploadTranscription(settings)));
+  const uploadAllowedByPolicy = true;
 
   const remoteTranscriptionUrl = useSettingsStore((s) => s.remoteTranscriptionUrl);
   const remoteTranscriptionModel = useSettingsStore((s) => s.remoteTranscriptionModel);
@@ -309,17 +297,14 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   const cortiEnvironment = useSettingsStore((s) => s.cortiEnvironment);
   const cortiTenant = useSettingsStore((s) => s.cortiTenant);
   const preferredLanguage = useSettingsStore((s) => s.preferredLanguage);
-  const isCloudCleanup = useSettingsStore((settings) =>
-    selectIsCloudCleanupMode(selectPolicyEffectiveSettings(settings, policyState))
-  );
+  const isCloudCleanup = useSettingsStore((settings) => selectIsCloudCleanupMode(settings));
   const effectiveCleanupModel = useSettingsStore((settings) => {
-    const effectiveSettings = selectPolicyEffectiveSettings(settings, policyState);
+    const effectiveSettings = settings;
     return selectIsCloudCleanupMode(effectiveSettings) ? "" : effectiveSettings.cleanupModel;
   });
   const useCleanupModel = useSettingsStore((s) => s.useCleanupModel);
 
-  const isOpenWhisprCloud =
-    isSignedIn && cloudTranscriptionMode === "openwhispr" && !useLocalWhisper;
+  const isOpenWhisprCloud = false;
 
   // Mode detection
   const isSelfHosted = transcriptionMode === "self-hosted" && !useLocalWhisper;
@@ -345,9 +330,6 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
       // Self-hosted / custom endpoints (e.g. local whisper.cpp): no file size restrictions
     } else if (isByok) {
       byokTooLarge = file.sizeBytes > byokMaxFileSize;
-      if (byokTooLarge && !isSignedIn) {
-        requiresAccount = true;
-      }
     } else {
       // Cloud (OpenWhispr) — user is always signed in here
       fileTooLarge = file.sizeBytes > CLOUD_PRO_MAX_FILE_SIZE;
@@ -628,7 +610,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   };
   const handleTranscribe = async () => {
     if (!file || batch.isProcessing) return;
-    if (!isTranscriptionContextAllowed(usePolicyStore.getState(), getSettings(), "upload")) {
+    if (!true) {
       setError(t("common.managedByOrg"));
       return;
     }
@@ -864,7 +846,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
 
   const startBatchProcessing = async () => {
     if (state === "downloading" || state === "transcribing") return;
-    if (!isTranscriptionContextAllowed(usePolicyStore.getState(), getSettings(), "upload")) {
+    if (!true) {
       setBatchUrlNotice(t("common.managedByOrg"));
       return;
     }
@@ -909,10 +891,12 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
 
   const handleCreateAccount = useStartOnboarding();
 
+  // Cloud upload was removed, so the "file too large" escape hatch is a local
+  // model rather than a managed endpoint. The surrounding upsell UI goes away
+  // with the rest of the account surface.
   const switchToCloud = () => {
-    setUploadTranscriptionMode("openwhispr");
-    setUploadCloudTranscriptionMode("openwhispr");
-    setUploadUseLocalWhisper(false);
+    setUploadTranscriptionMode("local");
+    setUploadUseLocalWhisper(true);
   };
 
   const getTranscribingLabel = (): string => {
@@ -1124,7 +1108,6 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
               byokMaxFileSizeMb={byokMaxFileSizeMb}
               requiresAccount={requiresAccount}
               isProUser={!!isProUser}
-              onUpgrade={() => usage?.openCheckout()}
               onCreateAccount={handleCreateAccount}
               onSwitchToCloud={switchToCloud}
               onOpenSettings={onOpenSettings}
@@ -1560,7 +1543,6 @@ interface SelectedViewProps {
   byokMaxFileSizeMb: number;
   requiresAccount: boolean;
   isProUser: boolean;
-  onUpgrade: () => void;
   onCreateAccount: () => void;
   onSwitchToCloud: () => void;
   onOpenSettings?: (section: string) => void;
@@ -1581,7 +1563,6 @@ function SelectedView({
   byokMaxFileSizeMb,
   requiresAccount,
   isProUser,
-  onUpgrade,
   onCreateAccount,
   onSwitchToCloud,
   onOpenSettings,
@@ -1680,20 +1661,6 @@ function SelectedView({
             className="h-8 text-xs px-5"
           >
             {t("notes.upload.switchToCloud")}
-          </Button>
-        )}
-
-        {/* BYOK too large — signed in, Free: Upgrade */}
-        {byokTooLarge && !requiresAccount && !isProUser && (
-          <Button variant="default" size="sm" onClick={onUpgrade} className="h-8 text-xs px-5">
-            {t("notes.upload.upgrade")}
-          </Button>
-        )}
-
-        {/* Cloud requires upgrade */}
-        {!byokTooLarge && requiresUpgrade && (
-          <Button variant="default" size="sm" onClick={onUpgrade} className="h-8 text-xs px-5">
-            {t("notes.upload.upgrade")}
           </Button>
         )}
 
