@@ -34,6 +34,7 @@ transcription, and Google/Microsoft/Apple calendars.
 | translation keys | 2,851 | 2,408 |
 
 Gates: typecheck, lint, format, `i18n:check` and `build:renderer` all clean.
+`npm test`: **2,848 tests, 0 failures**, 22 skipped, ~38s.
 
 ---
 
@@ -68,10 +69,10 @@ local SQLite mirror it wrote through already existed, so `renameSpace` /
    endpoint). `test/services/reasoningServiceEnforcement.test.js` is what
    guards this — keep it.
 
-1. **The suite got slower** during this work (~10 min vs ~45s before), even
-   though it now runs fewer tests. Not investigated. The pre-existing
-   `uiLanguageStartup` Vite-harness failure stopped reproducing somewhere along
-   the way, which may be related.
+1. ~~The suite got slower~~ — resolved. The slowdown (~10 min) was the failing
+   tests themselves: the Vite harness retries on modules that no longer
+   resolve. With the suite green it runs in ~38s, and the pre-existing
+   `uiLanguageStartup` failure stopped reproducing too.
 
 3. **Native helper releases** — `FaridBerlin/vocelibre` still has 0 releases,
    so the six repointed `scripts/download-*.js` find nothing and fail soft.
