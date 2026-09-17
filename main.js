@@ -228,7 +228,7 @@ function registerOpenWhisprProtocol() {
 // gated where it can't (AppImage/tar.gz with no scheme registration).
 const protocolRegistered = registerOpenWhisprProtocol() || isOAuthSchemeRegistered();
 if (!protocolRegistered) {
-  console.warn(`[Auth] Failed to register ${OAUTH_PROTOCOL}:// protocol handler`);
+  console.warn(`[DeepLink] Failed to register ${OAUTH_PROTOCOL}:// protocol handler`);
 }
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();

@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import {
-  CalendarDays,
   Home,
   BarChart3,
-  MessageSquare,
-  NotebookPen,
   BookOpen,
   Upload,
   Blocks,
@@ -33,8 +30,10 @@ const rowLabelClass =
 const rowButtonClass =
   "group flex items-center gap-2.5 w-full h-8 px-2.5 rounded-md text-left outline-none hover:bg-foreground/4 dark:hover:bg-white/4 focus-visible:ring-1 focus-visible:ring-primary/30 transition-colors duration-150";
 
-export type ControlPanelView =
-  "home" | "chat" | "personal-notes" | "dictionary" | "upload" | "calendars";
+// "personal-notes" has no sidebar entry: the notes view is still reached from an
+// upload result and from a meeting recording, so the route stays even though the
+// nav item is gone.
+export type ControlPanelView = "home" | "personal-notes" | "dictionary" | "upload";
 
 interface ControlPanelSidebarProps {
   activeView: ControlPanelView;
@@ -52,8 +51,6 @@ export default function ControlPanelSidebar({
   updateAction,
 }: ControlPanelSidebarProps) {
   const { t } = useTranslation();
-  const agentAllowed = true;
-  const policyActionsAllowed = true;
 
   const navItems: {
     id: ControlPanelView;
@@ -61,15 +58,8 @@ export default function ControlPanelSidebar({
     icon: React.ComponentType<{ size?: number; className?: string }>;
   }[] = [
     { id: "home", label: t("sidebar.home"), icon: Home },
-    ...(agentAllowed
-      ? [{ id: "chat" as const, label: t("sidebar.chat"), icon: MessageSquare }]
-      : []),
-    { id: "personal-notes", label: t("sidebar.notes"), icon: NotebookPen },
-    ...(policyActionsAllowed
-      ? [{ id: "upload" as const, label: t("sidebar.upload"), icon: Upload }]
-      : []),
+    { id: "upload", label: t("sidebar.upload"), icon: Upload },
     { id: "dictionary", label: t("sidebar.dictionary"), icon: BookOpen },
-    { id: "calendars", label: t("sidebar.calendars"), icon: CalendarDays },
   ];
 
   return (
