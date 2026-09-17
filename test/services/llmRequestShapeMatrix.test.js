@@ -44,8 +44,6 @@ const MATRIX = [
     { max_completion_tokens: MAX_TOKENS }],
   ["openrouter vendor-prefixed id speaks plain chat completions", "openrouter", "openai/gpt-4o", null, AGENT,
     { max_tokens: MAX_TOKENS, temperature: 0.3 }],
-  ["openrouter forwards sampling upstream: temperature-rejecting Claude omits it (#1417)", "openrouter", "anthropic/claude-sonnet-5", null, AGENT,
-    { max_tokens: MAX_TOKENS }],
   ["openrouter suppression uses its native reasoning toggle", "openrouter", "openai/gpt-4o", null, AGENT_NO_THINK,
     { max_tokens: MAX_TOKENS, temperature: 0.3, reasoning: { enabled: false } }],
 

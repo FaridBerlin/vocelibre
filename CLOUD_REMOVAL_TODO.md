@@ -68,16 +68,10 @@ local SQLite mirror it wrote through already existed, so `renameSpace` /
    endpoint). `test/services/reasoningServiceEnforcement.test.js` is what
    guards this — keep it.
 
-1. **`test/helpers/uiLanguageStartup.test.js`** — "fresh Chinese browser locale
-   survives settings hydration" fails with `transport was disconnected, cannot
-   call "fetchModule"` from Vite 8's `SSRCompatModuleRunner`. **Pre-existing**,
-   reproduces on a clean tree, unrelated to this work. Ruled out: the
-   `navigator` stub, a module that fails to load, an error hidden by the
-   harness's `logLevel: "silent"`.
-
-2. **The suite got slower** during this work (minutes vs ~45s). Probably
-   vite-harness tests retrying on modules that no longer resolve. Not
-   investigated.
+1. **The suite got slower** during this work (~10 min vs ~45s before), even
+   though it now runs fewer tests. Not investigated. The pre-existing
+   `uiLanguageStartup` Vite-harness failure stopped reproducing somewhere along
+   the way, which may be related.
 
 3. **Native helper releases** — `FaridBerlin/vocelibre` still has 0 releases,
    so the six repointed `scripts/download-*.js` find nothing and fail soft.
