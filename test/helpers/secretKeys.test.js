@@ -54,13 +54,15 @@ test("every BYOK key round-trips through the generated accessors", () => {
   }
 });
 
-test("openrouter is a first-class secret", () => {
-  const or = BYOK_API_KEYS.find((k) => k.base === "openrouter");
-  assert.ok(or, "openrouter present in manifest");
-  assert.equal(or.env, "OPENROUTER_API_KEY");
+test("a self-hosted scope key round-trips as a first-class secret", () => {
+  // Cloud provider keys were removed; the per-scope self-hosted endpoint
+  // credentials are what the manifest still has to carry.
+  const chat = BYOK_API_KEYS.find((k) => k.base === "chat-agent-custom");
+  assert.ok(chat, "chat-agent-custom present in manifest");
+  assert.equal(chat.env, "CHAT_AGENT_CUSTOM_API_KEY");
   const env = new EnvironmentManager();
-  env.saveOpenrouterKey("sk-or-abc");
-  assert.equal(env.getOpenrouterKey(), "sk-or-abc");
+  env.saveChatAgentCustomKey("sk-local-abc");
+  assert.equal(env.getChatAgentCustomKey(), "sk-local-abc");
 });
 
 test("preload BYOK_KEY_BRIDGES mirror the manifest exactly", () => {

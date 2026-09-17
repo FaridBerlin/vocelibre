@@ -66,7 +66,6 @@ import {
 } from "../models/ModelRegistry";
 import { TINFOIL_PROXY_REQUIRED_ERROR } from "../services/transcriptionBaseUrl";
 import { resolveByokModel, resolveTranscriptionRoute } from "./transcriptionRoute.ts";
-import { shouldSkipTranscriptionApiKey } from "./transcriptionAuth";
 import {
   isSelfHostedTranscription,
   resolveSelfHostedTranscriptionModel,
@@ -333,121 +332,15 @@ const isValidApiKey = (key, provider = "openai") => {
 const STREAMING_FINAL_QUIET_MS = 250;
 const STREAMING_FINAL_CEILING_MS = 2000;
 
-// Both realtime providers share the dictation realtime IPC surface and differ
-// only in the token-provider id. Forcing `provider` here (even though
-// buildStreamingSessionOptions already stamps it) is pinned by
-// audioManagerStreamingRouting.test.js: the hardened main-process allowlist
-// fails closed on an options object that lost the tag (#1624).
-const makeDictationRealtimeProvider = (id) => ({
-  awaitsFinalTranscript: true,
-  warmup: (opts) => window.electronAPI.dictationRealtimeWarmup({ ...opts, provider: id }),
-  start: (opts) => window.electronAPI.dictationRealtimeStart({ ...opts, provider: id }),
-  send: (buf) => window.electronAPI.dictationRealtimeSend(buf),
-  stop: () => window.electronAPI.dictationRealtimeStop(),
-  onPartial: (cb) => window.electronAPI.onDictationRealtimePartial(cb),
-  onFinal: (cb) => window.electronAPI.onDictationRealtimeFinal(cb),
-  onError: (cb) => window.electronAPI.onDictationRealtimeError(cb),
-  onSessionEnd: (cb) => window.electronAPI.onDictationRealtimeSessionEnd(cb),
-});
+// Cloud realtime STT (Deepgram, AssemblyAI, OpenAI Realtime, Corti, Tinfoil)
+// was removed with the rest of cloud transcription, so there is no streaming
+// provider left to dispatch to. shouldUseStreaming() returns false and this
+// table stays empty rather than the call sites growing null checks.
+const STREAMING_PROVIDERS = {};
 
-const STREAMING_PROVIDERS = {
-  deepgram: {
-    warmup: (opts) => window.electronAPI.deepgramStreamingWarmup(opts),
-    start: (opts) => window.electronAPI.deepgramStreamingStart(opts),
-    send: (buf) => window.electronAPI.deepgramStreamingSend(buf),
-    finalize: () => window.electronAPI.deepgramStreamingFinalize(),
-    stop: () => window.electronAPI.deepgramStreamingStop(),
-    status: () => window.electronAPI.deepgramStreamingStatus(),
-    onPartial: (cb) => window.electronAPI.onDeepgramPartialTranscript(cb),
-    onFinal: (cb) => window.electronAPI.onDeepgramFinalTranscript(cb),
-    onError: (cb) => window.electronAPI.onDeepgramError(cb),
-    onSessionEnd: (cb) => window.electronAPI.onDeepgramSessionEnd(cb),
-  },
-  assemblyai: {
-    warmup: (opts) => window.electronAPI.assemblyAiStreamingWarmup(opts),
-    start: (opts) => window.electronAPI.assemblyAiStreamingStart(opts),
-    send: (buf) => window.electronAPI.assemblyAiStreamingSend(buf),
-    finalize: () => window.electronAPI.assemblyAiStreamingForceEndpoint(),
-    stop: () => window.electronAPI.assemblyAiStreamingStop(),
-    status: () => window.electronAPI.assemblyAiStreamingStatus(),
-    onPartial: (cb) => window.electronAPI.onAssemblyAiPartialTranscript(cb),
-    onFinal: (cb) => window.electronAPI.onAssemblyAiFinalTranscript(cb),
-    onError: (cb) => window.electronAPI.onAssemblyAiError(cb),
-    onSessionEnd: (cb) => window.electronAPI.onAssemblyAiSessionEnd(cb),
-  },
-  "openai-realtime": makeDictationRealtimeProvider("openai-realtime"),
-  corti: {
-    warmup: (opts) => window.electronAPI.cortiStreamingWarmup(opts),
-    start: (opts) => window.electronAPI.cortiStreamingStart(opts),
-    send: (buf) => window.electronAPI.cortiStreamingSend(buf),
-    finalize: () => window.electronAPI.cortiStreamingFinalize(),
-    stop: () => window.electronAPI.cortiStreamingStop(),
-    status: () => window.electronAPI.cortiStreamingStatus(),
-    onPartial: (cb) => window.electronAPI.onCortiPartialTranscript(cb),
-    onFinal: (cb) => window.electronAPI.onCortiFinalTranscript(cb),
-    onError: (cb) => window.electronAPI.onCortiError(cb),
-    onSessionEnd: (cb) => window.electronAPI.onCortiSessionEnd(cb),
-  },
-  "tinfoil-realtime": makeDictationRealtimeProvider("tinfoil-realtime"),
-};
-
-// Batch providers that must transcribe via a main-process proxy (CORS,
-// non-Bearer auth, OAuth, or attested transport) instead of a renderer fetch.
-const PROXY_TRANSCRIPTION_PROVIDERS = {
-  tinfoil: {
-    displayName: "Tinfoil",
-    ipc: () => window.electronAPI?.proxyTinfoilTranscription,
-    buildPayload: ({ audioBuffer, language, dictionaryPrompt }) => ({
-      audioBuffer,
-      language,
-      prompt: dictionaryPrompt || undefined,
-    }),
-  },
-  mistral: {
-    displayName: "Mistral",
-    ipc: () => window.electronAPI?.proxyMistralTranscription,
-    buildPayload: ({ audioBuffer, model, language, dictionaryPrompt }) => {
-      const payload = { audioBuffer, model, language };
-      const tokens = (dictionaryPrompt || "")
-        .split(",")
-        .flatMap((entry) => entry.trim().split(/\s+/))
-        .filter(Boolean)
-        .slice(0, 100);
-      if (tokens.length > 0) payload.contextBias = tokens;
-      return payload;
-    },
-  },
-  gemini: {
-    displayName: "Gemini",
-    ipc: () => window.electronAPI?.proxyGeminiTranscription,
-    buildPayload: ({ audioBuffer, model, language, keyterms }) => ({
-      audioBuffer,
-      model,
-      language,
-      keyterms: keyterms.length > 0 ? keyterms : undefined,
-    }),
-  },
-  xai: {
-    displayName: "xAI",
-    ipc: () => window.electronAPI?.proxyXaiTranscription,
-    buildPayload: ({ audioBuffer, language, keyterms }) => {
-      const payload = { audioBuffer, language: language !== "auto" ? language : undefined };
-      if (keyterms.length > 0) payload.keyterms = keyterms;
-      return payload;
-    },
-  },
-  corti: {
-    displayName: "Corti",
-    ipc: () => window.electronAPI?.proxyCortiTranscription,
-    buildPayload: ({ audioBuffer, language, apiSettings }) => ({
-      audioBuffer,
-      // Corti requires a concrete primaryLanguage; default to English when auto-detecting
-      language: language || "en",
-      environment: apiSettings.cortiEnvironment || "us",
-      tenant: (apiSettings.cortiTenant || "").trim() || "base",
-    }),
-  },
-};
+// Batch providers that needed a main-process proxy (CORS, non-Bearer auth,
+// OAuth, attested transport) were all cloud; none remain.
+const PROXY_TRANSCRIPTION_PROVIDERS = {};
 
 class AudioManager {
   constructor() {
@@ -2304,7 +2197,8 @@ registerProcessor("pcm-streaming-processor", PCMStreamingProcessor);
 
   async getAPIKey() {
     const s = getSettings();
-    if (shouldSkipTranscriptionApiKey(s)) {
+    // A self-hosted endpoint carries its own credential.
+    if (isSelfHostedTranscription(s)) {
       return null;
     }
 
@@ -3963,45 +3857,11 @@ registerProcessor("pcm-streaming-processor", PCMStreamingProcessor);
     };
   }
 
-  shouldUseStreaming(isSignedInOverride) {
-    const s = getSettings();
-    if (s.useLocalWhisper) return false;
-
-    // Self-hosted transcription is batch HTTP to the user's server, never cloud realtime WS.
-    if (isSelfHostedTranscription(s)) return false;
-
-    // Corti (BYOK) streams over its own WSS — independent of OpenWhispr Cloud.
-    if (s.cloudTranscriptionProvider === "corti" && s.cloudTranscriptionMode === "byok") {
-      return !!(s.cortiClientId && s.cortiClientSecret);
-    }
-
-    // Tinfoil realtime streams without an OpenWhispr account.
-    if (s.cloudTranscriptionProvider === "tinfoil") {
-      const provider = getTranscriptionProvider("tinfoil");
-      const model = provider?.models.find((m) => m.id === s.cloudTranscriptionModel);
-      return !!model?.streaming && !!s.tinfoilApiKey;
-    }
-
-    // The managed-cloud bootstrap only controls OpenWhispr Cloud. A user's
-    // BYOK realtime model must not be downgraded because managed dictation is
-    // configured for batch processing.
-    if (s.cloudTranscriptionMode === "openwhispr" && this.sttConfig?.dictation?.mode === "batch") {
-      return false;
-    }
-
-    if (REALTIME_MODELS.has(s.cloudTranscriptionModel)) {
-      // Realtime WS is OpenAI-only — other providers fall through to HTTP.
-      if ((s.cloudTranscriptionProvider || "openai") !== "openai") return false;
-      if (s.cloudTranscriptionMode === "byok") return !!s.openaiApiKey;
-      if (s.cloudTranscriptionMode === "openwhispr") return !!(isSignedInOverride ?? s.isSignedIn);
-      return false;
-    }
-
-    if (s.cloudTranscriptionMode !== "openwhispr" || !(isSignedInOverride ?? s.isSignedIn)) {
-      return false;
-    }
-    if (!this.sttConfig) return false;
-    return this.sttConfig.dictation?.mode === "streaming";
+  shouldUseStreaming(_isSignedInOverride) {
+    // Every realtime transcription route was a cloud one (OpenWhispr Cloud,
+    // OpenAI realtime, Corti, Tinfoil). Local online-runtime models stream over
+    // their own websocket in parakeetOnlineStream, not through this path.
+    return false;
   }
 
   async warmupStreamingConnection({ isSignedIn: isSignedInOverride } = {}) {

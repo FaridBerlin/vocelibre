@@ -5,15 +5,6 @@ const { contextBridge, ipcRenderer, webUtils } = require("electron");
 // inlined here; keep them in sync with the BYOK_API_KEYS manifest in
 // src/config/secretKeys.js (the main process derives its plumbing from that).
 const BYOK_KEY_BRIDGES = [
-  { base: "openai", get: "getOpenAIKey", save: "saveOpenAIKey" },
-  { base: "anthropic", get: "getAnthropicKey", save: "saveAnthropicKey" },
-  { base: "gemini", get: "getGeminiKey", save: "saveGeminiKey" },
-  { base: "groq", get: "getGroqKey", save: "saveGroqKey" },
-  { base: "xai", get: "getXaiKey", save: "saveXaiKey" },
-  { base: "mistral", get: "getMistralKey", save: "saveMistralKey" },
-  { base: "openrouter", get: "getOpenrouterKey", save: "saveOpenrouterKey" },
-  { base: "tinfoil", get: "getTinfoilKey", save: "saveTinfoilKey" },
-  { base: "corti", get: "getCortiKey", save: "saveCortiKey" },
   {
     base: "note-formatting-custom",
     get: "getNoteFormattingCustomKey",
@@ -568,18 +559,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setUiLanguage: (language) => ipcRenderer.invoke("set-ui-language", language),
 
   // xAI / Mistral transcription proxies (keys handled by the manifest bridge)
-  proxyXaiTranscription: (data) => ipcRenderer.invoke("proxy-xai-transcription", data),
-  proxyMistralTranscription: (data) => ipcRenderer.invoke("proxy-mistral-transcription", data),
-  proxyGeminiTranscription: (data) => ipcRenderer.invoke("proxy-gemini-transcription", data),
 
   // Corti API
-  getCortiClientId: () => ipcRenderer.invoke("get-corti-client-id"),
-  saveCortiClientId: (key) => ipcRenderer.invoke("save-corti-client-id", key),
-  getCortiClientSecret: () => ipcRenderer.invoke("get-corti-client-secret"),
-  saveCortiClientSecret: (key) => ipcRenderer.invoke("save-corti-client-secret", key),
-  proxyCortiTranscription: (data) => ipcRenderer.invoke("proxy-corti-transcription", data),
-  getTinfoilChatModels: () => ipcRenderer.invoke("get-tinfoil-chat-models"),
-  proxyTinfoilTranscription: (data) => ipcRenderer.invoke("proxy-tinfoil-transcription", data),
 
   // Custom endpoint API keys
   getCustomTranscriptionKey: () => ipcRenderer.invoke("get-custom-transcription-key"),
@@ -592,16 +573,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveBedrockRegion: (value) => ipcRenderer.invoke("save-bedrock-region", value),
   getBedrockProfile: () => ipcRenderer.invoke("get-bedrock-profile"),
   saveBedrockProfile: (value) => ipcRenderer.invoke("save-bedrock-profile", value),
-  getBedrockAccessKeyId: () => ipcRenderer.invoke("get-bedrock-access-key-id"),
-  saveBedrockAccessKeyId: (key) => ipcRenderer.invoke("save-bedrock-access-key-id", key),
-  getBedrockSecretAccessKey: () => ipcRenderer.invoke("get-bedrock-secret-access-key"),
-  saveBedrockSecretAccessKey: (key) => ipcRenderer.invoke("save-bedrock-secret-access-key", key),
   getBedrockSessionToken: () => ipcRenderer.invoke("get-bedrock-session-token"),
   saveBedrockSessionToken: (key) => ipcRenderer.invoke("save-bedrock-session-token", key),
   getAzureEndpoint: () => ipcRenderer.invoke("get-azure-endpoint"),
   saveAzureEndpoint: (value) => ipcRenderer.invoke("save-azure-endpoint", value),
-  getAzureApiKey: () => ipcRenderer.invoke("get-azure-api-key"),
-  saveAzureApiKey: (key) => ipcRenderer.invoke("save-azure-api-key", key),
   getAzureDeployment: () => ipcRenderer.invoke("get-azure-deployment"),
   saveAzureDeployment: (value) => ipcRenderer.invoke("save-azure-deployment", value),
   getAzureApiVersion: () => ipcRenderer.invoke("get-azure-api-version"),
@@ -610,8 +585,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveVertexProject: (value) => ipcRenderer.invoke("save-vertex-project", value),
   getVertexLocation: () => ipcRenderer.invoke("get-vertex-location"),
   saveVertexLocation: (value) => ipcRenderer.invoke("save-vertex-location", value),
-  getVertexApiKey: () => ipcRenderer.invoke("get-vertex-api-key"),
-  saveVertexApiKey: (key) => ipcRenderer.invoke("save-vertex-api-key", key),
   testEnterpriseConnection: (provider, config) =>
     ipcRenderer.invoke("test-enterprise-connection", provider, config),
 
@@ -641,9 +614,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Node-only SDKs (AWS/Azure/Google credential providers) can resolve.
   processEnterpriseReasoning: (text, modelId, agentName, config) =>
     ipcRenderer.invoke("process-enterprise-reasoning", text, modelId, agentName, config),
-  cancelEnterpriseReasoning: () => ipcRenderer.send("enterprise-reasoning-cancel"),
-  enterpriseStreamStart: (payload) => ipcRenderer.invoke("enterprise-stream-start", payload),
-  enterpriseStreamCancel: (streamId) => ipcRenderer.invoke("enterprise-stream-cancel", streamId),
   onEnterpriseStreamPart: registerListener(
     "enterprise-stream-part",
     (callback) => (_event, payload) => callback(payload)
@@ -661,7 +631,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     "managed-enterprise-config-changed",
     (callback) => (_event, snapshot) => callback(snapshot)
   ),
-  clearManagedEnterpriseIdentity: () => ipcRenderer.invoke("clear-managed-enterprise-identity"),
 
   // llama.cpp
   llamaCppCheck: () => ipcRenderer.invoke("llama-cpp-check"),
@@ -719,9 +688,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   resumeMediaPlayback: () => ipcRenderer.invoke("resume-media-playback"),
   getModelCacheRoot: () => ipcRenderer.invoke("get-model-cache-root"),
   openWhisperModelsFolder: () => ipcRenderer.invoke("open-whisper-models-folder"),
-  authClearSession: () => ipcRenderer.invoke("auth-clear-session"),
-  authGetToken: () => ipcRenderer.invoke("auth-get-token"),
-  authGetTokenState: () => ipcRenderer.invoke("auth-get-token-state"),
   authSetToken: (token, expectedGeneration) =>
     ipcRenderer.invoke("auth-set-token", token, expectedGeneration),
   onAuthTokenStateChanged: registerListener(
@@ -730,20 +696,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ),
 
   // OpenWhispr Cloud API
-  cloudHealthCheck: () => ipcRenderer.invoke("cloud-health-check"),
-  cloudTranscribe: (audioBuffer, opts) => ipcRenderer.invoke("cloud-transcribe", audioBuffer, opts),
-  cancelCloudTranscription: () => ipcRenderer.send("cloud-transcribe-cancel"),
-  cloudReason: (text, opts) => ipcRenderer.invoke("cloud-reason", text, opts),
-  cancelCloudReason: () => ipcRenderer.send("cloud-reason-cancel"),
   cloudStreamingUsage: (text, audioDurationSeconds, opts) =>
     ipcRenderer.invoke("cloud-streaming-usage", text, audioDurationSeconds, opts),
-  cloudUsage: () => ipcRenderer.invoke("cloud-usage"),
-  cloudCheckout: (opts) => ipcRenderer.invoke("cloud-checkout", opts),
-  cloudBillingPortal: () => ipcRenderer.invoke("cloud-billing-portal"),
-  cloudSwitchPlan: (opts) => ipcRenderer.invoke("cloud-switch-plan", opts),
-  cloudPreviewSwitch: (opts) => ipcRenderer.invoke("cloud-preview-switch", opts),
-  cloudApiRequest: (opts) => ipcRenderer.invoke("cloud-api-request", opts),
-  getSttConfig: () => ipcRenderer.invoke("get-stt-config"),
   getWorkspacePolicy: (accountId, expectedAuthGeneration) =>
     ipcRenderer.invoke("get-workspace-policy", accountId, expectedAuthGeneration),
   onWorkspacePolicyChanged: (callback) => {
@@ -751,7 +705,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("workspace-policy-changed", listener);
     return () => ipcRenderer.removeListener("workspace-policy-changed", listener);
   },
-  getNoteRecordingConfig: () => ipcRenderer.invoke("get-note-recording-config"),
 
   // Cloud audio file transcription
   transcribeAudioFileCloud: (filePath, options) =>
@@ -765,19 +718,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ),
 
   // Referral stats
-  getReferralStats: () => ipcRenderer.invoke("get-referral-stats"),
-  sendReferralInvite: (email) => ipcRenderer.invoke("send-referral-invite", email),
-  getReferralInvites: () => ipcRenderer.invoke("get-referral-invites"),
 
   // Assembly AI Streaming
   assemblyAiStreamingWarmup: (options) =>
     ipcRenderer.invoke("assemblyai-streaming-warmup", options),
-  assemblyAiStreamingStart: (options) => ipcRenderer.invoke("assemblyai-streaming-start", options),
   assemblyAiStreamingSend: (audioBuffer) =>
     ipcRenderer.send("assemblyai-streaming-send", audioBuffer),
-  assemblyAiStreamingForceEndpoint: () => ipcRenderer.send("assemblyai-streaming-force-endpoint"),
-  assemblyAiStreamingStop: () => ipcRenderer.invoke("assemblyai-streaming-stop"),
-  assemblyAiStreamingStatus: () => ipcRenderer.invoke("assemblyai-streaming-status"),
   onAssemblyAiPartialTranscript: registerListener(
     "assemblyai-partial-transcript",
     (callback) => (_event, text) => callback(text)
@@ -796,12 +742,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ),
 
   // Deepgram Streaming
-  deepgramStreamingWarmup: (options) => ipcRenderer.invoke("deepgram-streaming-warmup", options),
-  deepgramStreamingStart: (options) => ipcRenderer.invoke("deepgram-streaming-start", options),
-  deepgramStreamingSend: (audioBuffer) => ipcRenderer.send("deepgram-streaming-send", audioBuffer),
-  deepgramStreamingFinalize: () => ipcRenderer.send("deepgram-streaming-finalize"),
-  deepgramStreamingStop: () => ipcRenderer.invoke("deepgram-streaming-stop"),
-  deepgramStreamingStatus: () => ipcRenderer.invoke("deepgram-streaming-status"),
   onDeepgramPartialTranscript: registerListener(
     "deepgram-partial-transcript",
     (callback) => (_event, text) => callback(text)
@@ -820,12 +760,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ),
 
   // Corti streaming (BYOK)
-  cortiStreamingWarmup: (options) => ipcRenderer.invoke("corti-streaming-warmup", options),
-  cortiStreamingStart: (options) => ipcRenderer.invoke("corti-streaming-start", options),
-  cortiStreamingSend: (audioBuffer) => ipcRenderer.send("corti-streaming-send", audioBuffer),
-  cortiStreamingFinalize: () => ipcRenderer.send("corti-streaming-finalize"),
-  cortiStreamingStop: () => ipcRenderer.invoke("corti-streaming-stop"),
-  cortiStreamingStatus: () => ipcRenderer.invoke("corti-streaming-status"),
   onCortiPartialTranscript: registerListener(
     "corti-partial-transcript",
     (callback) => (_event, text) => callback(text)
@@ -886,10 +820,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ),
 
   // Dictation realtime streaming
-  dictationRealtimeWarmup: (options) => ipcRenderer.invoke("dictation-realtime-warmup", options),
-  dictationRealtimeStart: (options) => ipcRenderer.invoke("dictation-realtime-start", options),
-  dictationRealtimeSend: (buffer) => ipcRenderer.send("dictation-realtime-send", buffer),
-  dictationRealtimeStop: () => ipcRenderer.invoke("dictation-realtime-stop"),
   onDictationRealtimePartial: registerListener(
     "dictation-realtime-partial",
     (callback) => (_event, data) => callback(data)
@@ -908,15 +838,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ),
 
   // Usage limit events (for showing UpgradePrompt in ControlPanel)
-  notifyLimitReached: (data) => ipcRenderer.send("limit-reached", data),
-  onLimitReached: registerListener("limit-reached", (callback) => (_event, data) => callback(data)),
 
   // Workspace invitation deep link
   onWorkspaceInvitationToken: registerListener(
     "workspace-invitation-token",
     (callback) => (_event, token) => callback(token)
   ),
-  getPendingInvitationToken: () => ipcRenderer.invoke("get-pending-invitation-token"),
 
   // Globe key listener for hotkey capture (macOS only)
   onGlobeKeyPressed: (callback) => {
@@ -1024,7 +951,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Agent cloud streaming (event-based for real-time chunks)
   startAgentStream: (requestId, messages, opts) =>
     ipcRenderer.send("cloud-agent-stream-start", requestId, messages, opts),
-  cancelAgentStream: (requestId) => ipcRenderer.send("cloud-agent-stream-cancel", requestId),
   onAgentStreamChunk: registerListener(
     "cloud-agent-stream-chunk",
     (callback) => (_event, payload) => callback(payload)
@@ -1039,7 +965,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ),
 
   // Agent cloud tools
-  agentWebSearch: (query, numResults) => ipcRenderer.invoke("agent-web-search", query, numResults),
   agentOpenNote: (noteId) => ipcRenderer.invoke("agent-open-note", noteId),
 
   // Agent conversation persistence
