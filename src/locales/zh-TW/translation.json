@@ -724,6 +724,13 @@
     },
     "selfHosted": {
       "endpointHelp": "指向本地網路中相容 OpenAI 的伺服器（例如 Ollama、LM Studio、vLLM 或 llama-server）。"
+    },
+    "technicalDetails": {
+      "title": "技術詳細資料",
+      "httpStatus": "HTTP 狀態",
+      "underlyingError": "底層錯誤",
+      "copy": "複製技術詳細資料",
+      "copyCommand": "複製復原命令"
     }
   },
   "transcription": {

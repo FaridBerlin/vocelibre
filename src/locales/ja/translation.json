@@ -724,6 +724,13 @@
     },
     "selfHosted": {
       "endpointHelp": "ローカルネットワーク上の OpenAI 互換サーバーを指定します（例: Ollama、LM Studio、vLLM、llama-server）。"
+    },
+    "technicalDetails": {
+      "title": "技術情報",
+      "httpStatus": "HTTP ステータス",
+      "underlyingError": "原因となったエラー",
+      "copy": "技術情報をコピー",
+      "copyCommand": "復旧コマンドをコピー"
     }
   },
   "transcription": {

@@ -40,11 +40,7 @@ test("batch uploads retain diarization warnings separately from transcription wa
         export function uploadTitleFallback() { return "Uploaded note"; }
       `,
       "/stores/settingsStore": "export function getSettings() { return {}; }",
-      "/stores/policyRules": "export function isTranscriptionContextAllowed() { return true; }",
-      "/stores/policyStore": `
-        export const usePolicyStore = { getState() { return {}; } };
-      `,
-    },
+          },
   });
   const { addFiles, processBatchQueue, useBatchQueueStore } = await vite.ssrLoadModule(
     "/stores/batchQueueStore.ts"

@@ -23,7 +23,6 @@ import {
   getLocalModel,
   enterpriseProviderName,
 } from "../../models/ModelRegistry";
-import TestConnectionButton from "../TestConnectionButton";
 import { Button } from "../ui/button";
 import { resetOnboardingProgress } from "../onboarding/flow";
 

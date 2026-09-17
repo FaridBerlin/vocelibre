@@ -724,6 +724,13 @@
     },
     "selfHosted": {
       "endpointHelp": "Укажите OpenAI-совместимый сервер в вашей локальной сети (например, Ollama, LM Studio, vLLM или llama-server)."
+    },
+    "technicalDetails": {
+      "title": "Технические сведения",
+      "httpStatus": "Статус HTTP",
+      "underlyingError": "Исходная ошибка",
+      "copy": "Копировать технические сведения",
+      "copyCommand": "Копировать команду восстановления"
     }
   },
   "transcription": {

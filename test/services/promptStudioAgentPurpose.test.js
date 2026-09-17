@@ -49,7 +49,6 @@ test("Prompt Studio labels dictation-agent runs for policy enforcement", async (
           };
           if (modules[source]) return `\0prompt-studio-${modules[source]}`;
           if (source.endsWith("/hooks/useDialogs")) return "\0prompt-studio-dialogs";
-          if (source.endsWith("/hooks/usePolicy")) return "\0prompt-studio-policy";
           if (source.endsWith("/utils/agentName")) return "\0prompt-studio-agent-name";
           if (source.endsWith("/services/ReasoningService")) return "\0prompt-studio-reasoning";
           if (source.endsWith("/models/ModelRegistry")) return "\0prompt-studio-models";
@@ -115,13 +114,6 @@ test("Prompt Studio labels dictation-agent runs for policy enforcement", async (
                   showAlertDialog() {},
                   hideAlertDialog() {},
                 };
-              }
-            `;
-          }
-          if (id === "\0prompt-studio-policy") {
-            return `
-              export function usePolicySnapshot() {
-                return { status: "unmanaged", policy: null, appVersion: "1.8.1" };
               }
             `;
           }

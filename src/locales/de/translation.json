@@ -724,6 +724,13 @@
     },
     "selfHosted": {
       "endpointHelp": "Zeige auf einen OpenAI-kompatiblen Server in deinem lokalen Netzwerk (z. B. Ollama, LM Studio, vLLM oder llama-server)."
+    },
+    "technicalDetails": {
+      "title": "Technische Details",
+      "httpStatus": "HTTP-Status",
+      "underlyingError": "Zugrunde liegender Fehler",
+      "copy": "Technische Details kopieren",
+      "copyCommand": "Wiederherstellungsbefehl kopieren"
     }
   },
   "transcription": {

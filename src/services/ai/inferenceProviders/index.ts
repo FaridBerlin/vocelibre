@@ -8,6 +8,9 @@ import { lanProvider } from "./lan";
 export const PROVIDER_REGISTRY: Readonly<Record<string, InferenceProvider>> = Object.freeze({
   local: localProvider,
   lan: lanProvider,
+  // A "custom" scope is the same self-hosted OpenAI-compatible server, stored
+  // under baseUrl instead of lanUrl.
+  custom: lanProvider,
 });
 
 export type { InferenceProvider, ProviderContext, ProviderCallParams } from "./types";
