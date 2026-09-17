@@ -1604,44 +1604,62 @@ export default function SettingsPage({
                   </SettingsRow>
                 </SettingsPanelRow>
                 <SettingsPanelRow>
-                  <SettingsRow
-                    label={t("settingsPage.general.notifications.meetingDetection")}
-                    description={t(
-                      "settingsPage.general.notifications.meetingDetectionDescription"
-                    )}
+                  <div
+                    className={`pl-4 transition-opacity duration-150 ${
+                      notificationsEnabled ? "opacity-100" : "opacity-50"
+                    }`}
                   >
-                    <Toggle
-                      checked={notifyMeetingDetection}
-                      onChange={setNotifyMeetingDetection}
-                      disabled={!notificationsEnabled}
-                    />
-                  </SettingsRow>
+                    <SettingsRow
+                      label={t("settingsPage.general.notifications.meetingDetection")}
+                      description={t(
+                        "settingsPage.general.notifications.meetingDetectionDescription"
+                      )}
+                    >
+                      <Toggle
+                        checked={notifyMeetingDetection}
+                        onChange={setNotifyMeetingDetection}
+                        disabled={!notificationsEnabled}
+                      />
+                    </SettingsRow>
+                  </div>
                 </SettingsPanelRow>
                 <SettingsPanelRow>
-                  <SettingsRow
-                    label={t("settingsPage.general.notifications.calendarReminders")}
-                    description={t(
-                      "settingsPage.general.notifications.calendarRemindersDescription"
-                    )}
+                  <div
+                    className={`pl-4 transition-opacity duration-150 ${
+                      notificationsEnabled ? "opacity-100" : "opacity-50"
+                    }`}
                   >
-                    <Toggle
-                      checked={notifyCalendarReminders}
-                      onChange={setNotifyCalendarReminders}
-                      disabled={!notificationsEnabled}
-                    />
-                  </SettingsRow>
+                    <SettingsRow
+                      label={t("settingsPage.general.notifications.calendarReminders")}
+                      description={t(
+                        "settingsPage.general.notifications.calendarRemindersDescription"
+                      )}
+                    >
+                      <Toggle
+                        checked={notifyCalendarReminders}
+                        onChange={setNotifyCalendarReminders}
+                        disabled={!notificationsEnabled}
+                      />
+                    </SettingsRow>
+                  </div>
                 </SettingsPanelRow>
                 <SettingsPanelRow>
-                  <SettingsRow
-                    label={t("settingsPage.general.notifications.updates")}
-                    description={t("settingsPage.general.notifications.updatesDescription")}
+                  <div
+                    className={`pl-4 transition-opacity duration-150 ${
+                      notificationsEnabled ? "opacity-100" : "opacity-50"
+                    }`}
                   >
-                    <Toggle
-                      checked={notifyUpdates}
-                      onChange={setNotifyUpdates}
-                      disabled={!notificationsEnabled}
-                    />
-                  </SettingsRow>
+                    <SettingsRow
+                      label={t("settingsPage.general.notifications.updates")}
+                      description={t("settingsPage.general.notifications.updatesDescription")}
+                    >
+                      <Toggle
+                        checked={notifyUpdates}
+                        onChange={setNotifyUpdates}
+                        disabled={!notificationsEnabled}
+                      />
+                    </SettingsRow>
+                  </div>
                 </SettingsPanelRow>
               </SettingsPanel>
             </div>

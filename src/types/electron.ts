@@ -2740,6 +2740,7 @@ declare global {
       onPreviewHold?: (callback: (payload: { showCleanup: boolean }) => void) => () => void;
       onPreviewResult?: (callback: (payload: { text: string }) => void) => () => void;
       onPreviewHide?: (callback: () => void) => () => void;
+      startDictationFromPanel?: () => Promise<{ success: boolean }>;
       startDictationPreview?: (opts: {
         provider: string;
         model: string;

@@ -7,8 +7,12 @@ export { LIVE_TRANSCRIPT_SURFACE_LIMITS };
 // native overlay window around the compact recording pill, so these values
 // and that window size may only change together.
 export const VOICE_PILL_FOOTPRINT = Object.freeze({
-  idle: Object.freeze({ width: 40, height: 40 }),
-  recording: Object.freeze({ width: 92, height: 36 }),
+  // The floating trigger reads as a target on an arbitrary desktop background,
+  // so it carries a 60px hit area rather than the 40px a docked control could
+  // get away with. The listening capsule grew with it to keep the idle ->
+  // listening transition from collapsing the control's height by a third.
+  idle: Object.freeze({ width: 60, height: 60 }),
+  recording: Object.freeze({ width: 108, height: 48 }),
 });
 
 export const LISTENING_ENTRANCE_TIMING = Object.freeze({

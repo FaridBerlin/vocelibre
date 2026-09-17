@@ -53,9 +53,14 @@ test("thinking and recording keep the same persistent glow and pill roots", asyn
   }
   assert.match(thinking, /class="processing-signal-glow" data-active="true"/);
   assert.doesNotMatch(recording, /data-active/);
+
+  // Bar counts are a capsule property, so they are asserted on the panel
+  // variant; the floating trigger renders no waveform at all now.
   const expectedBars = await totalWaveBars();
-  assert.equal((thinking.match(/rounded-full bg-current/g) || []).length, expectedBars);
-  assert.equal((recording.match(/rounded-full bg-current/g) || []).length, expectedBars);
+  const panelThinking = await renderPill("thinking", false, "right", { variant: "panel" });
+  const panelRecording = await renderPill("recording", true, "right", { variant: "panel" });
+  assert.equal((panelThinking.match(/rounded-full bg-current/g) || []).length, expectedBars);
+  assert.equal((panelRecording.match(/rounded-full bg-current/g) || []).length, expectedBars);
 });
 
 test("one Signal glow serves both identities: blue processing, purple agent", async () => {
@@ -77,12 +82,16 @@ test("one Signal glow serves both identities: blue processing, purple agent", as
 test("the pill renders exactly the footprints the native window ladder is sized around", async () => {
   const footprint = await pillFootprints();
   const idle = await renderPill("idle", false);
-  const recording = await renderPill("recording", true);
+  // The capsule is panel-only now; the floating trigger never changes shape.
+  const panelRecording = await renderPill("recording", true, "right", { variant: "panel" });
+  const floatingRecording = await renderPill("recording", true);
 
   assert.match(idle, footprint.idle);
   assert.doesNotMatch(idle, footprint.recording);
-  assert.match(recording, footprint.recording);
-  assert.doesNotMatch(recording, footprint.idle);
+  assert.match(panelRecording, footprint.recording);
+  assert.doesNotMatch(panelRecording, footprint.idle);
+  assert.match(floatingRecording, footprint.idle);
+  assert.doesNotMatch(floatingRecording, footprint.recording);
 });
 
 test("panel thinking contracts to the identity circle instead of freezing a waveform", async () => {
@@ -118,9 +127,11 @@ test("an idle Agent panel starts with the normal pill and expands only while lis
 });
 
 test("the waveform stays to the right of the identity across docks and voice modes", async () => {
-  const right = await renderPill("recording", true, "right");
-  const left = await renderPill("recording", true, "left");
+  // The waveform capsule only exists on the panel variant now.
+  const right = await renderPill("recording", true, "right", { variant: "panel" });
+  const left = await renderPill("recording", true, "left", { variant: "panel" });
   const leftAgent = await renderPill("recording", true, "left", {
+    variant: "panel",
     agentMode: true,
   });
   const leftLiveTranscript = await renderPill("recording", true, "left", {
@@ -141,11 +152,13 @@ test("the waveform stays to the right of the identity across docks and voice mod
 });
 
 test("the collapsed Live Transcript pill transitions its logo into an expand chevron", async () => {
-  const resting = await renderPill("recording", true);
+  const resting = await renderPill("recording", true, "right", { variant: "panel" });
   const hovered = await renderPill("recording", true, "right", {
+    variant: "panel",
     showExpandChevron: true,
   });
   const leftHovered = await renderPill("recording", true, "left", {
+    variant: "panel",
     showExpandChevron: true,
   });
 
@@ -161,8 +174,10 @@ test("the collapsed Live Transcript pill transitions its logo into an expand che
   );
 });
 
-test("the idle pill keeps the logo at normal foreground strength", async () => {
-  const idle = await renderPill("idle", false);
+test("the panel pill keeps the logo at normal foreground strength", async () => {
+  // The floating trigger now paints its own bolt surface, so the neutral
+  // surface tokens live on with the panel variant that still uses them.
+  const idle = await renderPill("idle", false, "right", { variant: "panel" });
 
   assert.match(idle, /border-border-hover[^"\n]*dark:border-border\/50/);
   assert.match(
@@ -174,11 +189,25 @@ test("the idle pill keeps the logo at normal foreground strength", async () => {
 test("the floating hover pill changes surface treatment without zooming", async () => {
   const footprint = await pillFootprints();
   const hovered = await renderPill("hover", false);
+  const css = readDictationStyles();
 
-  assert.match(hovered, /border-border-hover bg-surface-3 text-foreground/);
-  assert.match(hovered, /box-shadow:var\(--shadow-card-hover-subtle\)/);
+  // Hover is expressed through the bolt surface now. The breathing keyframe
+  // sets box-shadow, which outranks any inline hover shadow, so the hover
+  // treatment has to come from CSS keyed on the state.
+  assert.match(hovered, /data-bolt-surface="true"/);
+  assert.match(hovered, /data-pill-state="hover"/);
+  assert.match(css, /\.voice-pill-control\[data-bolt-surface="true"\]\[data-pill-state="hover"\]/);
+
+  // Still no zoom, and the footprint never changes on hover.
   assert.doesNotMatch(hovered, /style="[^"]*transform:/);
   assert.match(hovered, footprint.idle);
+});
+
+test("the panel hover pill keeps its neutral surface treatment", async () => {
+  const hovered = await renderPill("hover", false, "right", { variant: "panel" });
+
+  assert.match(hovered, /border-border-hover bg-surface-3 text-foreground/);
+  assert.doesNotMatch(hovered, /style="[^"]*transform:/);
   assert.match(hovered, /<svg width="22" height="22"/);
 });
 
@@ -206,7 +235,7 @@ test("an interactive voice pill is keyboard focusable", async () => {
 });
 
 test("the waveform uses foreground contrast, rounded caps, and a pronounced height range", async () => {
-  const recording = await renderPill("recording", true);
+  const recording = await renderPill("recording", true, "right", { variant: "panel" });
   const { WAVEFORM_BAR_MIN_PX, WAVEFORM_BAR_MAX_PX, resolveWaveformBarHeight } =
     await import("../../src/components/dictation/waveformMath.ts");
 
@@ -236,9 +265,10 @@ test("Live Transcript hands visual border ownership to the shared panel", async 
 
 test("Agent Mode uses the supplied mark, a purple perimeter glow, and a neutral waveform", async () => {
   const agentRecording = await renderPill("recording", true, "right", {
+    variant: "panel",
     agentMode: true,
   });
-  const normalRecording = await renderPill("recording", true);
+  const normalRecording = await renderPill("recording", true, "right", { variant: "panel" });
   const { AGENT_MODE_PATH } = await import("../../src/components/dictation/voiceIdentityMorph.ts");
   const styles = readDictationStyles();
 
@@ -308,4 +338,69 @@ test("the voice identity performs an actual SVG geometry morph", async () => {
   assert.ok(midpoint.sparkOpacity > 0);
   assert.equal(agent.agentOpacity, 1);
   assert.equal(agent.constructionOpacity, 0);
+});
+
+test("the floating trigger keeps one circular bolt form across idle and listening", async () => {
+  const footprint = await pillFootprints();
+  const idle = await renderPill("idle", false);
+  const listening = await renderPill("recording", true);
+  const panel = await renderPill("idle", false, "right", { variant: "panel" });
+
+  // Idle and listening differ only by the arcs: same surface, same glyph, same
+  // footprint. This is the whole point of the redesign.
+  for (const markup of [idle, listening]) {
+    assert.match(markup, /data-bolt-surface="true"/);
+    assert.match(markup, /voice-pill-bolt[^"\n]*scale-100 opacity-100/);
+    assert.match(markup, footprint.idle);
+  }
+
+  // The old capsule UI must be gone from the floating trigger entirely: no
+  // waveform bars, no divider padding, no identity mark standing in for a bolt.
+  assert.doesNotMatch(listening, /rounded-full bg-current/);
+  assert.doesNotMatch(listening, /voice-pill-control[^"\n]*pr-1/);
+  assert.match(listening, /voice-pill-identity-logo[^"\n]*opacity-0/);
+
+  // The docked panel variant still owns the identity mark that morphs to Agent.
+  assert.doesNotMatch(panel, /data-bolt-surface/);
+});
+
+test("sparking arcs mark live capture only, and only on the floating trigger", async () => {
+  const idle = await renderPill("idle", false);
+  const listening = await renderPill("recording", true);
+  const processing = await renderPill("processing", false);
+  const panelListening = await renderPill("recording", true, "right", { variant: "panel" });
+
+  assert.doesNotMatch(idle, /voice-pill-arc/);
+  assert.doesNotMatch(processing, /voice-pill-arc/);
+  assert.doesNotMatch(panelListening, /voice-pill-arc/);
+
+  assert.match(listening, /class="voice-pill-arcs"/);
+  assert.equal((listening.match(/class="voice-pill-arc"/g) || []).length, 6);
+  // Each arc is addressed by index so the CSS can give it its own cycle.
+  for (let i = 1; i <= 6; i += 1) {
+    assert.match(listening, new RegExp(`data-arc="${i}"`));
+  }
+});
+
+test("the bolt treatment supplies its own contrast and keeps the glyph still", async () => {
+  const css = readDictationStyles();
+
+  // The trigger sits on an arbitrary desktop, so it cannot inherit surface tokens.
+  assert.match(css, /\.voice-pill-control\[data-bolt-surface="true"\]/);
+  assert.match(css, /--bolt-center:\s*#8fe0ff/);
+  assert.match(css, /--bolt-core:\s*#2196f3/);
+  assert.match(css, /--bolt-edge:\s*#0a3d8f/);
+  assert.match(css, /animation:\s*voice-pill-breathe/);
+
+  // All motion lives in the glow and arcs; a moving bolt would not stay legible.
+  assert.match(css, /@keyframes voice-pill-breathe/);
+  assert.match(css, /@keyframes voice-pill-arc-flicker/);
+  assert.doesNotMatch(css, /voice-pill-bolt\s*\{[^}]*animation/);
+
+  // The radar rings the arcs replaced must be gone, not merely unused.
+  assert.doesNotMatch(css, /voice-pill-listening-ring/);
+  assert.doesNotMatch(css, /@keyframes voice-pill-ping/);
+
+  // Reduced motion still has to distinguish resting from live.
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });

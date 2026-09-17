@@ -4352,6 +4352,14 @@ class IPCHandlers {
     const isAgentDictationPillInteractive = () =>
       this.windowManager.getAgentDictationPillState().interactive;
 
+    // The Home empty state offers the hotkey as a button for people who have
+    // not learned it yet. It routes through the same toggle the hotkey fires,
+    // so every lifecycle and onboarding guard still applies.
+    ipcMain.handle("start-dictation-from-panel", () => {
+      this.windowManager.sendToggleDictation();
+      return { success: true };
+    });
+
     ipcMain.handle("toggle-agent-panel-dictation", (event) => {
       if (!isAgentDictationPill(event) || !isAgentDictationPillInteractive()) {
         return { success: false };

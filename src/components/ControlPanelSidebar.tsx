@@ -100,14 +100,23 @@ export default function ControlPanelSidebar({
             <button
               key={item.id}
               onClick={() => onViewChange(item.id)}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "group relative flex items-center gap-2.5 w-full h-8 px-2.5 rounded-md outline-none transition-colors duration-150 text-left",
+                "group relative flex items-center gap-2.5 w-full h-8 px-2.5 rounded-lg outline-none transition-colors duration-150 text-left",
                 "focus-visible:ring-1 focus-visible:ring-primary/30",
                 isActive
-                  ? "bg-primary/8 dark:bg-primary/10"
+                  ? "bg-primary/14 dark:bg-primary/20"
                   : "hover:bg-foreground/4 dark:hover:bg-white/4 active:bg-foreground/6"
               )}
             >
+              {/* The filled pill alone reads as hover on a dense sidebar; the
+                  rail is what makes the current view unambiguous at a glance. */}
+              {isActive && (
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-r-full bg-primary"
+                />
+              )}
               <Icon
                 size={15}
                 className={cn(

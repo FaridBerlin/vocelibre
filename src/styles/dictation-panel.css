@@ -606,6 +606,25 @@
     animation: none;
   }
 
+  /* Keep the resting glow and a single static ring so the trigger and the
+     live-capture state stay distinguishable without motion. */
+  .voice-pill-control[data-bolt-surface="true"] {
+    animation: none;
+    box-shadow:
+      0 0 12px rgb(33 150 243 / 0.6),
+      0 0 26px rgb(33 150 243 / 0.32);
+  }
+
+  /* Hold a single arc lit instead of flickering, so live still reads without
+     motion. */
+  .voice-pill-arc {
+    animation: none;
+  }
+
+  .voice-pill-arc[data-arc="1"] {
+    opacity: 0.8;
+  }
+
   .inline-response-shimmer {
     animation: none;
     color: var(--color-foreground);
@@ -633,5 +652,140 @@
 
   .assistant-response-content-updating {
     filter: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Floating trigger: electric-blue bolt
+   ------------------------------------------------------------------------ */
+
+/* The trigger sits on an arbitrary desktop, so it supplies its own contrast
+   instead of inheriting the surface tokens the docked panel variant uses.
+   data-bolt-surface is set only for the floating variant's circular form. */
+.voice-pill-control[data-bolt-surface="true"] {
+  --bolt-edge: #0a3d8f;
+  --bolt-core: #2196f3;
+  --bolt-center: #8fe0ff;
+  border-color: color-mix(in srgb, var(--bolt-center) 55%, transparent);
+  background: radial-gradient(
+    circle at 34% 28%,
+    var(--bolt-center) 0%,
+    var(--bolt-core) 52%,
+    var(--bolt-edge) 100%
+  );
+  color: #f2fbff;
+  animation: voice-pill-breathe 2s ease-in-out infinite;
+}
+
+/* Hover: the surface tokens that used to carry this are gone, and the breathing
+   keyframe overrides any inline box-shadow, so hover has to brighten the
+   gradient and quicken the breath from here instead. */
+.voice-pill-control[data-bolt-surface="true"][data-pill-state="hover"] {
+  --bolt-center: #b6ecff;
+  --bolt-core: #48a9f7;
+  animation-duration: 1.2s;
+}
+
+/* The glyph stays still: all motion lives in the glow and the rings, so the
+   bolt itself never blurs or rotates out of legibility. */
+.voice-pill-control[data-bolt-surface="true"] .voice-pill-bolt {
+  fill: currentColor;
+  stroke: currentColor;
+  filter: drop-shadow(0 1px 2px rgb(4 30 66 / 0.45));
+}
+
+/* Scale and glow are animated together so the trigger reads as breathing
+   rather than merely pulsing brightness. */
+@keyframes voice-pill-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 12px rgb(33 150 243 / 0.6),
+      0 0 26px rgb(33 150 243 / 0.32);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow:
+      0 0 18px rgb(33 150 243 / 0.7),
+      0 0 38px rgb(33 150 243 / 0.42);
+  }
+}
+
+/* Sparking arcs marking live capture. The field extends 12px beyond the 60px
+   button, which is exactly the dock inset the overlay window reserves
+   (voice-pill-position-* above), so an arc can never clip at the window edge. */
+.voice-pill-arcs {
+  position: absolute;
+  inset: -12px;
+  pointer-events: none;
+}
+
+.voice-pill-arc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 0;
+  animation-name: voice-pill-arc-flicker;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+
+.voice-pill-arc polyline {
+  fill: none;
+  stroke: #6fd3ff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: miter;
+  filter: drop-shadow(0 0 3px rgb(111 211 255 / 0.9));
+}
+
+/* Non-harmonic cycles: with no common period the six arcs never line up, so
+   the sparking reads as random without any JS randomness (which would also
+   differ between server render and hydration). Each arc is lit for ~280ms. */
+.voice-pill-arc[data-arc="1"] {
+  animation-duration: 1.7s;
+  animation-delay: 0s;
+}
+.voice-pill-arc[data-arc="2"] {
+  animation-duration: 2.3s;
+  animation-delay: 0.37s;
+}
+.voice-pill-arc[data-arc="3"] {
+  animation-duration: 1.9s;
+  animation-delay: 0.71s;
+}
+.voice-pill-arc[data-arc="4"] {
+  animation-duration: 2.9s;
+  animation-delay: 1.13s;
+}
+.voice-pill-arc[data-arc="5"] {
+  animation-duration: 2.1s;
+  animation-delay: 1.49s;
+}
+.voice-pill-arc[data-arc="6"] {
+  animation-duration: 2.6s;
+  animation-delay: 1.91s;
+}
+
+/* Hard steps rather than a fade: a lightning arc snaps on and off. The lit
+   window is a fraction of each cycle, so ~280ms at these durations. */
+@keyframes voice-pill-arc-flicker {
+  0% {
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  7% {
+    opacity: 0.55;
+  }
+  12% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
   }
 }

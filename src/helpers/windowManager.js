@@ -229,6 +229,23 @@ class WindowManager {
       return;
     }
 
+    if (process.platform === "linux") {
+      // Linux ignores the `forward` option, so a window returned to
+      // click-through never delivers another mouseenter. The renderer only
+      // re-enables capture from the pill's onMouseEnter, so the first
+      // mouseleave after a drag latches the pill click-through for the rest of
+      // the session and it can never be hovered or dragged again. Same root
+      // cause as the meeting card in #1456.
+      //
+      // Tradeoff: the pill window keeps hit-testing, so its click-through
+      // headroom (the tooltip/glow margin around the pill) swallows desktop
+      // clicks in a 176x120 corner instead of passing them through. Windows
+      // already accepts exactly this for the same window; an undraggable pill
+      // is the worse failure.
+      this.mainWindow.setIgnoreMouseEvents(false);
+      return;
+    }
+
     if (shouldCapture) {
       this.mainWindow.setIgnoreMouseEvents(false);
     } else {
