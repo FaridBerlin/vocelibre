@@ -7,6 +7,7 @@ import type { TranscriptionItem as TranscriptionItemType } from "../types/electr
 import { formatHotkeyLabel, parseHotkeyList } from "../utils/hotkeys";
 import { formatDateGroup } from "../utils/dateFormatting";
 import { useSettingsStore } from "../stores/settingsStore";
+import LanguageSelector from "./ui/LanguageSelector";
 
 interface HistoryViewProps {
   history: TranscriptionItemType[];
@@ -42,6 +43,8 @@ export default function HistoryView({
   const { t } = useTranslation();
   const personalDataRetentionEnabled = useSettingsStore((s) => s.dataRetentionEnabled);
   const dataRetentionEnabled = personalDataRetentionEnabled;
+  const preferredLanguage = useSettingsStore((s) => s.preferredLanguage);
+  const updateTranscriptionSettings = useSettingsStore((s) => s.updateTranscriptionSettings);
 
   const groupedHistory = useMemo(() => {
     if (history.length === 0) return [];
@@ -122,11 +125,22 @@ export default function HistoryView({
         )}
 
         <div className="min-w-0">
-          <div className="flex items-center gap-1.5 pb-2.5">
-            <Mic size={12} className="text-muted-foreground" />
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-              {t("upcoming.transcriptions")}
-            </span>
+          <div className="flex items-center justify-between gap-3 pb-2.5">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Mic size={12} className="text-muted-foreground" />
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                {t("upcoming.transcriptions")}
+              </span>
+            </div>
+            {/* Writes the same preferredLanguage the settings pane does. Anything
+                but "auto" is passed to the engine as an explicit language, which
+                is what stops it drifting into another one mid-dictation. */}
+            <div className="w-44 shrink-0" title={t("settings.language.transcriptionDescription")}>
+              <LanguageSelector
+                value={preferredLanguage}
+                onChange={(value) => updateTranscriptionSettings({ preferredLanguage: value })}
+              />
+            </div>
           </div>
           {!dataRetentionEnabled && (
             <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10 px-3.5 py-2.5 flex items-center gap-2.5">

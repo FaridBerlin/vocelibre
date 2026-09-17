@@ -350,6 +350,13 @@ const clampVadValue = (key: WhisperVadKey, raw: unknown): number => {
 
 const LANGUAGE_MIGRATIONS: Record<string, string> = { zh: "zh-CN" };
 
+// A fresh install dictates in English rather than auto-detecting. Auto-detect
+// re-decides per utterance, so an accent or a borrowed foreign word can flip a
+// whole dictation into another language; an explicit code is passed to the
+// engine and pins it. Installs that already chose a language keep it — this is
+// only the fallback for an absent key — and "auto" is still selectable.
+const DEFAULT_PREFERRED_LANGUAGE = "en-US";
+
 function migratePreferredLanguage() {
   if (!isBrowser) return;
   const stored = localStorage.getItem("preferredLanguage");
@@ -1217,7 +1224,7 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
   allowOpenAIFallback: readBoolean("allowOpenAIFallback", false),
   allowLocalFallback: readBoolean("allowLocalFallback", false),
   fallbackWhisperModel: readString("fallbackWhisperModel", "base"),
-  preferredLanguage: readString("preferredLanguage", "auto"),
+  preferredLanguage: readString("preferredLanguage", DEFAULT_PREFERRED_LANGUAGE),
   chineseScriptPreference: normalizeChineseScriptPreference(
     readString("chineseScriptPreference", "as-transcribed")
   ),
