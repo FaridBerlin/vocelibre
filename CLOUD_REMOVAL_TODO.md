@@ -48,10 +48,16 @@ went 115 → 5 (the survivors are inert locals), `*.openwhispr.com` 22 → 4.
 | `npm run typecheck` | clean |
 | `npm run lint` | clean |
 | `npm run format:check` | clean |
-| `npm test` | see below — 35 test files for deleted features were removed; re-run to get the current count |
+| `npm run build:renderer` | clean — **add this to your loop** |
+| `npm test` | 35 test files for deleted features were removed; count pending a clean run |
 
-> The suite got noticeably slower during day 2 (minutes, not ~45s). Worth a
-> look: probably vite-harness tests retrying on modules that no longer resolve.
+> **`tsc` does not typecheck plain `.js`.** Day 2 shipped a green typecheck with
+> four dead imports in `audioManager.js` and the dictation-inference helpers
+> that only `npm run build:renderer` caught. Run the build after every deletion
+> pass, not just tsc.
+
+> The suite got noticeably slower on day 2 (minutes, not ~45s). Worth a look;
+> likely vite-harness tests retrying on modules that no longer resolve.
 
 **Before running tests:** `npm run rebuild:node`. Before running the app again:
 `npm run rebuild:electron`. (better-sqlite3 is built for Electron's ABI by
