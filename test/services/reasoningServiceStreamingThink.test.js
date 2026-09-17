@@ -534,8 +534,8 @@ test("self-hosted streaming preserves think tags when thinking is enabled", asyn
 test("non-local streaming remains unfiltered", async (t) => {
   const { reasoningService } = await loadReasoningService(
     t,
-    "openwhispr-cloud-streaming-think-test-",
-    { window: { electronAPI: { getGroqKey: async () => "test-key" } } }
+    "openwhispr-selfhosted-streaming-think-test-",
+    { window: { electronAPI: { getChatAgentCustomKey: async () => "test-key" } } }
   );
   const originalFetch = globalThis.fetch;
   t.after(() => {
@@ -545,9 +545,14 @@ test("non-local streaming remains unfiltered", async (t) => {
 
   const stream = reasoningService.processTextStreamingAI(
     [{ role: "user", content: "hello" }],
-    "llama-3.3-70b-versatile",
-    "groq",
-    { systemPrompt: "Answer the user.", disableThinking: true },
+    "some-model",
+    "custom",
+    {
+      systemPrompt: "Answer the user.",
+      disableThinking: true,
+      baseUrl: "https://stt.example.com/v1",
+      customApiKey: "test-key",
+    },
     {}
   );
 
@@ -558,7 +563,7 @@ test("chat cancellation leaves single-shot reasoning alive until all requests ar
   const { reasoningService } = await loadReasoningService(
     t,
     "openwhispr-non-streaming-reason-cancel-test-",
-    { window: { electronAPI: { getGroqKey: async () => "test-key" } } }
+    { window: { electronAPI: { getChatAgentCustomKey: async () => "test-key" } } }
   );
   const originalFetch = globalThis.fetch;
   t.after(() => {
@@ -580,12 +585,11 @@ test("chat cancellation leaves single-shot reasoning alive until all requests ar
     });
   };
 
-  const reasoning = reasoningService.processText(
-    "clean this text",
-    "llama-3.3-70b-versatile",
-    null,
-    { provider: "groq" }
-  );
+  const reasoning = reasoningService.processText("clean this text", "some-model", null, {
+    provider: "custom",
+    baseUrl: "https://llm.example.com/v1",
+    customApiKey: "test-key",
+  });
   while (!requestStarted) await waitForMicrotasks();
   const cancelled = assert.rejects(reasoning, /cancelled/i);
 

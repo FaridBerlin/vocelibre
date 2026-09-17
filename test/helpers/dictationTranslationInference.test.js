@@ -120,20 +120,6 @@ test("managed mode never falls through to a stale provider when signed out", asy
   assert.equal(result.config.provider, undefined);
 });
 
-test("provider mode rejects a stale local catalog provider", async () => {
-  const { resolveDictationTranslationInference } = await load();
-
-  const result = resolveDictationTranslationInference({
-    ...baseSettings,
-    translationProvider: "qwen",
-    translationModel: "qwen2.5-coder",
-  });
-
-  assert.equal(result.reachable, false);
-  assert.equal(result.displayProvider, "none");
-  assert.equal(result.config.provider, undefined);
-});
-
 test("custom provider credentials stay scoped to custom mode", async () => {
   const { resolveDictationTranslationInference } = await load();
 

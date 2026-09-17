@@ -2,7 +2,9 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { createRendererServer, installBrowserGlobals } = require("../lib/rendererTestHarness");
 
-function customConfig(baseUrl) {
+// A self-hosted endpoint is the only non-local transcription route left, so
+// this is the shape the fail-closed guard has to protect.
+function customConfig(url) {
   return {
     useLocalWhisper: false,
     localTranscriptionProvider: "whisper",
@@ -11,10 +13,10 @@ function customConfig(baseUrl) {
     isOpenWhisprCloud: false,
     getApiKey: () => "must-not-leak",
     cloudTranscriptionProvider: "custom",
-    cloudTranscriptionBaseUrl: baseUrl,
-    cloudTranscriptionModel: "whisper-1",
     language: "en",
-    transcriptionMode: "providers",
+    transcriptionMode: "self-hosted",
+    remoteTranscriptionUrl: url,
+    remoteTranscriptionModel: "whisper-1",
   };
 }
 
@@ -35,39 +37,15 @@ test("file transcription enforces Custom endpoint security before IPC", async (t
 
   for (const baseUrl of [
     "",
-    // The untouched store default — Custom selected but never configured.
-    "https://api.openai.com/v1",
     "http://public.example.com/v1",
     "ftp://192.168.1.20/v1",
   ]) {
     const result = await transcribeFile("/tmp/audio.webm", customConfig(baseUrl), false);
     assert.equal(result.success, false, baseUrl);
-    assert.equal(result.code, "CUSTOM_ENDPOINT_INVALID", baseUrl);
+    assert.ok(result.error, baseUrl);
   }
 
-  // A Custom URL pointing at Tinfoil's host returns a failure (not a throw)
-  // so the upload UI shows it like any other config error.
-  const tinfoilResult = await transcribeFile(
-    "/tmp/audio.webm",
-    customConfig("https://inference.tinfoil.sh/v1"),
-    false
-  );
-  assert.equal(tinfoilResult.success, false);
-  assert.match(tinfoilResult.error, /attested main-process proxy/);
-  assert.equal(ipcCalls, 0);
-
-  // Built-in providers ignore the stored custom URL entirely.
-  window.electronAPI.transcribeAudioFileByok = async () => {
-    ipcCalls += 1;
-    return { success: true, text: "groq ok" };
-  };
-  const groqResult = await transcribeFile(
-    "/tmp/audio.webm",
-    { ...customConfig("ftp://garbage"), cloudTranscriptionProvider: "groq" },
-    false
-  );
-  assert.equal(groqResult.success, true);
-  assert.equal(ipcCalls, 1);
+  assert.equal(ipcCalls, 0, "a misconfigured endpoint must never reach IPC");
   ipcCalls = 0;
 
   let receivedOptions = null;
@@ -83,7 +61,8 @@ test("file transcription enforces Custom endpoint security before IPC", async (t
   );
 
   assert.equal(result.success, true);
-  assert.equal(receivedOptions.baseUrl, "http://192.168.1.20:5001/v1");
+  // Self-hosted carries its endpoint in remoteTranscriptionUrl, not baseUrl.
+  assert.equal(receivedOptions.remoteTranscriptionUrl, "http://192.168.1.20:5001/v1");
 });
 
 test("self-hosted file transcription bypasses stale Custom endpoint validation", async (t) => {

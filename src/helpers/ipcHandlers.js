@@ -4557,6 +4557,10 @@ class IPCHandlers {
       });
     });
 
+    // Honors system proxy via Electron's net stack. useSessionCookies:false so
+    // Electron doesn't auto-attach jar cookies on top of our explicit headers.
+    const proxyFetch = (url, init = {}) => net.fetch(url, { ...init, useSessionCookies: false });
+
     ipcMain.handle("retry-transcription", async (event, id, settings) => {
       const buffer = this.audioStorageManager.getAudioBuffer(id);
       if (!buffer) return { success: false, error: "Audio file not found" };
@@ -5260,54 +5264,6 @@ class IPCHandlers {
       return pending.finally(() => {
         if (meetingReconnectPromise === pending) meetingReconnectPromise = null;
       });
-    };
-
-    const fetchRealtimeToken = async (event, options, { streams } = {}) => {
-      const postServerToken = async (path, body = {}) => {
-        const apiUrl = getApiUrl();
-        if (!apiUrl) {
-          const err = new Error("OpenWhispr API URL not configured");
-          err.code = "NO_API";
-          throw err;
-        }
-        const authHeader = await getAuthHeader(event);
-        if (!Object.keys(authHeader).length) throw new Error("Not authenticated");
-        const url = `${apiUrl}${path}`;
-        let response;
-        try {
-          response = await proxyFetch(url, {
-            method: "POST",
-            headers: withPolicyHeaders({ "Content-Type": "application/json", ...authHeader }),
-            body: JSON.stringify(body),
-          });
-        } catch (err) {
-          const classified = classifyAndLog(err, url);
-          if (classified.isNetworkError) {
-            throw Object.assign(new Error(err.message || "Network request failed"), {
-              code: "NETWORK_ERROR",
-              networkCode: classified.code,
-              messageKey: classified.messageKey,
-            });
-          }
-          throw err;
-        }
-        if (!response.ok) {
-          throw await readPolicyResponseError(response, `Token request failed: ${response.status}`);
-        }
-        return response.json();
-      };
-
-      return fetchRealtimeTokenForProvider(
-        options.provider,
-        {
-          environmentManager: this.environmentManager,
-          proxyFetch,
-          postServerToken,
-          mintCortiToken: (tokenOptions) => this._mintStoredCortiToken(tokenOptions),
-        },
-        options,
-        { streams }
-      );
     };
 
     const getMeetingSystemAudioCapabilityMode = () => {
@@ -6311,78 +6267,6 @@ class IPCHandlers {
       }, DICTATION_IDLE_TIMEOUT_MS);
     };
 
-    const connectDictationStreaming = async (event, options) => {
-      // Older renderers did not label the OpenAI dictation adapter. Dictation
-      // realtime was OpenAI-only before Tinfoil support, so preserve that
-      // established default while requiring new adapters to be explicit.
-      options = {
-        ...options,
-        provider: options?.provider || "openai-realtime",
-      };
-
-      if (this._dictationConnectPromise) {
-        await this._dictationConnectPromise.catch(() => {});
-      }
-
-      clearDictationIdleTimer();
-      this._dictationPreviewEnabled = !!options.preview;
-
-      if (this._dictationStreaming) {
-        await this._dictationStreaming.disconnect().catch(() => {});
-        this._dictationStreaming = null;
-      }
-
-      const connectInner = async () => {
-        const isCloud = options.mode !== "byok";
-        // Dictation renderers before 1.8.4 omit `provider` and mean OpenAI; the
-        // default lives here, at the boundary, so the token allowlist stays
-        // fail-closed for genuinely unknown providers (#1624).
-        const provider = options.provider ?? "openai-realtime";
-        const streaming = new OpenAIRealtimeStreaming();
-        setupDictationCallbacks(streaming, event);
-        // Assign before the token fetch (a real network round trip) so
-        // dictation-realtime-send has a live instance to buffer into instead
-        // of silently dropping the start of the recording.
-        streaming.beginConnecting();
-        this._dictationStreaming = streaming;
-        try {
-          const apiKey = await fetchRealtimeToken(event, {
-            mode: options.mode,
-            provider,
-          });
-          if (provider === "tinfoil-realtime") {
-            const model = options.model || TINFOIL_REALTIME_MODEL;
-            await streaming.connect({
-              apiKey,
-              model,
-              // The capture worklet emits 16kHz PCM; declare the true rate.
-              inputRate: 16000,
-              createSocket: () => createTinfoilRealtimeSocket({ model, apiKey }),
-            });
-          } else {
-            await streaming.connect({
-              apiKey,
-              model: options.model || "gpt-4o-mini-transcribe",
-              // OpenAI rejects rates below 24kHz; the 16kHz capture is upsampled instead.
-              captureRate: 16000,
-              preconfigured: isCloud,
-            });
-          }
-        } catch (err) {
-          if (this._dictationStreaming === streaming) this._dictationStreaming = null;
-          throw err;
-        }
-      };
-
-      this._dictationConnectPromise = connectInner();
-      try {
-        await this._dictationConnectPromise;
-      } finally {
-        this._dictationConnectPromise = null;
-      }
-    };
-
-    // Pre-warm: fetch tokens + connect WebSockets before user hits record
     ipcMain.handle("meeting-transcription-prepare", async (event, options = {}) => {
       if (meetingTranscriptionPrepareInProgress || meetingTranscriptionStartInProgress) {
         debugLogger.debug("Meeting transcription prepare already in progress, ignoring");
