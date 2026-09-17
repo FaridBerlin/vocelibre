@@ -659,11 +659,6 @@
       "description": "我們已將轉錄切換至 OpenWhispr Cloud，提供更快、更準確的結果。你之前的設定已儲存，隨時可在設定中切換回來。",
       "viewSettings": "查看設定"
     },
-    "aiCta": {
-      "title": "用 AI 增強你的轉錄品質",
-      "description": "說話時自動修正文法、標點和格式。",
-      "enable": "啟用 AI 增強"
-    },
     "loading": "載入中...",
     "gpu": {
       "bannerTitle": "GPU 加速可用",
@@ -1319,10 +1314,6 @@
       "speechToText": {
         "description": "聽寫與筆記錄音引擎",
         "label": "語音轉文字"
-      },
-      "llms": {
-        "description": "用於清理、筆記格式化和聊天的模型",
-        "label": "語言模型"
       },
       "privacyData": {
         "description": "隱私、權限與資料分析",

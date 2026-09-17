@@ -96,9 +96,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
   const [settingsSection, setSettingsSection] = useState<string | undefined>(
     initialSettingsSection
   );
-  const [aiCTADismissed, setAiCTADismissed] = useState(
-    () => localStorage.getItem("aiCTADismissed") === "true"
-  );
   const [showReferrals, setShowReferrals] = useState(false);
   const [invitationToken, setInvitationToken] = useState<string | null>(null);
   const [invitationNotesEntry, setInvitationNotesEntry] = useState<{
@@ -911,55 +908,49 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
               </div>
             )}
             <RequiredModelsBanner />
-            {(gpuAccelAvailable.transcription || gpuAccelAvailable.intelligence) &&
-              activeView === "home" &&
-              !gpuBannerDismissed && (
-                <div className="max-w-3xl mx-auto w-full mb-3">
-                  <div className="rounded-lg border border-primary/20 dark:border-primary/15 bg-primary/5 p-3">
-                    <div className="flex items-start gap-3">
-                      <div className="shrink-0 w-8 h-8 rounded-md bg-primary/10 dark:bg-primary/15 flex items-center justify-center">
-                        <Zap size={16} className="text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-foreground mb-0.5">
-                          {t("controlPanel.gpu.bannerTitle")}
-                        </p>
-                        <p className="text-xs text-muted-foreground mb-2">
-                          {t("controlPanel.gpu.bannerDescription")}
-                        </p>
-                        <div className="flex items-center gap-3">
-                          <Button
-                            variant="default"
-                            size="sm"
-                            className="h-7 text-xs"
-                            onClick={() => {
-                              setSettingsSection(
-                                gpuAccelAvailable.transcription
-                                  ? "transcription"
-                                  : gpuAccelAvailable.intelligence === "dictationAgent"
-                                    ? "dictationAgent"
-                                    : "intelligence"
-                              );
-                              setShowSettings(true);
-                            }}
-                          >
-                            {t("controlPanel.gpu.enableButton")}
-                          </Button>
-                          <button
-                            onClick={() => {
-                              setGpuBannerDismissed(true);
-                              localStorage.setItem("gpuBannerDismissedUnified", "true");
-                            }}
-                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            {t("controlPanel.gpu.dismissButton")}
-                          </button>
-                        </div>
+            {/* Only the transcription offer is actionable: the language-model
+                settings page the intelligence offer linked to is gone. */}
+            {gpuAccelAvailable.transcription && activeView === "home" && !gpuBannerDismissed && (
+              <div className="max-w-3xl mx-auto w-full mb-3">
+                <div className="rounded-lg border border-primary/20 dark:border-primary/15 bg-primary/5 p-3">
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 w-8 h-8 rounded-md bg-primary/10 dark:bg-primary/15 flex items-center justify-center">
+                      <Zap size={16} className="text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground mb-0.5">
+                        {t("controlPanel.gpu.bannerTitle")}
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {t("controlPanel.gpu.bannerDescription")}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={() => {
+                            setSettingsSection("transcription");
+                            setShowSettings(true);
+                          }}
+                        >
+                          {t("controlPanel.gpu.enableButton")}
+                        </Button>
+                        <button
+                          onClick={() => {
+                            setGpuBannerDismissed(true);
+                            localStorage.setItem("gpuBannerDismissedUnified", "true");
+                          }}
+                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {t("controlPanel.gpu.dismissButton")}
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
             {activeView === "home" && (
               <HistoryView
                 history={history}
@@ -967,9 +958,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
                 hotkey={hotkey}
                 showCloudMigrationBanner={showCloudMigrationBanner}
                 setShowCloudMigrationBanner={setShowCloudMigrationBanner}
-                aiCTADismissed={aiCTADismissed}
-                setAiCTADismissed={setAiCTADismissed}
-                useCleanupModel={useCleanupModel}
                 copyToClipboard={copyToClipboard}
                 deleteTranscription={deleteTranscription}
                 clearAllTranscriptions={clearAllTranscriptions}

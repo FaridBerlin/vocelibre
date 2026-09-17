@@ -659,11 +659,6 @@
       "description": "Wir haben die Transkription auf OpenWhispr Cloud umgestellt für schnellere und genauere Ergebnisse. Ihre bisherigen Einstellungen sind gespeichert – wechseln Sie jederzeit in den Einstellungen zurück.",
       "viewSettings": "Einstellungen anzeigen"
     },
-    "aiCta": {
-      "title": "Verbessern Sie Ihre Transkriptionen mit KI",
-      "description": "Korrigiert automatisch Grammatik, Zeichensetzung und Formatierung, während Sie sprechen.",
-      "enable": "KI-Verbesserung aktivieren"
-    },
     "loading": "Laden...",
     "gpu": {
       "bannerTitle": "GPU-Beschleunigung verfügbar",
@@ -1341,10 +1336,6 @@
       "speechToText": {
         "description": "Engines für Diktat & Notizaufnahme",
         "label": "Spracherkennung"
-      },
-      "llms": {
-        "description": "Modelle für Chat, Bereinigung & Zusammenfassungen",
-        "label": "Sprachmodelle"
       },
       "privacyData": {
         "description": "Datenschutz, Berechtigungen & Analyse",

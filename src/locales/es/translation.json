@@ -659,11 +659,6 @@
       "description": "Cambiamos tu transcripción a OpenWhispr Cloud para resultados más rápidos y precisos. Tu configuración anterior se guardó: puedes volver cuando quieras en Ajustes.",
       "viewSettings": "Ver ajustes"
     },
-    "aiCta": {
-      "title": "Mejora tus transcripciones con IA",
-      "description": "Corrige automáticamente gramática, puntuación y formato mientras hablas.",
-      "enable": "Activar mejora con IA"
-    },
     "loading": "Cargando...",
     "gpu": {
       "bannerTitle": "Aceleración GPU disponible",
@@ -1319,10 +1314,6 @@
       "speechToText": {
         "description": "Motores para dictado y grabación de notas",
         "label": "Conversión de voz a texto"
-      },
-      "llms": {
-        "description": "Modelos para chat, limpieza y resúmenes",
-        "label": "Modelos de lenguaje"
       },
       "privacyData": {
         "description": "Privacidad, permisos y análisis",

@@ -659,11 +659,6 @@
       "description": "より高速で正確な文字起こしのために OpenWhispr Cloud に切り替えました。以前の設定は保存されています。設定からいつでも戻せます。",
       "viewSettings": "設定を表示"
     },
-    "aiCta": {
-      "title": "AI で文字起こしを向上させましょう",
-      "description": "話しながら文法、句読点、書式を自動的に修正します。",
-      "enable": "AI 補正を有効にする"
-    },
     "loading": "読み込み中...",
     "gpu": {
       "bannerTitle": "GPU アクセラレーションが利用可能",
@@ -1319,10 +1314,6 @@
       "speechToText": {
         "description": "ディクテーションとノート録音用エンジン",
         "label": "音声認識"
-      },
-      "llms": {
-        "description": "クリーンアップ、ノートのフォーマット、チャット用のモデル",
-        "label": "言語モデル"
       },
       "privacyData": {
         "description": "プライバシー、権限、分析",

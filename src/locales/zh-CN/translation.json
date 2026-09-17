@@ -659,11 +659,6 @@
       "description": "我们已将转录切换到 VoceLibre 云端，以获得更快、更准确的结果。你之前的设置已保存——随时可以在设置中切换回去。",
       "viewSettings": "查看设置"
     },
-    "aiCta": {
-      "title": "用 AI 提升你的转录质量",
-      "description": "在你说话的同时，自动修正语法、标点和格式。",
-      "enable": "启用 AI 增强"
-    },
     "loading": "加载中...",
     "gpu": {
       "bannerTitle": "GPU 加速可用",
@@ -1319,10 +1314,6 @@
       "speechToText": {
         "description": "听写与笔记录音引擎",
         "label": "语音转文字"
-      },
-      "llms": {
-        "description": "用于清理、笔记格式化和聊天的模型",
-        "label": "语言模型"
       },
       "privacyData": {
         "description": "隐私、权限与数据分析",

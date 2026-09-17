@@ -19,7 +19,6 @@ import {
   Key,
   Cpu,
   Network,
-  Sparkles,
   AlertTriangle,
   Loader2,
   Check,
@@ -31,11 +30,8 @@ import {
   Copy,
   Trash2,
   Info,
-  MessageSquare,
   FileAudio,
-  Wand2,
   Upload,
-  Languages,
 } from "lucide-react";
 import MicPermissionWarning from "./ui/MicPermissionWarning";
 import MicrophoneSettings from "./ui/MicrophoneSettings";
@@ -63,7 +59,6 @@ import { useSystemAudioPermission } from "../hooks/useSystemAudioPermission";
 import { useClipboard } from "../hooks/useClipboard";
 import { useUpdater } from "../hooks/useUpdater";
 
-import PromptStudio from "./ui/PromptStudio";
 import { ProviderTabs } from "./ui/ProviderTabs";
 import { HotkeyListInput } from "./ui/HotkeyListInput";
 import { useHotkeyRegistration } from "../hooks/useHotkeyRegistration";
@@ -81,10 +76,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import LinuxPttSetupInfo from "./ui/LinuxPttSetupInfo";
 import { Toggle } from "./ui/toggle";
 import DeveloperSection from "./DeveloperSection";
-import ChatAgentSettings from "./settings/ChatAgentSettings";
-import DictationAgentSettings from "./settings/DictationAgentSettings";
-import DictationTranslationSettings from "./settings/DictationTranslationSettings";
-import InferenceConfigEditor from "./settings/InferenceConfigEditor";
 import { MeetingTranscriptionPanel } from "./settings/MeetingSettings";
 import { UploadTranscriptionPanel } from "./settings/UploadSettings";
 import LanguageSelector from "./ui/LanguageSelector";
@@ -125,7 +116,6 @@ export type SettingsSectionType =
   | "general"
   | "hotkeys"
   | "speechToText"
-  | "llms"
   | "privacyData"
   | "system";
 
@@ -645,98 +635,9 @@ function TranscriptionSection({
   );
 }
 
-interface AiModelsSectionProps {
-  useCleanupModel: boolean;
-  setUseCleanupModel: (value: boolean) => void;
-  toast: (opts: {
-    title: string;
-    description: string;
-    variant?: "default" | "destructive" | "success";
-    duration?: number;
-  }) => void;
-}
-
-const CLEANUP_MODE_TOAST_KEY: Record<InferenceMode, string> = {
-  local: "switchedLocal",
-  "self-hosted": "switchedSelfHosted",
-};
-
-function NoteFormattingSettings() {
-  const { t } = useTranslation();
-  const autoGenerateNoteTitle = useSettingsStore((s) => s.autoGenerateNoteTitle);
-  const setAutoGenerateNoteTitle = useSettingsStore((s) => s.setAutoGenerateNoteTitle);
-
-  return (
-    <div className="space-y-4">
-      <SettingsPanel>
-        <SettingsPanelRow>
-          <SettingsRow
-            label={t("settingsPage.noteFormatting.autoGenerateTitle")}
-            description={t("settingsPage.noteFormatting.autoGenerateTitleDescription")}
-          >
-            <Toggle checked={autoGenerateNoteTitle} onChange={setAutoGenerateNoteTitle} />
-          </SettingsRow>
-        </SettingsPanelRow>
-      </SettingsPanel>
-      <InferenceConfigEditor scope="noteFormatting" />
-    </div>
-  );
-}
-
-function AiModelsSection({ useCleanupModel, setUseCleanupModel, toast }: AiModelsSectionProps) {
-  const { t } = useTranslation();
-
-  const handleCleanupModeChange = (mode: InferenceMode) => {
-    const toastKey = CLEANUP_MODE_TOAST_KEY[mode];
-    toast({
-      title: t(`settingsPage.aiModels.toasts.${toastKey}.title`),
-      description: t(`settingsPage.aiModels.toasts.${toastKey}.description`),
-      variant: "success",
-      duration: 3000,
-    });
-  };
-
-  return (
-    <div className="space-y-4">
-      <SettingsPanel>
-        <SettingsPanelRow>
-          <SettingsRow
-            label={t("settingsPage.aiModels.enableTextCleanup")}
-            description={t("settingsPage.aiModels.enableTextCleanupDescription")}
-          >
-            <Toggle checked={useCleanupModel} onChange={setUseCleanupModel} />
-          </SettingsRow>
-        </SettingsPanelRow>
-      </SettingsPanel>
-
-      {useCleanupModel && (
-        <>
-          <InferenceConfigEditor scope="dictationCleanup" onModeChange={handleCleanupModeChange} />
-          <GpuDeviceSelector purpose="intelligence" />
-        </>
-      )}
-    </div>
-  );
-}
-
 type SpeechTab = "dictation" | "noteRecording" | "upload";
-type LlmTab =
-  | "dictationCleanup"
-  | "dictationAgent"
-  | "dictationTranslation"
-  | "noteFormatting"
-  | "chatIntelligence";
 
 const SPEECH_TABS: SpeechTab[] = ["dictation", "noteRecording", "upload"];
-const LLM_TABS: LlmTab[] = [
-  "dictationCleanup",
-  "dictationAgent",
-  "dictationTranslation",
-  "noteFormatting",
-  "chatIntelligence",
-];
-const AGENT_LLM_TABS = new Set<LlmTab>(["dictationAgent", "chatIntelligence"]);
-
 function useSubTab<T extends string>(storageKey: string, options: readonly T[], initial?: T) {
   const [tab, setTab] = useLocalStorage<T>(storageKey, initial ?? options[0]);
   useEffect(() => {
@@ -854,67 +755,6 @@ function SpeechToTextTabs({
       <TabPanel active={tab === "dictation"}>{renderDictation()}</TabPanel>
       <TabPanel active={tab === "noteRecording"}>{renderNoteRecording()}</TabPanel>
       <TabPanel active={tab === "upload"}>{renderUpload()}</TabPanel>
-    </div>
-  );
-}
-
-function LlmsTabs({
-  initialTab,
-  renderDictationCleanup,
-  renderDictationAgent,
-  renderDictationTranslation,
-  renderNoteFormatting,
-  renderChatIntelligence,
-}: {
-  initialTab?: LlmTab;
-  renderDictationCleanup: () => React.ReactNode;
-  renderDictationAgent: () => React.ReactNode;
-  renderDictationTranslation: () => React.ReactNode;
-  renderNoteFormatting: () => React.ReactNode;
-  renderChatIntelligence: () => React.ReactNode;
-}) {
-  const { t } = useTranslation();
-  const agentAllowed = true;
-  const visibleTabIds = agentAllowed
-    ? LLM_TABS
-    : LLM_TABS.filter((tabId) => !AGENT_LLM_TABS.has(tabId));
-  const [tab, setTab] = useSubTab<LlmTab>("settings.llmsTab", visibleTabIds, initialTab);
-
-  const subTabs = [
-    { id: "dictationCleanup", name: t("settingsPage.llms.tabs.dictationCleanup") },
-    { id: "dictationAgent", name: t("settingsPage.llms.tabs.dictationAgent") },
-    { id: "dictationTranslation", name: t("settingsPage.llms.tabs.dictationTranslation") },
-    { id: "noteFormatting", name: t("settingsPage.llms.tabs.noteFormatting") },
-    { id: "chatIntelligence", name: t("settingsPage.llms.tabs.chatIntelligence") },
-  ].filter((item) => visibleTabIds.includes(item.id as LlmTab));
-
-  return (
-    <div className="space-y-4">
-      <SectionHeader
-        title={t("settingsPage.llms.title")}
-        description={t("settingsPage.llms.description")}
-      />
-      <ProviderTabs
-        providers={subTabs}
-        selectedId={tab}
-        onSelect={(id) => setTab(id as LlmTab)}
-        renderIcon={(id) => {
-          if (id === "dictationCleanup") return <Wand2 className="w-3.5 h-3.5" />;
-          if (id === "dictationAgent") return <Sparkles className="w-3.5 h-3.5" />;
-          if (id === "dictationTranslation") return <Languages className="w-3.5 h-3.5" />;
-          if (id === "noteFormatting") return <BookOpen className="w-3.5 h-3.5" />;
-          return <MessageSquare className="w-3.5 h-3.5" />;
-        }}
-      />
-      <TabPanel active={tab === "dictationCleanup"}>{renderDictationCleanup()}</TabPanel>
-      {agentAllowed && (
-        <TabPanel active={tab === "dictationAgent"}>{renderDictationAgent()}</TabPanel>
-      )}
-      <TabPanel active={tab === "dictationTranslation"}>{renderDictationTranslation()}</TabPanel>
-      <TabPanel active={tab === "noteFormatting"}>{renderNoteFormatting()}</TabPanel>
-      {agentAllowed && (
-        <TabPanel active={tab === "chatIntelligence"}>{renderChatIntelligence()}</TabPanel>
-      )}
     </div>
   );
 }
@@ -1188,12 +1028,8 @@ export default function SettingsPage({
   const [hasMountedSpeechToText, setHasMountedSpeechToText] = useState(
     activeSection === "speechToText"
   );
-  const [hasMountedLlms, setHasMountedLlms] = useState(activeSection === "llms");
   if (activeSection === "speechToText" && !hasMountedSpeechToText) {
     setHasMountedSpeechToText(true);
-  }
-  if (activeSection === "llms" && !hasMountedLlms) {
-    setHasMountedLlms(true);
   }
 
   const handleClearAllAudio = async () => {
@@ -2813,7 +2649,6 @@ EOF`,
         );
 
       case "speechToText":
-      case "llms":
         return null;
 
       case "privacyData":
@@ -3402,37 +3237,6 @@ EOF`,
                 <UploadTranscriptionPanel />
               </div>
             )}
-          />
-        </TabPanel>
-      )}
-      {hasMountedLlms && (
-        <TabPanel active={activeSection === "llms"}>
-          <LlmsTabs
-            initialTab={
-              activeSection === "llms" ? (initialSubTab as LlmTab | undefined) : undefined
-            }
-            renderChatIntelligence={() => <ChatAgentSettings />}
-            renderDictationCleanup={() => (
-              <div className="space-y-6">
-                <AiModelsSection
-                  useCleanupModel={useCleanupModel}
-                  setUseCleanupModel={(value) => {
-                    updateCleanupSettings({ useCleanupModel: value });
-                  }}
-                  toast={toast}
-                />
-                <div className="border-t border-border/40 pt-6">
-                  <SectionHeader
-                    title={t("settingsPage.prompts.title")}
-                    description={t("settingsPage.prompts.description")}
-                  />
-                  <PromptStudio />
-                </div>
-              </div>
-            )}
-            renderDictationAgent={() => <DictationAgentSettings />}
-            renderDictationTranslation={() => <DictationTranslationSettings />}
-            renderNoteFormatting={() => <NoteFormattingSettings />}
           />
         </TabPanel>
       )}
