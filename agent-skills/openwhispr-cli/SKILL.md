@@ -22,7 +22,6 @@ Every command runs against one of two backends. The behavior is identical from t
 | Backend    | What it talks to                                  | Use when                                                                                      |
 | ---------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | **local**  | Desktop app's loopback HTTP bridge on `127.0.0.1` | The desktop app is running. Authoritative during/right after a recording.                     |
-| **remote** | `https://api.openwhispr.com/api/v1`               | Desktop is closed, or running on a different machine, or the user wants cloud-side semantics. |
 
 ### How the CLI picks a backend
 
@@ -146,7 +145,6 @@ openwhispr auth logout
 ```bash
 openwhispr config get [--format json]
 openwhispr config set backend auto|local|remote
-openwhispr config set api-base https://api.openwhispr.com
 ```
 
 Only `backend` and `api-base` are settable via `config set`. The API key is managed through `auth login`/`auth logout`. `api-base` is overridable for self-hosted or staging deployments (default: production cloud). The `OPENWHISPR_API_BASE` env var also overrides it for a single invocation.

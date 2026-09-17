@@ -8,7 +8,13 @@ Keep responses focused, brief, and concise. Keep disclaimers and caveats short, 
 
 ## Project Overview
 
-VoceLibre is an Electron-based desktop dictation application that uses whisper.cpp for speech-to-text transcription. It supports both local (privacy-focused) and cloud (OpenAI API) processing modes.
+VoceLibre is an Electron-based desktop dictation application that uses whisper.cpp for speech-to-text transcription.
+
+**There is no account, no backend and no cloud tier.** Transcription and AI
+reasoning run on downloaded local models, or on an OpenAI-compatible endpoint
+the user hosts themselves. Nothing in live code contacts an `openwhispr.com`
+host — a grep for it returns only the load-bearing identifiers listed under
+"The OpenWhispr → VoceLibre rename" below, which must not be changed.
 
 ## Architecture Overview
 

@@ -65,30 +65,25 @@ npm run i18n:check    # locale key/placeholder parity
 
 - **Voice dictation** — global hotkey to dictate into any app with automatic pasting
 - **Dictation translation** — dedicated hotkey to dictate in one language and paste the text in another
-- **AI agent** — talk to GPT-5, Claude, Gemini, Groq, Tinfoil, OpenRouter, or local models with a named voice assistant
-- **Voice Assistant hotkey** — dedicated hotkey that sends what you say straight to your AI assistant as a command, no wake word needed and no cleanup pass; highlighted text is edited in place. With auto-paste enabled, answers paste at a focused text cursor or stream into a floating panel and copy to the clipboard when no writable cursor is available. You can also opt in to sending a screenshot of your current screen as context
+- **AI assistant** — a named voice assistant running on a local GGUF model via llama.cpp, or on an OpenAI-compatible endpoint you host yourself
+- **Voice Assistant hotkey** — dedicated hotkey that sends what you say straight to your assistant as a command, no wake word needed and no cleanup pass; highlighted text is edited in place. With auto-paste enabled, answers paste at a focused text cursor or stream into a floating panel and copy to the clipboard when no writable cursor is available. You can also opt in to sending a screenshot of your current screen as context
 - **Meeting transcription** — auto-detect Zoom, Teams, and FaceTime calls with live speaker diarization, voice fingerprinting, and Google, Microsoft, or Apple Calendar integration
-- **Local speaker diarization** — on-device speaker labelling with voice fingerprint recognition across meetings, no cloud required
-- **Notes** — create, organize, and search notes with folders, semantic search, cloud sync, and AI actions
-- **Team spaces & sharing** — free for signed-in users; share notes on the web with link, domain, or invite-only visibility, and collaborate in team spaces with roles, invitations, and server-enforced membership
+- **Local speaker diarization** — on-device speaker labelling with voice fingerprint recognition across meetings
+- **Notes** — create, organize, and search notes with folders, on-device semantic search, and AI actions
 - **Audio import** — transcribe existing audio and video: drag in files, batch-upload, or paste a YouTube/audio URL, with optional speaker detection
-- **Local or cloud — your choice** — all core features (transcription, AI reasoning, speaker diarization, semantic search) work with local models or cloud providers — including GPU-accelerated local Whisper on Metal, CUDA, and Vulkan (AMD/Intel)
-- **Enterprise controls** — enforce organization policy, company SSO and SCIM, and centrally managed Amazon Bedrock or Azure OpenAI access without distributing cloud keys
-- **Public API & MCP** — manage notes and transcriptions programmatically or connect your AI assistant via the [MCP server](https://docs.openwhispr.com/integrations/mcp)
+- **Local or self-hosted — nothing in between** — transcription, AI reasoning, speaker diarization and semantic search all run on downloaded models, with GPU-accelerated Whisper on Metal, CUDA and Vulkan (AMD/Intel). Point any of them at your own server instead if you prefer
+
+Everything above works with no account. There is no sign-in, no cloud tier and
+no telemetry to opt out of: the app talks to your machine, the model hosts you
+download from, and any endpoint you configure yourself.
 
 ## Documentation
 
-VoceLibre is a rebrand of OpenWhispr's local-dictation path, so most of the upstream docs still apply. Visit **[docs.openwhispr.com](https://docs.openwhispr.com)** for:
-
-- [Getting started](https://docs.openwhispr.com/quickstart)
-- [Platform guides](https://docs.openwhispr.com/platform/macos) (macOS, Windows, Linux)
-- [API reference](https://docs.openwhispr.com/api/overview)
-- [MCP server setup](https://docs.openwhispr.com/integrations/mcp)
-- [Troubleshooting](https://docs.openwhispr.com/troubleshooting)
-
-Repo examples:
-
-- [Custom ASR shim](examples/custom-asr-shim/) for Self-Hosted transcription against non-OpenAI-compatible ASR APIs
+- [Local Whisper setup](LOCAL_WHISPER_SETUP.md)
+- [Troubleshooting](TROUBLESHOOTING.md)
+- [Debugging](DEBUG.md)
+- [Network allowlist](docs/network-allowlist.md)
+- [Custom ASR shim](examples/custom-asr-shim/) — self-hosted transcription against non-OpenAI-compatible ASR APIs
 
 ## Tech stack
 
