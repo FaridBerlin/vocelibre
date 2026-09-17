@@ -609,6 +609,7 @@
       "couldNotDeleteDescription": "Эта транскрипция, возможно, уже была удалена.",
       "couldNotDeleteDescriptionGeneric": "Что-то пошло не так. Попробуйте снова.",
       "empty": "Транскрипций пока нет",
+      "startRecording": "Начать запись",
       "dataRetentionDisabled": "Хранение данных отключено. Транскрипции и аудио не сохраняются в истории.",
       "press": "Нажмите",
       "toStart": "чтобы начать",

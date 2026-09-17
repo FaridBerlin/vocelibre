@@ -603,6 +603,7 @@
       "couldNotDeleteDescription": "Esta transcrição pode já ter sido removida.",
       "couldNotDeleteDescriptionGeneric": "Algo deu errado. Tente novamente.",
       "empty": "Ainda sem transcrições",
+      "startRecording": "Iniciar gravação",
       "dataRetentionDisabled": "A retenção de dados está desativada. Transcrições e áudio não são salvos no histórico.",
       "press": "Pressione",
       "toStart": "para iniciar",

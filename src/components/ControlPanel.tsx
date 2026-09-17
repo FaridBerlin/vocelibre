@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   PanelLeftOpen,
   PanelLeftClose,
+  X,
 } from "lucide-react";
 import PostMigrationOnboarding from "./PostMigrationOnboarding";
 import { RequiredModelsBanner } from "./RequiredModelsBanner";
@@ -936,17 +937,23 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
                         >
                           {t("controlPanel.gpu.enableButton")}
                         </Button>
-                        <button
-                          onClick={() => {
-                            setGpuBannerDismissed(true);
-                            localStorage.setItem("gpuBannerDismissedUnified", "true");
-                          }}
-                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {t("controlPanel.gpu.dismissButton")}
-                        </button>
                       </div>
                     </div>
+                    {/* This offer is non-urgent and shares the banner slot with
+                        the update notice, so dismissal moves to a corner X and
+                        stops reading as a second action. */}
+                    <button
+                      type="button"
+                      aria-label={t("controlPanel.gpu.dismissButton")}
+                      title={t("controlPanel.gpu.dismissButton")}
+                      onClick={() => {
+                        setGpuBannerDismissed(true);
+                        localStorage.setItem("gpuBannerDismissedUnified", "true");
+                      }}
+                      className="shrink-0 -mt-1 -mr-1 flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/30"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 </div>
               </div>

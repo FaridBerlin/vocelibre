@@ -609,6 +609,7 @@
       "couldNotDeleteDescription": "Cette transcription a peut-être déjà été supprimée.",
       "couldNotDeleteDescriptionGeneric": "Une erreur est survenue. Veuillez réessayer.",
       "empty": "Aucune transcription pour le moment",
+      "startRecording": "Démarrer l'enregistrement",
       "dataRetentionDisabled": "La conservation des données est désactivée. Les transcriptions et l'audio ne sont pas sauvegardés dans l'historique.",
       "press": "Appuyez sur",
       "toStart": "pour démarrer",

@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
 import { Loader2, Sparkles, Cloud, X, Mic, Trash2, Archive } from "lucide-react";
@@ -247,18 +247,29 @@ export default function HistoryView({
                 <h3 className="text-xs font-semibold text-foreground/70 dark:text-foreground/60 mb-2">
                   {t("controlPanel.history.empty")}
                 </h3>
-                <div className="flex items-center gap-2 text-xs text-foreground/50 dark:text-foreground/25">
-                  <span>{t("controlPanel.history.press")}</span>
-                  {parseHotkeyList(hotkey).map((hk, index) => (
-                    <Fragment key={hk}>
-                      {index > 0 && <span className="text-foreground/30">/</span>}
-                      <kbd className="inline-flex items-center h-5 px-1.5 rounded-sm bg-surface-1 dark:bg-white/6 border border-border/50 text-xs font-mono font-medium text-foreground/60 dark:text-foreground/40">
+                {/* The empty state is the one place a first run has nothing to
+                    act on, so the hotkey is offered as a real button and the
+                    shortcut rides along on its label to teach it. */}
+                <Button
+                  size="sm"
+                  className="h-8 gap-2 text-xs"
+                  onClick={() => {
+                    void window.electronAPI?.startDictationFromPanel?.();
+                  }}
+                >
+                  <Mic size={13} />
+                  <span>{t("controlPanel.history.startRecording")}</span>
+                  {parseHotkeyList(hotkey)
+                    .slice(0, 1)
+                    .map((hk) => (
+                      <kbd
+                        key={hk}
+                        className="inline-flex items-center h-4 px-1 rounded-sm bg-primary-foreground/15 text-[10px] font-mono font-medium"
+                      >
                         {formatHotkeyLabel(hk)}
                       </kbd>
-                    </Fragment>
-                  ))}
-                  <span>{t("controlPanel.history.toStart")}</span>
-                </div>
+                    ))}
+                </Button>
               </div>
             </div>
           ) : (
