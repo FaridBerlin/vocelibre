@@ -24,7 +24,6 @@ async function loadFileTranscription(t) {
   const vite = await createRendererServer(t, {
     cachePrefix: "openwhispr-file-diarization-warning-test-",
     mockModules: {
-      "/lib/auth": "export const withSessionRefresh = (fn) => fn();",
     },
   });
   const mod = await vite.ssrLoadModule("/services/fileTranscription.ts");

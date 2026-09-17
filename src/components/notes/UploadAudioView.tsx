@@ -32,8 +32,6 @@ import {
   transcriptionErrorKey,
   MEETINGS_FOLDER_NAME,
 } from "./shared";
-import { useAuth } from "../../hooks/useAuth";
-import { useUsage } from "../../hooks/useUsage";
 import { useSettings } from "../../hooks/useSettings";
 import { useStartOnboarding } from "../../hooks/useStartOnboarding";
 import {
@@ -259,11 +257,9 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
 
   const [providerReady, setProviderReady] = useState<boolean | null>(null);
 
-  const { isSignedIn } = useAuth();
-  const usage = useUsage();
-  // The server enforces the free-tier size limit regardless, so an unresolved
-  // entitlement should not block a payer's upload.
-  const isProUser = usage?.hasPaidAccessOptimistic ?? false;
+  // No account and no paid tier: uploads are limited only by what the local
+  // model can process.
+  const isProUser = true;
 
   const apiKeys = useSettings();
   const {
@@ -318,8 +314,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   });
   const useCleanupModel = useSettingsStore((s) => s.useCleanupModel);
 
-  const isOpenWhisprCloud =
-    isSignedIn && cloudTranscriptionMode === "openwhispr" && !useLocalWhisper;
+  const isOpenWhisprCloud = false;
 
   // Mode detection
   const isSelfHosted = transcriptionMode === "self-hosted" && !useLocalWhisper;
@@ -345,9 +340,6 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
       // Self-hosted / custom endpoints (e.g. local whisper.cpp): no file size restrictions
     } else if (isByok) {
       byokTooLarge = file.sizeBytes > byokMaxFileSize;
-      if (byokTooLarge && !isSignedIn) {
-        requiresAccount = true;
-      }
     } else {
       // Cloud (OpenWhispr) — user is always signed in here
       fileTooLarge = file.sizeBytes > CLOUD_PRO_MAX_FILE_SIZE;
@@ -1126,7 +1118,6 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
               byokMaxFileSizeMb={byokMaxFileSizeMb}
               requiresAccount={requiresAccount}
               isProUser={!!isProUser}
-              onUpgrade={() => usage?.openCheckout()}
               onCreateAccount={handleCreateAccount}
               onSwitchToCloud={switchToCloud}
               onOpenSettings={onOpenSettings}
@@ -1562,7 +1553,6 @@ interface SelectedViewProps {
   byokMaxFileSizeMb: number;
   requiresAccount: boolean;
   isProUser: boolean;
-  onUpgrade: () => void;
   onCreateAccount: () => void;
   onSwitchToCloud: () => void;
   onOpenSettings?: (section: string) => void;
@@ -1583,7 +1573,6 @@ function SelectedView({
   byokMaxFileSizeMb,
   requiresAccount,
   isProUser,
-  onUpgrade,
   onCreateAccount,
   onSwitchToCloud,
   onOpenSettings,
@@ -1682,20 +1671,6 @@ function SelectedView({
             className="h-8 text-xs px-5"
           >
             {t("notes.upload.switchToCloud")}
-          </Button>
-        )}
-
-        {/* BYOK too large — signed in, Free: Upgrade */}
-        {byokTooLarge && !requiresAccount && !isProUser && (
-          <Button variant="default" size="sm" onClick={onUpgrade} className="h-8 text-xs px-5">
-            {t("notes.upload.upgrade")}
-          </Button>
-        )}
-
-        {/* Cloud requires upgrade */}
-        {!byokTooLarge && requiresUpgrade && (
-          <Button variant="default" size="sm" onClick={onUpgrade} className="h-8 text-xs px-5">
-            {t("notes.upload.upgrade")}
           </Button>
         )}
 

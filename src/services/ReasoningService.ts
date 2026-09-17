@@ -17,8 +17,6 @@ import { stripThinkingTags } from "../helpers/stripThinking.js";
 import { getLlmRequestTimeoutSeconds } from "../helpers/llmRequestTimeout.js";
 import { streamText, stepCountIs } from "ai";
 import { getAIModel } from "./ai/providers";
-import { createEnterpriseChatModel } from "./ai/enterpriseChatModel";
-import { getManagedScopeResolution } from "../stores/enterpriseIdentityStore";
 import type { InferenceScope } from "../config/inferenceScopes";
 import { PROVIDER_REGISTRY, type ProviderContext } from "./ai/inferenceProviders";
 import {
@@ -143,25 +141,10 @@ class ReasoningService extends BaseReasoningService {
     config: T,
     fallbackScope: InferenceScope
   ): { model: string; provider: P; config: T; isManaged: boolean } {
+    // Enterprise managed providers were removed, so a scope's own selection
+    // always stands.
     const inferenceScope = config.inferenceScope || fallbackScope;
-    const managed = getManagedScopeResolution(inferenceScope, getSettings().enterpriseSetupMode);
-    if (managed.kind === "error") throw new Error(managed.message);
-    if (managed.kind !== "managed") {
-      return { model, provider, config: { ...config, inferenceScope }, isManaged: false };
-    }
-    return {
-      model: managed.model,
-      provider: managed.provider as P,
-      config: {
-        ...config,
-        inferenceScope,
-        provider: managed.provider,
-        lanUrl: undefined,
-        baseUrl: undefined,
-        customApiKey: undefined,
-      },
-      isManaged: true,
-    };
+    return { model, provider, config: { ...config, inferenceScope }, isManaged: false };
   }
 
   private async getApiKey(
@@ -801,11 +784,9 @@ class ReasoningService extends BaseReasoningService {
     // exemption below can't apply — honor the toggle directly.
     const openrouterDisableThinking = provider === "openrouter" && config.disableThinking === true;
     // Resolving a Tinfoil model refreshes the registry, so read model config after it.
-    const aiModel = isEnterprise
-      ? createEnterpriseChatModel(provider as EnterpriseProvider, model, config.inferenceScope)
-      : await getAIModel(aiProvider, model, apiKey, baseURL, {
-          disableThinking: openrouterDisableThinking,
-        });
+    const aiModel = await getAIModel(aiProvider, model, apiKey, baseURL, {
+      disableThinking: openrouterDisableThinking,
+    });
 
     if (abortController.signal.aborted) {
       yield { type: "done", finishReason: "stop" };
@@ -946,10 +927,6 @@ class ReasoningService extends BaseReasoningService {
     this.requestCancellationGeneration += 1;
     for (const controller of this.activeRequestControllers) controller.abort();
     this.activeRequestControllers.clear();
-    if (typeof window !== "undefined") {
-      window.electronAPI?.cancelCloudReason?.();
-      window.electronAPI?.cancelEnterpriseReasoning?.();
-    }
     this.cancelActiveStream();
   }
 
@@ -1058,15 +1035,6 @@ class ReasoningService extends BaseReasoningService {
   async isAvailable(): Promise<boolean> {
     try {
       const settings = getSettings();
-      // Mirrors processText's precedence: managed access outranks every manual route.
-      if (
-        getManagedScopeResolution("dictationCleanup", settings.enterpriseSetupMode).kind ===
-        "managed"
-      ) {
-        logger.logReasoning("API_KEY_CHECK", { managedEnterprise: true });
-        return true;
-      }
-
       if (isCloudCleanupMode()) {
         logger.logReasoning("API_KEY_CHECK", { cloudCleanupMode: true });
         return true;

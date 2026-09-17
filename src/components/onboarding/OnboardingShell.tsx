@@ -31,7 +31,6 @@ interface OnboardingShellProps {
 interface CompactOnboardingFrameProps {
   children: ReactNode;
   showBrandMark?: boolean;
-  showLegalNotice?: boolean;
   /**
    * AuthenticationStep and EmailVerificationStep also render inside the control
    * panel's SignInDialog, where the compact window chrome makes no sense: the
@@ -321,7 +320,6 @@ export default function OnboardingShell({
 export function CompactOnboardingFrame({
   children,
   showBrandMark = true,
-  showLegalNotice = true,
   embedded = false,
 }: CompactOnboardingFrameProps) {
   const { t } = useTranslation();
@@ -353,30 +351,6 @@ export function CompactOnboardingFrame({
       <div className="relative z-10 mx-auto flex w-full max-w-[30rem] flex-1 flex-col">
         {children}
       </div>
-
-      {showLegalNotice && (
-        <p className="relative z-10 mx-auto mt-auto w-full max-w-xs shrink-0 px-2 pb-4 pt-5 text-center text-sm leading-5 text-[var(--onboarding-text-secondary)]">
-          {t("auth.legal.prefix")}{" "}
-          <a
-            href="https://openwhispr.com/terms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--onboarding-link)] transition-colors hover:opacity-80"
-          >
-            {t("auth.legal.terms")}
-          </a>{" "}
-          {t("auth.legal.and")}{" "}
-          <a
-            href="https://openwhispr.com/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--onboarding-link)] transition-colors hover:opacity-80"
-          >
-            {t("auth.legal.privacy")}
-          </a>
-          {t("auth.legal.suffix")}
-        </p>
-      )}
     </section>
   );
 }

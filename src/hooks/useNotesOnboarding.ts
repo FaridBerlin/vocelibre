@@ -5,7 +5,6 @@ import {
   selectPolicyEffectiveSettings,
   useSettingsStore,
 } from "../stores/settingsStore";
-import { useUsage } from "./useUsage";
 import { usePolicySnapshot } from "./usePolicy";
 
 interface UseNotesOnboardingReturn {
@@ -17,9 +16,9 @@ interface UseNotesOnboardingReturn {
 }
 
 export function useNotesOnboarding(): UseNotesOnboardingReturn {
-  const usage = useUsage();
-  const isProUser = usage?.hasPaidAccess === true;
-  const isProLoading = usage !== null && usage.status !== "success";
+  // There is no paid tier any more: every feature is available to everyone.
+  const isProUser = true;
+  const isProLoading = false;
   const policyState = usePolicySnapshot();
   const { useCleanupModel, effectiveModel, isCloudCleanup } = useSettingsStore(
     useShallow((settings) => {

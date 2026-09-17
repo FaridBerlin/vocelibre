@@ -23,8 +23,6 @@ async function loadManager(t) {
         export const isCloudTranslationMode = () => false;
       `,
       "/services/ReasoningService": "export default { processText: async (t) => t };",
-      "/services/SyncService.js": "export const syncService = {};",
-      "/lib/auth": "export const withSessionRefresh = (fn) => fn();",
       "/utils/permissions": "export const isAccessibilitySkipped = () => false;",
     },
   });

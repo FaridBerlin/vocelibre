@@ -23,7 +23,6 @@ test("file transcription enforces Custom endpoint security before IPC", async (t
   const vite = await createRendererServer(t, {
     cachePrefix: "openwhispr-file-custom-endpoint-test-",
     mockModules: {
-      "/lib/auth": "export const withSessionRefresh = (fn) => fn();",
     },
   });
   const { transcribeFile } = await vite.ssrLoadModule("/services/fileTranscription.ts");
@@ -92,7 +91,6 @@ test("self-hosted file transcription bypasses stale Custom endpoint validation",
   const vite = await createRendererServer(t, {
     cachePrefix: "openwhispr-file-self-hosted-endpoint-test-",
     mockModules: {
-      "/lib/auth": "export const withSessionRefresh = (fn) => fn();",
     },
   });
   const { transcribeFile } = await vite.ssrLoadModule("/services/fileTranscription.ts");

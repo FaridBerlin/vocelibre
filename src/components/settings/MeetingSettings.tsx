@@ -37,7 +37,6 @@ export function MeetingTranscriptionPanel() {
   const startOnboarding = useStartOnboarding();
 
   const {
-    isSignedIn,
     meetingTranscriptionMode,
     setMeetingTranscriptionMode,
     setMeetingUseLocalWhisper,

@@ -23,8 +23,6 @@ async function loadAudioManager(t, { cachePrefix, settingsKey, reasoningKey }) {
       "/services/ReasoningService": `
         export default { processText: (...args) => globalThis.${reasoningKey}(...args) };
       `,
-      "/services/SyncService.js": "export const syncService = {};",
-      "/lib/auth": "export const withSessionRefresh = (fn) => fn();",
       "/utils/permissions": "export const isAccessibilitySkipped = () => false;",
     },
   });

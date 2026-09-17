@@ -63,8 +63,6 @@ async function loadAudioManager(t) {
         export const appendScreenContextSuffix = (prompt) => prompt;
       `,
       "/services/ReasoningService": "export default class ReasoningService {};",
-      "/services/SyncService.js": "export const syncService = {};",
-      "/lib/auth": "export const withSessionRefresh = (fn) => fn();",
       "/utils/permissions": "export const isAccessibilitySkipped = () => false;",
     },
   });

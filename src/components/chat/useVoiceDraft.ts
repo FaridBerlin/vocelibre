@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import { useSettings } from "../../hooks/useSettings";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { getBaseLanguageCode } from "../../utils/languageSupport";
@@ -23,7 +22,6 @@ interface UseVoiceDraftOptions {
  * handed back for the caller to place into the input.
  */
 export function useVoiceDraft({ onTranscript, onError }: UseVoiceDraftOptions) {
-  const { isSignedIn } = useAuth();
   const settings = useSettings();
   const {
     useLocalWhisper,
@@ -60,7 +58,7 @@ export function useVoiceDraft({ onTranscript, onError }: UseVoiceDraftOptions) {
     whisperModel,
     parakeetModel,
     cohereModel,
-    isOpenWhisprCloud: isSignedIn && cloudTranscriptionMode === "openwhispr" && !useLocalWhisper,
+    isOpenWhisprCloud: false,
     getApiKey: () => getTranscriptionApiKey(cloudTranscriptionProvider as string, settings),
     cloudTranscriptionProvider: cloudTranscriptionProvider as string,
     cloudTranscriptionBaseUrl: cloudTranscriptionBaseUrl || "",

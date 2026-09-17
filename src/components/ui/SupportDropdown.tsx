@@ -46,7 +46,9 @@ export default function SupportDropdown({ className, trigger }: SupportDropdownP
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => openExternal("https://docs.openwhispr.com")}>
+        <DropdownMenuItem
+          onClick={() => openExternal("https://github.com/FaridBerlin/vocelibre#readme")}
+        >
           <BookOpen className="mr-2 h-4 w-4" />
           {t("support.documentation")}
         </DropdownMenuItem>

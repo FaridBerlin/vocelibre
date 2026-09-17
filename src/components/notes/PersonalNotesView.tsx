@@ -60,8 +60,6 @@ import {
   setSessionExpectedCount,
 } from "../../stores/meetingRecordingStore";
 import { useNotesOnboarding } from "../../hooks/useNotesOnboarding";
-import { useTeamSpacesCapability } from "../../hooks/useTeamSpacesCapability";
-import { useAuth } from "../../hooks/useAuth";
 import { usePolicySnapshot, useTranscriptionContextAllowed } from "../../hooks/usePolicy";
 import NotesOnboarding from "./NotesOnboarding";
 import { notesEmptyTitleKey } from "./shared";
@@ -229,8 +227,7 @@ export default function PersonalNotesView({
   const isCloudMode = noteFormatting.isCloudMode;
   const effectiveModelId = noteFormatting.modelId;
   const { isComplete: isOnboardingComplete, complete: completeOnboarding } = useNotesOnboarding();
-  const { isSignedIn, user } = useAuth();
-  const teamSpacesAvailable = useTeamSpacesCapability(isSignedIn);
+  const teamSpacesAvailable = false;
   const isTreeLoading = useIsTreeLoading();
   const [structureIntroPending, setStructureIntroPending] = useState(() =>
     shouldShowIntro(localStorage, NOTES_STRUCTURE_INTRO)
@@ -268,7 +265,6 @@ export default function PersonalNotesView({
     if (
       structureIntroPending &&
       isOnboardingComplete &&
-      isSignedIn &&
       teamSpacesAvailable &&
       !isTreeLoading &&
       !isSidePanelLayout
@@ -278,7 +274,6 @@ export default function PersonalNotesView({
   }, [
     structureIntroPending,
     isOnboardingComplete,
-    isSignedIn,
     teamSpacesAvailable,
     isTreeLoading,
     isSidePanelLayout,
@@ -793,8 +788,8 @@ export default function PersonalNotesView({
                         for (const m of mappingRows) speakerMappings[m.speaker_id] = m.display_name;
 
                         const identity: MeetingIdentity = {
-                          selfName: user?.name?.trim() || null,
-                          selfEmail: user?.email?.trim() || null,
+                          selfName: null,
+                          selfEmail: null,
                           participants: parseNoteParticipants(editorNote.participants),
                         };
                         const selfLabel = identity.selfName || t("notes.speaker.you");

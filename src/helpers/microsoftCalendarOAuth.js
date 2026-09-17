@@ -27,7 +27,6 @@ class MicrosoftCalendarOAuth {
       throw new Error("MICROSOFT_CALENDAR_CLIENT_ID is not configured");
     }
     return runOAuthLoopbackFlow({
-      errorParam: "mcal_error",
       buildAuthUrl: (redirectUri, state, codeChallenge) => {
         const params = new URLSearchParams({
           client_id: this.getClientId(),

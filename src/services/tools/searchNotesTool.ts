@@ -6,13 +6,12 @@ import { resolveLocalNoteId, resolveSpace } from "./utils";
 const MAX_CONTENT_LENGTH = 500;
 
 interface SearchToolOptions {
-  useCloudSearch: boolean;
   /** Pins every search to this container; the LLM's space arg is dropped. */
   fixedScope?: ContainerScope;
 }
 
 export function createSearchNotesTool(options: SearchToolOptions): ToolDefinition {
-  const { useCloudSearch, fixedScope } = options;
+  const { fixedScope } = options;
 
   const spaceParameter = fixedScope
     ? {}
@@ -65,18 +64,10 @@ export function createSearchNotesTool(options: SearchToolOptions): ToolDefinitio
       const spaceId = fixedScope?.spaceId ?? space?.id ?? null;
       const folderId = fixedScope?.folderId ?? null;
 
-      // Fallback chain: cloud → local semantic (hybrid RRF) → FTS5 keyword.
-      // A team space without a cloud team can't be scoped server-side, so its
-      // searches go straight to the local legs. Folder scoping is local-only:
-      // the cloud API has no folder filter, and a pinned scope whose space
-      // didn't resolve must not widen to an all-spaces cloud search.
+      // Fallback chain: local semantic (hybrid RRF) → FTS5 keyword. The cloud
+      // leg that used to lead this chain is gone; both remaining legs run
+      // entirely on-device.
       const strategies: Array<() => Promise<ToolResult>> = [];
-      const cloudCanScope = fixedScope
-        ? !!space && (space.kind === "private" || !!space.cloud_space_id)
-        : !space || space.kind === "private" || !!space.cloud_space_id;
-      if (useCloudSearch && cloudCanScope && folderId == null) {
-        strategies.push(() => executeCloudSearch(query, limit, space, spaces));
-      }
       strategies.push(() =>
         executeLocalSearch(query, limit, true, space, spaces, spaceId, folderId)
       );
@@ -141,41 +132,5 @@ async function executeLocalSearch(
     success: true,
     data: results,
     displayText: summaryText(results.length, query, space, semantic),
-  };
-}
-
-async function executeCloudSearch(
-  query: string,
-  limit: number,
-  space: SpaceItem | undefined,
-  spaces: SpaceItem[]
-): Promise<ToolResult> {
-  const { NotesService } = await import("../../services/NotesService.js");
-  // No space → all accessible spaces; team space → that space only (membership
-  // is server-enforced); private space → the personal-only default.
-  const spaceId = space?.kind === "team" ? (space.cloud_space_id ?? undefined) : undefined;
-  const scope = space ? undefined : ("all" as const);
-  const { notes: cloudNotes } = await NotesService.search(query, limit, scope, spaceId);
-
-  const spaceNameByCloudId = new Map(
-    spaces.filter((s) => s.cloud_space_id).map((s) => [s.cloud_space_id!, s.name])
-  );
-  const privateSpaceName = spaces.find((s) => s.kind === "private")?.name ?? null;
-  const results = await Promise.all(
-    cloudNotes.map(async (cn) => ({
-      id: await resolveLocalNoteId(cn.client_note_id),
-      title: cn.title,
-      date: cn.created_at,
-      type: cn.note_type,
-      score: cn.score,
-      space: cn.space_id ? (spaceNameByCloudId.get(cn.space_id) ?? null) : privateSpaceName,
-      content: (cn.enhanced_content || cn.content).slice(0, MAX_CONTENT_LENGTH),
-    }))
-  );
-
-  return {
-    success: true,
-    data: results,
-    displayText: summaryText(results.length, query, space, true),
   };
 }

@@ -3,16 +3,9 @@ const crypto = require("crypto");
 const { openExternalUrl } = require("./externalUrlOpener");
 
 const OAUTH_TIMEOUT_MS = 120000;
-const DEFAULT_DESKTOP_CALLBACK_URL = "https://openwhispr.com/auth/desktop-callback";
 
-const PROTOCOL_BY_CHANNEL = {
-  development: "openwhispr-dev",
-  staging: "openwhispr-staging",
-  production: "openwhispr",
-};
-
-// Thrown by handleCallback to control the error code shown on the hosted
-// desktop-callback page (defaults to "server_error").
+// Thrown by handleCallback to control the error code shown on the result page
+// (defaults to "server_error").
 class OAuthFlowError extends Error {
   constructor(redirectCode, message) {
     super(message);
@@ -20,27 +13,34 @@ class OAuthFlowError extends Error {
   }
 }
 
-function getDesktopCallbackUrl() {
-  return process.env.VITE_OPENWHISPR_OAUTH_CALLBACK_URL || DEFAULT_DESKTOP_CALLBACK_URL;
+function escapeHtml(value) {
+  return String(value).replace(
+    /[&<>"']/g,
+    (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]
+  );
 }
 
-function getProtocol() {
-  const channel = process.env.OPENWHISPR_CHANNEL || "production";
-  return PROTOCOL_BY_CHANNEL[channel] || PROTOCOL_BY_CHANNEL.production;
-}
-
-function buildCallbackRedirect(params) {
-  const url = new URL(getDesktopCallbackUrl());
-  url.searchParams.set("protocol", getProtocol());
-  for (const [key, value] of Object.entries(params)) {
-    url.searchParams.set(key, value);
-  }
-  return url.toString();
-}
-
-function redirect(res, params) {
-  res.writeHead(302, { Location: buildCallbackRedirect(params) });
-  res.end();
+// The loopback server renders its own result page rather than redirecting the
+// browser to a hosted one. Nothing leaves the machine, and the flow still
+// finishes when the app is offline or the host is unreachable.
+function renderResultPage(res, { ok, detail }) {
+  const title = ok ? "Connected" : "Connection failed";
+  const body = ok
+    ? "You can close this tab and return to VoceLibre."
+    : `VoceLibre could not complete the connection${detail ? ` (${escapeHtml(detail)})` : ""}. You can close this tab and try again.`;
+  res.writeHead(ok ? 200 : 400, { "Content-Type": "text/html; charset=utf-8" });
+  res.end(
+    `<!doctype html><html lang="en"><head><meta charset="utf-8" />` +
+      `<meta name="viewport" content="width=device-width,initial-scale=1" />` +
+      `<title>VoceLibre — ${title}</title>` +
+      `<style>:root{color-scheme:light dark}body{margin:0;min-height:100vh;display:flex;` +
+      `align-items:center;justify-content:center;font:16px/1.5 system-ui,-apple-system,` +
+      `"Segoe UI",sans-serif;background:#faf9f7;color:#1c1b19}` +
+      `@media(prefers-color-scheme:dark){body{background:#17161a;color:#eceaf0}}` +
+      `main{max-width:26rem;padding:2rem;text-align:center}` +
+      `h1{margin:0 0 .5rem;font-size:1.25rem}p{margin:0;opacity:.7}</style></head>` +
+      `<body><main><h1>${title}</h1><p>${body}</p></main></body></html>`
+  );
 }
 
 // Runs a PKCE auth-code flow through an ephemeral 127.0.0.1 server:
@@ -48,11 +48,7 @@ function redirect(res, params) {
 // - handleCallback(code, redirectUri, codeVerifier) → resolves the flow result;
 //   called once with a state-validated code, throws (OAuthFlowError for a
 //   specific callback-page code) to reject.
-// - errorParam — query-param name for the hosted desktop-callback page
-//   (e.g. "gcal_error"); the success param is derived from the same prefix.
-function runOAuthLoopbackFlow({ buildAuthUrl, handleCallback, errorParam }) {
-  const connectedParam = errorParam.replace(/_error$/, "_connected");
-
+function runOAuthLoopbackFlow({ buildAuthUrl, handleCallback }) {
   return new Promise((resolve, reject) => {
     const codeVerifier = crypto.randomBytes(32).toString("base64url").slice(0, 43);
     const codeChallenge = crypto.createHash("sha256").update(codeVerifier).digest("base64url");
@@ -76,7 +72,7 @@ function runOAuthLoopbackFlow({ buildAuthUrl, handleCallback, errorParam }) {
 
         if (error) {
           callbackClaimed = true;
-          redirect(res, { [errorParam]: error });
+          renderResultPage(res, { ok: false, detail: error });
           cleanup();
           reject(new Error(`OAuth error: ${error}`));
           return;
@@ -100,12 +96,12 @@ function runOAuthLoopbackFlow({ buildAuthUrl, handleCallback, errorParam }) {
         const redirectUri = `http://127.0.0.1:${server.address().port}`;
         const result = await handleCallback(code, redirectUri, codeVerifier);
 
-        redirect(res, { [connectedParam]: "true" });
+        renderResultPage(res, { ok: true });
         cleanup();
         resolve(result);
       } catch (err) {
         callbackClaimed = true;
-        redirect(res, { [errorParam]: err.redirectCode || "server_error" });
+        renderResultPage(res, { ok: false, detail: err.redirectCode || "server_error" });
         cleanup();
         reject(err);
       }

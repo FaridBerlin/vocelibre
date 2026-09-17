@@ -34,32 +34,18 @@ import { ConfirmDialog } from "../ui/dialog";
 import { useDialogs } from "../../hooks/useDialogs";
 import { useToast } from "../ui/useToast";
 import { useNoteDragAndDrop, type NoteMoveTarget } from "../../hooks/useNoteDragAndDrop";
-import { useTeamSpacesCapability } from "../../hooks/useTeamSpacesCapability";
-import { useAuth } from "../../hooks/useAuth";
-import { useWorkspace } from "../../hooks/useWorkspace";
 import { EmojiPickerInput } from "./EmojiPickerInput";
-import {
-  canChangeSpaceNoteScope,
-  canDeleteSpaceNote,
-  canManageSpace,
-  canManageWorkspace,
-  canMoveBetweenSpaces,
-  canMoveOrDeleteSpaceFolder,
-} from "../../lib/spacePermissions";
 import {
   canOrganizeNote as canOrganizeSharedNote,
   resolveNotePermission,
   sharedNoteBlocksDelete,
 } from "../../lib/notePermissions";
-import { groupTeamSpacesByWorkspace } from "../../lib/workspaceSelection";
 import { localMutationErrorKey } from "../../lib/localMutationError";
-import { deleteSpace, renameSpace } from "../../services/spaceActions";
+import DeleteSpaceDialog from "./DeleteSpaceDialog";
+import { deleteSpace, renameSpace } from "../../stores/noteStore";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { cn } from "../lib/utils";
 import { getCachedPlatform } from "../../utils/platform";
-import CreateSpaceDialog from "./CreateSpaceDialog";
-import DeleteSpaceDialog from "./DeleteSpaceDialog";
-import SpaceMembersDialog from "./SpaceMembersDialog";
 import type { FolderItem, NoteItem, SpaceItem, WorkspaceRole } from "../../types/electron";
 import {
   folderContainerKey,
@@ -1153,9 +1139,9 @@ export default function SpacesTree({
   const activeContext = useActiveContext();
   const activeNoteId = useActiveNoteId();
   const isTreeLoading = useIsTreeLoading();
-  const { isSignedIn, user } = useAuth();
-  const teamCapability = useTeamSpacesCapability(isSignedIn);
-  const { workspaces, loaded: workspacesLoaded } = useWorkspace();
+  // Team spaces, workspaces and per-user ACLs went with the cloud. What is
+  // left is a single local user who owns everything on this machine.
+  const teamCapability = false;
   const noteFilesEnabled = useSettingsStore((s) => s.noteFilesEnabled);
   const shareByCloudId = useShareCache();
 
@@ -1186,13 +1172,8 @@ export default function SpacesTree({
     ? expanded.has(spaceContainerKey(privateSpace.id))
     : false;
   const teamSpaces = useMemo(() => spaces.filter((s) => s.kind === "team"), [spaces]);
-  const showWorkspaceGroups = workspaces.length > 1;
-  const {
-    groups: teamSpaceGroups,
-    ungrouped: ungroupedTeamSpaces,
-    ordered: groupedTeamSpaces,
-  } = useMemo(() => groupTeamSpacesByWorkspace(workspaces, teamSpaces), [teamSpaces, workspaces]);
-  const orderedTeamSpaces = showWorkspaceGroups ? groupedTeamSpaces : teamSpaces;
+  const showWorkspaceGroups = false;
+  const orderedTeamSpaces = teamSpaces;
   const visibleSpaces = teamCapability ? spaces : privateSpaces;
   const spacesById = useMemo(() => new Map(spaces.map((space) => [space.id, space])), [spaces]);
   // Valid move destinations per source space (the source itself stays listed —
@@ -1200,76 +1181,21 @@ export default function SpacesTree({
   const moveTargetsBySpace = useMemo(() => {
     const targets = new Map<number, SpaceItem[]>();
     for (const source of spaces) {
-      targets.set(
-        source.id,
-        visibleSpaces.filter(
-          (target) => target.id === source.id || canMoveBetweenSpaces(source, target)
-        )
-      );
+      targets.set(source.id, visibleSpaces);
     }
     return targets;
   }, [spaces, visibleSpaces]);
 
-  // Until the workspace fetch settles, grouping is unknown — showing spaces
-  // flat and regrouping on arrival reads as a glitch, so skeleton instead.
-  // Signed-out users never load workspaces (mirrored team spaces render flat);
-  // errors still flip `loaded`, so this can't skeleton forever.
-  const workspacesPending = isSignedIn && !workspacesLoaded;
+  const workspacesPending = false;
+  const canCreateTeamSpace = false;
+  const canManageTeamSpace = (_space: SpaceItem): boolean => true;
 
-  // The server 403s team creation for plain members; no-workspace users get the create funnel.
-  const canCreateTeamSpace =
-    isSignedIn &&
-    workspacesLoaded &&
-    (workspaces.length === 0 || workspaces.some((w) => canManageWorkspace(w.role)));
-
-  const currentUserId = user?.id ?? null;
-  const workspaceRoleFor = (space: SpaceItem | undefined): WorkspaceRole | null =>
-    workspaces.find((w) => w.id === space?.workspace_id)?.role ?? null;
-
-  // Local-only spaces (no cloud id) stay fully manageable; cloud spaces
-  // follow space/workspace roles. Cosmetic — the server enforces.
-  const canManageTeamSpace = (space: SpaceItem): boolean =>
-    !space.cloud_space_id || canManageSpace(space, workspaceRoleFor(space));
-
-  // Note-level ACL for cloud-backed personal notes shared with this user.
-  // Without a cache entry (note never opened this session, offline) the
-  // owner fallback keeps today's behavior; once the ACL loads, editors and
-  // viewers lose owner-only actions. Team notes follow space roles instead.
-  const sharedNoteScope = (note: NoteItem) => ({
-    isTeamNote: spacesById.get(note.space_id)?.kind === "team",
-    hasCloudCopy: !!note.cloud_id,
-  });
-  const sharedNotePermission = (note: NoteItem) => {
-    const entry = note.cloud_id ? shareByCloudId.get(note.cloud_id) : null;
-    return resolveNotePermission({
-      cachedPermission: entry?.access?.my_permission,
-      aclState: entry ? "loaded" : "unavailable",
-      isTeamNote: sharedNoteScope(note).isTeamNote,
-    });
-  };
-
-  // Destructive/scope-changing note and folder actions mirror the server's
-  // rules (spacePermissions + per-note ACLs). Menus, keyboard, drag/drop,
-  // and undo all route through these so no path bypasses them; the server
-  // enforces regardless.
-  const canDeleteNote = (note: NoteItem): boolean => {
-    if (sharedNoteBlocksDelete(sharedNotePermission(note), sharedNoteScope(note))) return false;
-    const space = spacesById.get(note.space_id);
-    return canDeleteSpaceNote(note, space, currentUserId, workspaceRoleFor(space));
-  };
-  const canChangeNoteScope = (note: NoteItem): boolean => {
-    const space = spacesById.get(note.space_id);
-    return canChangeSpaceNoteScope(note, space, currentUserId, workspaceRoleFor(space));
-  };
-  // Any local re-filing (same-space folder moves included): owner-only on
-  // shared personal notes — a denied folder_id PATCH would fork an
-  // unexpected Personal copy.
-  const canMoveNote = (note: NoteItem): boolean =>
-    canOrganizeSharedNote(sharedNotePermission(note), sharedNoteScope(note));
-  const canManageFolderDestructive = (folder: FolderItem): boolean => {
-    const space = spacesById.get(folder.space_id);
-    return canMoveOrDeleteSpaceFolder(space, workspaceRoleFor(space));
-  };
+  // Every note and folder is local and owned by this install, so the
+  // former ACL checks collapse to "allowed".
+  const canDeleteNote = (_note: NoteItem): boolean => true;
+  const canChangeNoteScope = (_note: NoteItem): boolean => true;
+  const canMoveNote = (_note: NoteItem): boolean => true;
+  const canManageFolderDestructive = (_folder: FolderItem): boolean => true;
 
   // Cross-space targets require scope-change permission; same-space folder
   // targets stay available to every member.
@@ -1401,9 +1327,7 @@ export default function SpacesTree({
   };
 
   const allowsCrossSpaceMove = (fromSpaceId: number, toSpaceId: number): boolean => {
-    const from = spacesById.get(fromSpaceId);
-    const to = spacesById.get(toSpaceId);
-    return !!from && !!to && canMoveBetweenSpaces(from, to);
+    return spacesById.has(fromSpaceId) && spacesById.has(toSpaceId);
   };
 
   const requestMoveNote = (noteId: number, target: NoteMoveTarget): void => {
@@ -2019,10 +1943,7 @@ export default function SpacesTree({
             onActivate={() => activateRow({ type: "space", key: spaceKey, space })}
             onToggle={() => toggleContainerExpanded(spaceKey)}
             onNewFolder={() => startCreateFolder(space)}
-            onMembers={() => {
-              setMembersSpaceId(space.id);
-              setMembersOpen(true);
-            }}
+            onMembers={undefined}
             onRename={(focus) => startRenameSpace(space, focus)}
             onDelete={() => requestDeleteSpace(space)}
             a11y={a11yFor(spaceKey)}
@@ -2135,46 +2056,7 @@ export default function SpacesTree({
               <SkeletonRows />
             ) : (
               <>
-                {showWorkspaceGroups
-                  ? teamSpaceGroups.map(({ workspace, spaces: workspaceSpaces }) => (
-                      <div
-                        key={workspace.id}
-                        role="group"
-                        aria-label={workspace.name}
-                        className="mt-1 group/workspace"
-                      >
-                        <div
-                          role="none"
-                          className="flex items-center justify-between h-5 pl-4 pr-2"
-                        >
-                          <span
-                            title={workspace.name}
-                            className="min-w-0 text-[10px] font-medium text-foreground/40 truncate"
-                          >
-                            {workspace.name}
-                          </span>
-                          {canManageWorkspace(workspace.role) && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label={t("notes.spaces.newSpaceInWorkspace", {
-                                workspace: workspace.name,
-                              })}
-                              onClick={() => openCreateSpace(workspace.id)}
-                              className={cn(
-                                HOVER_REVEAL_BUTTON_CLASS,
-                                "group-hover/workspace:opacity-100"
-                              )}
-                            >
-                              <Plus size={12} />
-                            </Button>
-                          )}
-                        </div>
-                        {workspaceSpaces.map(renderSpace)}
-                      </div>
-                    ))
-                  : teamSpaces.map(renderSpace)}
-                {showWorkspaceGroups && ungroupedTeamSpaces.map(renderSpace)}
+                {teamSpaces.map(renderSpace)}
                 {teamSpaces.length === 0 &&
                   (canCreateTeamSpace ? (
                     // Grouped view already offers a + on each manageable workspace row.
@@ -2201,19 +2083,6 @@ export default function SpacesTree({
           </div>
         )}
       </div>
-
-      <CreateSpaceDialog
-        open={showCreateSpace}
-        onOpenChange={(open) => {
-          setShowCreateSpace(open);
-          if (!open) setCreateSpaceWorkspaceId(null);
-        }}
-        initialWorkspaceId={createSpaceWorkspaceId}
-      />
-
-      {membersSpace && (
-        <SpaceMembersDialog space={membersSpace} open={membersOpen} onOpenChange={setMembersOpen} />
-      )}
 
       <DeleteSpaceDialog
         space={deleteSpaceTarget}

@@ -281,18 +281,11 @@ export function useChatStreaming({
         // so any connected provider enables it.
         const calendarConnected =
           settings.gcalConnected || settings.mcalConnected || settings.appleCalendarConnected;
-        const webSearchEnabled = isWebSearchAllowed(usePolicyStore.getState());
-        const cacheKey = `${settings.isSignedIn}-${calendarConnected}-${settings.cloudBackupEnabled}-${scopeKey}-${webSearchEnabled}`;
+        const cacheKey = `${calendarConnected}-${scopeKey}`;
         if (toolRegistryRef.current?.key === cacheKey) {
           registry = toolRegistryRef.current.registry;
         } else {
-          registry = createToolRegistry({
-            isSignedIn: settings.isSignedIn,
-            calendarConnected,
-            cloudBackupEnabled: settings.cloudBackupEnabled,
-            searchScope: scope,
-            webSearchEnabled,
-          });
+          registry = createToolRegistry({ calendarConnected, searchScope: scope });
           toolRegistryRef.current = { key: cacheKey, registry };
         }
       }

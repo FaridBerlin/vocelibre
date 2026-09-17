@@ -31,17 +31,15 @@ Apple calendar OAuth (third-party, not OpenWhispr — explicitly kept).
 
 ---
 
-## State: ~40% done
+## State: ~75% done (updated 2026-09-17)
 
-Branch `feat/remove-cloud-and-accounts`, **5 commits, nothing pushed**:
+Branch `feat/remove-cloud-and-accounts`, **nothing pushed**.
 
-```
-2c49cba4 build: fetch native helpers from this repo's releases, not upstream's
-e5fe0628 refactor: collapse inference to local/self-hosted and drop the account flow
-51dd23d5 chore: fix fork metadata, rename fallout, and document the native-ABI split
-9e035a4b ci: run tests on pushes to main and stop the permanently-red gates
-fd321cf7 fix: point the auto-updater at VoceLibre's own release feed
-```
+Day 2 removed the whole renderer-side cloud surface: **~135 files deleted**.
+Auth, sync, spaces, teams, workspaces, enterprise, billing, referrals, cloud
+analytics/insights, the 11 cloud API service wrappers, the 8 cloud inference
+providers, and the cloud-backed web-search tool are all gone. `isSignedIn`
+went 115 → 5 (the survivors are inert locals), `*.openwhispr.com` 22 → 4.
 
 ### Gates right now
 
@@ -50,7 +48,10 @@ fd321cf7 fix: point the auto-updater at VoceLibre's own release feed
 | `npm run typecheck` | clean |
 | `npm run lint` | clean |
 | `npm run format:check` | clean |
-| `npm test` | **16 failing** (all the not-yet-removed policy/BYOK surface) + 1 pre-existing |
+| `npm test` | see below — 35 test files for deleted features were removed; re-run to get the current count |
+
+> The suite got noticeably slower during day 2 (minutes, not ~45s). Worth a
+> look: probably vite-harness tests retrying on modules that no longer resolve.
 
 **Before running tests:** `npm run rebuild:node`. Before running the app again:
 `npm run rebuild:electron`. (better-sqlite3 is built for Electron's ABI by
@@ -72,113 +73,88 @@ every caller at once; deleting callers first leaves orphans that still compile.
 
 ---
 
-## Next: Stage 3 — auth, sync, spaces, enterprise
+## Done on day 2
 
-Largest remaining chunk. Suggested order:
+- **3a policy**: partially — `policyRules`/`policyStore` still exist but every
+  predicate is inert (no workspace can ever be managed). Full deletion still
+  pending; 40 files still import them.
+- **3b auth**: done. `lib/auth`, `useAuth`, `authRequestContext`,
+  `authAccountScope`, `emailAuthDiscovery`, `cloudApi`, `useUsage`,
+  `useWorkspace`, and every sign-in / reauth / invitation component are gone.
+  `settingsStore.isSignedIn` and its setter are gone.
+- **3c sync/spaces/enterprise/referral**: done. `SyncService` (2,726 lines),
+  `SpacesService`, `spaceActions*`, `Workspaces*`, `EnterpriseIdentityService`,
+  `syncPassPolicy`, `workspaceStore`, `enterpriseIdentityStore`, all billing /
+  referral / team / workspace components, plus the 11 cloud API wrappers
+  (`NotesService`, `FoldersService`, …) and `InsightsView` + `AnalyticsService`.
+- **3d settings/sidebar**: done. Account / plansBilling / workspace sections
+  removed from `SettingsPage` and `SettingsModal`; `ControlPanelView` lost
+  `insights` and `integrations`; the sidebar's upsell banners, referral row and
+  account footer are gone.
+- **3e providers**: the 8 cloud inference providers are deleted and the registry
+  is `{ local, lan }`. **BYOK secret keys are NOT done** — see below.
+- Notes kept working throughout: `noteStore` lost its sync/conflict wiring, and
+  `renameSpace`/`deleteSpace` were reimplemented as local SQLite mutations.
+- `oauthLoopbackFlow.js` now serves its own OAuth result page instead of
+  redirecting the browser to `openwhispr.com/auth/desktop-callback`. Calendar
+  OAuth therefore no longer touches an OpenWhispr host at all.
 
-### 3a. Kill the policy system (clears ~10 of the 16 failing tests)
+## Next — what is actually left
 
-Org policy arrived with the enterprise workspace; with no workspace it can never
-be `managed`. `selectPolicyEffectiveSettings` is already a no-op and
-`policyRules` already ignores BYOK/enterprise allowlists — finish the job.
+### A. Main process (biggest remaining piece)
 
-- Delete `src/stores/policyStore.ts` (277), `src/stores/policyRules.ts` (465),
-  `src/hooks/usePolicy.ts`, `usePolicyModeOptions`
-- Delete `src/helpers/workspacePolicyManager.js`, `workspacePolicyCache.js`
-- Callers assume "allowed": `isAgentAllowed` → `true`,
-  `isModeAllowedByPolicy` → `true`, `isScreenContextAllowed` → follow the
-  user setting only
-- Delete `test/helpers/policyRules.test.js`,
-  `test/helpers/transcriptionRoute.test.js` (policy floor test)
-- Trim `test/services/reasoningServiceEnforcement.test.js` to the
-  non-policy cases (the self-hosted endpoint + key-isolation tests are
-  **still valuable — keep them**)
-
-### 3b. Delete auth + account modules
-
-```
-src/lib/auth.ts (330)              src/hooks/useAuth.ts (247)
-src/hooks/useUsage.ts (261)        src/services/cloudApi.ts (102)
-src/lib/authRequestContext.ts      src/lib/emailAuthDiscovery.ts
-src/lib/authAccountScope.ts        src/lib/upsell.ts
-```
-Components: `SignInDialog`, `AuthenticationStep`, `CompactAuthenticationFlow`,
-`EmailVerificationStep`, `ForgotPasswordView`, `ReauthenticationScreen`,
-`AcceptInvitationModal`, `JoinYourTeamModal`, `settings/ProfileSection`.
-
-`AppRouter.jsx` is **already auth-free** — done in `e5fe0628`.
-
-### 3c. Delete sync / spaces / workspaces / enterprise / referral
-
-```
-services/  SyncService.ts (2726!)  SpacesService.ts  spaceActions.ts
-           spaceActionsCore.ts     accountSpaceValidation.ts
-           WorkspacesService.ts    WorkspaceApiKeysService.ts
-           EnterpriseIdentityService.ts   syncPassPolicy.ts (361)
-stores/    workspaceStore.ts  enterpriseIdentityStore.ts
-lib/       spacePermissions  workspaceSelection  workspaceBilling
-           billingPortalError  teamSpacesCapability  spaceRosterCache
-helpers/   cloudSyncGuards.js  enterpriseAiProviders.js
-           enterpriseIdentityManager.js  enterpriseManagedConfig.mjs
-           enterpriseProviderErrors.js  sessionHeaders.js
-           transcriptionAuth.js
-components/  EnterpriseSection  EnterpriseProviderConfig  CreateWorkspaceDialog
-             ReferralModal  ReferralDashboard  referral-cards/
-             IntegrationsView  McpIntegrationCard  CliIntegrationCard
-             settings/{EnterpriseCheckoutDialog,EnterpriseConsoleRow,
-                       WorkspaceBillingCard,WorkspaceBillingOverview,
-                       WorkspaceDeveloperTab,WorkspaceMembersTab,
-                       WorkspaceSection,WorkspaceTeamsTab}
-notes/     ShareNoteDialog  SpaceSyncToastListener  (+ spaces UI in SpacesTree)
-```
-Keep local notes and folders. Only cloud sync + sharing + spaces go.
-
-### 3d. Settings + sidebar
-
-- `SettingsSectionType`: drop `"account" | "plansBilling" | "workspace"`
-- `ControlPanelView`: drop `"integrations"` (MCP/CLI/API are all cloud)
-- `src/components/SettingsPage.tsx` is 4,777 lines — expect a long tail
-
-### 3e. BYOK secrets
-
-- `src/config/secretKeys.js` — `BYOK_API_KEYS` is the single source of truth;
-  emptying it cascades to `environment.js`, `ipcHandlers.js`, settings store
-- `preload.js` mirrors the tuples inline as `BYOK_KEY_BRIDGES` — **keep in
-  sync**, guarded by `test/helpers/secretKeys.test.js`
-- Delete cloud providers under `src/services/ai/inferenceProviders/`:
-  `anthropic corti enterprise gemini groq openai openwhispr tinfoil`
-  → registry keeps only `local` + `lan`
-- `src/models/modelRegistryData.json` → `cloudProviders: []`
-- Delete `corti*.js`, `src/config/retiredCloudModels.ts`
-
-### 3f. Main process
-
-`src/helpers/ipcHandlers.js` (11,653 lines) — remove these handler families:
+`src/helpers/ipcHandlers.js` (11.6k lines) still registers every cloud handler:
 ```
 auth-clear-session  auth-get-token  auth-get-token-state  auth-set-token
 cloud-agent-stream-{start,cancel,chunk,end,error}
 cloud-api-request  cloud-billing-portal  cloud-checkout  cloud-health-check
 cloud-preview-switch  cloud-reason  cloud-reason-cancel  cloud-streaming-usage
 cloud-switch-plan  cloud-transcribe  cloud-transcribe-cancel  cloud-usage
+agent-web-search   (proxies api.openwhispr.com with auth)
 ```
-Plus the matching `preload.js` bridges, `main.js:771` (`auth.openwhispr.com`
-session header wiring) and the `sessionHeaders.js` allowlist.
+Nothing in the renderer calls them any more, so the app runs — but they are the
+last live code paths to OpenWhispr. Remove them plus:
+- the matching `preload.js` bridges
+- `src/helpers/sessionHeaders.js` (the `auth./api.openwhispr.com` allowlist) and
+  its two importers (`main.js:304`, `ipcHandlers.js:174`)
+- `main.js` `getAuthUrl()` (~line 771) and `getOauthCookieName()`
+- `ipcHandlers.js` `getAuthUrl()` / `getApiUrl()` (~line 5612)
+- helpers: `cloudSyncGuards.js`, `transcriptionAuth.js`, `enterprise*.js`,
+  `workspacePolicy*.js`, `corti*.js`
 
-### 3g. i18n — last, once nothing references the keys
+**The 4 remaining `*.openwhispr.com` references are all here.**
+
+### B. BYOK secrets (3e, unfinished)
+
+- `src/config/secretKeys.js` — empty `BYOK_API_KEYS`; cascades to
+  `environment.js`, `ipcHandlers.js`, settings store
+- `preload.js` mirrors them inline as `BYOK_KEY_BRIDGES` — keep in sync,
+  guarded by `test/helpers/secretKeys.test.js`
+- `src/models/modelRegistryData.json` → `cloudProviders: []`
+- delete `src/config/retiredCloudModels.ts`
+
+### C. Finish the policy system (3a)
+
+Delete `policyStore.ts`, `policyRules.ts`, `hooks/usePolicy.ts`,
+`usePolicyModeOptions`, `workspacePolicyManager.js`, `workspacePolicyCache.js`.
+Callers assume allowed (`isAgentAllowed` → true, `isModeAllowedByPolicy` → true,
+`isScreenContextAllowed` → the user setting alone). ~40 importers, but most just
+call one predicate.
+
+### D. The 5 inert `isSignedIn` survivors
+
+`policyRules.ts:416`, `TranscriptionModelPicker.tsx:391/606/622`. They are
+hard-coded `false` locals; they disappear with C.
+
+### E. i18n, then docs
 
 10 locales in `src/locales/*/translation.json`. Whole top-level blocks to drop:
-`auth`, `workspaces`, `referral`, `upgradePrompt`. Plus cloud keys scattered
-under `settingsPage.*`, `notes.upload.*`, `onboarding.*`.
-`npm run i18n:check` enforces parity across all 10 — run it after every pass.
+`auth`, `workspaces`, `referral`, `upgradePrompt`. Plus cloud keys under
+`settingsPage.*`, `notes.upload.*`, `onboarding.*`.
+`npm run i18n:check` enforces parity across all 10 — run after every pass.
 
-### 3h. Docs
-
-- README: feature list still advertises team spaces, enterprise controls,
-  public API/MCP, cloud sync, and links `docs.openwhispr.com` for every doc
-- CLAUDE.md: the fork section's "Still genuinely upstream-owned" list should
-  shrink to nothing as endpoints are deleted
-
----
+README still advertises team spaces, enterprise controls, public API/MCP and
+cloud sync, and links `docs.openwhispr.com` for every doc.
 
 ## Verification
 

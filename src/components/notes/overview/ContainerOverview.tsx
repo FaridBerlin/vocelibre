@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import InviteTeammateDialog from "../../InviteTeammateDialog";
-import { useWorkspaceStore } from "../../../stores/workspaceStore";
-import { canManageSpace } from "../../../lib/spacePermissions";
 import {
   useNotes,
   useNotesByContainer,
@@ -36,7 +33,6 @@ export function ContainerOverview({
   onAddExisting,
 }: ContainerOverviewProps) {
   const { t } = useTranslation();
-  const workspaces = useWorkspaceStore((s) => s.workspaces);
   const folders = useFolders();
   const containerNotes = useNotes();
   const notesByContainer = useNotesByContainer();
@@ -68,14 +64,7 @@ export function ContainerOverview({
 
   const chat = useContainerChat({ space, folder, notes });
 
-  const workspace = space.workspace_id
-    ? workspaces.find((w) => w.id === space.workspace_id)
-    : undefined;
-  const canInvite =
-    space.kind === "team" &&
-    !!space.cloud_space_id &&
-    !!workspace &&
-    canManageSpace(space, workspace.role ?? null);
+  const canInvite = false;
 
   const spaceFolders = useMemo(
     () => folders.filter((f) => f.space_id === space.id),
@@ -89,7 +78,6 @@ export function ContainerOverview({
       (spaceRootCounts[space.id] ?? 0);
 
   const metaParts: string[] = [];
-  if (space.kind === "team" && workspace) metaParts.push(workspace.name);
   if (!folder && spaceFolders.length > 0) {
     metaParts.push(t("notes.overview.meta.folders", { count: spaceFolders.length }));
   }
@@ -125,15 +113,6 @@ export function ContainerOverview({
                 {t("notes.list.newNote")}
               </button>
             )}
-            {canInvite && (
-              <button
-                onClick={() => setShowInviteDialog(true)}
-                className="inline-flex items-center gap-1.5 px-3 h-7 rounded-md border border-border/40 dark:border-white/10 text-xs font-medium text-foreground/60 hover:text-foreground/85 hover:border-border/70 hover:bg-foreground/3 dark:hover:bg-white/3 transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring/30"
-              >
-                <UserPlus size={12} />
-                {t("notes.overview.invite")}
-              </button>
-            )}
           </div>
         </div>
 
@@ -161,16 +140,6 @@ export function ContainerOverview({
           />
         </div>
       </div>
-
-      {canInvite && workspace && space.cloud_space_id && (
-        <InviteTeammateDialog
-          open={showInviteDialog}
-          onOpenChange={setShowInviteDialog}
-          workspaceId={workspace.id}
-          workspaceName={workspace.name}
-          teamIds={space.teams.map((team) => team.id)}
-        />
-      )}
     </div>
   );
 }
