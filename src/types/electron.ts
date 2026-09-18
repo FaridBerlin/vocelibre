@@ -1462,7 +1462,6 @@ declare global {
       getAnthropicKey: () => Promise<string | null>;
       saveAnthropicKey: (key: string) => Promise<void>;
       getUiLanguage: () => Promise<string>;
-      saveUiLanguage: (language: string) => Promise<{ success: boolean; language: string }>;
       setUiLanguage: (language: string) => Promise<{ success: boolean; language: string }>;
       saveAllKeysToEnv: () => Promise<{ success: boolean; path: string }>;
       syncStartupPreferences: (prefs: {
@@ -1632,36 +1631,8 @@ declare global {
       checkLocalReasoningAvailable: () => Promise<boolean>;
 
       // Anthropic reasoning
-      processAnthropicReasoning: (
-        text: string,
-        modelId: string,
-        agentName: string | null,
-        config: any
-      ) => Promise<{ success: boolean; text?: string; error?: string }>;
 
       // Enterprise reasoning (Bedrock, Azure, Vertex)
-      processEnterpriseReasoning: (
-        text: string,
-        modelId: string,
-        agentName: string | null,
-        config: any
-      ) => Promise<{
-        success: boolean;
-        text?: string;
-        error?: string;
-        messageKey?: string;
-        messageParams?: Record<string, string | number>;
-        action?: string;
-        actionKey?: string;
-        copyCommand?: string;
-        retryable?: boolean;
-        technicalDetails?: {
-          status?: number;
-          exceptionType?: string;
-          requestId?: string;
-          underlyingError?: string;
-        };
-      }>;
       cancelEnterpriseReasoning?: () => void;
       enterpriseStreamStart?: (payload: {
         streamId: string;
@@ -1679,16 +1650,8 @@ declare global {
           error?: string;
         }) => void
       ) => () => void;
-      listBedrockModels?: (config: Record<string, unknown>) => Promise<{
-        success: boolean;
-        models?: Array<{ value: string; label: string; vendor: string }>;
-        error?: string;
-      }>;
 
       // llama.cpp management
-      llamaCppCheck: () => Promise<{ isInstalled: boolean; version?: string }>;
-      llamaCppInstall: () => Promise<{ success: boolean; error?: string }>;
-      llamaCppUninstall: () => Promise<{ success: boolean; error?: string }>;
 
       // llama-server
       llamaServerStart: (
@@ -1930,40 +1893,6 @@ declare global {
       saveVertexLocation?: (value: string) => Promise<void>;
       getVertexApiKey?: () => Promise<string | null>;
       saveVertexApiKey?: (key: string) => Promise<void>;
-      testEnterpriseConnection?: (
-        provider: string,
-        config: Record<string, unknown>
-      ) => Promise<{
-        success: boolean;
-        error?: string;
-        messageKey?: string;
-        messageParams?: Record<string, string | number>;
-        action?: string;
-        actionKey?: string;
-        copyCommand?: string;
-        technicalDetails?: {
-          status?: number;
-          exceptionType?: string;
-          requestId?: string;
-          underlyingError?: string;
-        };
-      }>;
-      getManagedEnterpriseConfig?: (
-        accountId: string,
-        workspaceId: string,
-        expectedAuthGeneration: number,
-        forceRefresh?: boolean
-      ) => Promise<{
-        success: boolean;
-        status?: "network" | "current" | "cached" | "error";
-        accountId?: string | null;
-        workspaceId?: string | null;
-        authGeneration?: number | null;
-        config?: ManagedEnterpriseConfig;
-        code?: string;
-        error?: string;
-        enforcementRequired?: boolean;
-      }>;
       onManagedEnterpriseConfigChanged?: (
         callback: (snapshot: {
           accountId: string;
@@ -1984,7 +1913,6 @@ declare global {
 
       // Activation mode persistence (file-based for reliable startup)
       getActivationMode?: () => Promise<"tap" | "push">;
-      saveActivationMode?: (mode: "tap" | "push") => Promise<void>;
 
       // Debug logging
       getLogLevel?: () => Promise<string>;
@@ -2105,19 +2033,12 @@ declare global {
       getPendingInvitationToken?: () => Promise<string | null>;
 
       // AssemblyAI Streaming
-      assemblyAiStreamingWarmup?: (options?: { sampleRate?: number; language?: string }) => Promise<
-        {
-          success: boolean;
-          alreadyWarm?: boolean;
-        } & PolicyFailureMetadata
-      >;
       assemblyAiStreamingStart?: (options?: { sampleRate?: number; language?: string }) => Promise<
         {
           success: boolean;
           usedWarmConnection?: boolean;
         } & PolicyFailureMetadata
       >;
-      assemblyAiStreamingSend?: (audioBuffer: ArrayBuffer) => void;
       assemblyAiStreamingForceEndpoint?: () => void;
       assemblyAiStreamingStop?: () => Promise<{
         success: boolean;
@@ -2353,15 +2274,6 @@ declare global {
       onCortiSessionEnd?: (callback: (data: { text?: string }) => void) => () => void;
 
       // Agent cloud streaming (event-based)
-      startAgentStream?: (
-        requestId: string,
-        messages: Array<{ role: string; content: string | Array<unknown> }>,
-        opts?: {
-          systemPrompt?: string;
-          tools?: Array<{ name: string; description: string; parameters: Record<string, unknown> }>;
-          screenContext?: { data: string; mediaType: string };
-        }
-      ) => void;
       cancelAgentStream?: (requestId: string) => void;
       onAgentStreamChunk?: (
         callback: (payload: {

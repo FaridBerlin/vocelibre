@@ -6,7 +6,6 @@ import {
   Download,
   RefreshCw,
   Loader2,
-  AlertTriangle,
   Zap,
   ChevronLeft,
   PanelLeftOpen,
@@ -154,8 +153,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
       setActiveView("home");
     }
   }, [activeView, agentAllowedByPolicy, policyActionsAllowed]);
-  const updateRequiredByOrg = true;
-  const policyMinAppVersion = null;
 
   // Policy-effective, because the settings pane the GPU banner links to renders
   // the clamped mode — see eligibleGpuOffers.
@@ -887,27 +884,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
             )}
           </div>
           <div className="flex-1 overflow-y-auto pt-1">
-            {updateRequiredByOrg && (
-              <div className="max-w-3xl mx-auto w-full mb-3">
-                <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/50 p-3">
-                  <div className="flex items-start gap-3">
-                    <div className="shrink-0 w-8 h-8 rounded-md bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                      <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-amber-900 dark:text-amber-200 mb-0.5">
-                        {t("controlPanel.updateRequiredByOrg.title")}
-                      </p>
-                      <p className="text-xs text-amber-700 dark:text-amber-300/80">
-                        {t("controlPanel.updateRequiredByOrg.description", {
-                          version: policyMinAppVersion,
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
             <RequiredModelsBanner />
             {/* Only the transcription offer is actionable: the language-model
                 settings page the intelligence offer linked to is gone. */}

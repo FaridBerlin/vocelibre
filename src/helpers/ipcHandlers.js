@@ -1161,6 +1161,313 @@ class IPCHandlers {
   }
 
   setupHandlers() {
+    // --- Restored local handlers ------------------------------------------
+    // 169fa408 ("cut the main process off from OpenWhispr") removed 142
+    // ipcMain.handle registrations and re-added 59. It was aimed at the cloud
+    // surface, but it also took these local-only handlers with it, leaving
+    // preload.js invoking channels nothing answered: UI language, hotkeys,
+    // logging, startup prefs, the system-settings shortcut, and the whole
+    // llama.cpp/Vulkan local-inference bridge. Their managers were never
+    // deleted, so this is wiring, not new behaviour. Nothing here may reach
+    // the network — see the rename/scope policy in CLAUDE.md.
+    // test/helpers/ipcChannelParity.test.js fails if a bridge channel loses
+    // its handler again.
+
+    // Logging
+    ipcMain.handle("app-log", async (event, entry) => {
+      debugLogger.logEntry(entry);
+      return { success: true };
+    });
+    ipcMain.handle("get-log-level", async () => {
+      return debugLogger.getLevel();
+    });
+
+    // UI language
+    ipcMain.handle("get-ui-language", async () => {
+      return this.environmentManager.getUiLanguage();
+    });
+    ipcMain.handle("set-ui-language", async (event, language) => {
+      const result = this.environmentManager.saveUiLanguage(language);
+      process.env.UI_LANGUAGE = result.language;
+      changeLanguage(result.language);
+      this.windowManager?.refreshLocalizedUi?.();
+      this.getTrayManager?.()?.updateTrayMenu?.();
+      return { success: true, language: result.language };
+    });
+
+    // Hotkeys and activation mode
+    ipcMain.handle("get-activation-mode", async () => {
+      return this.environmentManager.getActivationMode();
+    });
+    ipcMain.handle("get-dictation-key", async () => {
+      return this.environmentManager.getDictationKey();
+    });
+    ipcMain.handle("save-dictation-key", async (event, key) => {
+      return this.environmentManager.saveDictationKey(key);
+    });
+    ipcMain.handle("get-active-dictation-key", async () => {
+      const hotkeys = this.windowManager?.hotkeyManager?.getSlotHotkeys?.("dictation") ?? [];
+      return hotkeys.length > 0 ? hotkeys.join(",") : null;
+    });
+    ipcMain.handle("get-effective-default-hotkey", async () => {
+      return this.windowManager?.hotkeyManager?.getEffectiveDefaultHotkey() ?? null;
+    });
+
+    // Startup preferences and env persistence
+    ipcMain.handle("sync-startup-preferences", async (event, prefs) => {
+      const setVars = {};
+      const clearVars = [];
+
+      if (prefs.useLocalWhisper && prefs.model) {
+        // Local mode with model selected - set provider and model for pre-warming
+        setVars.LOCAL_TRANSCRIPTION_PROVIDER = prefs.localTranscriptionProvider;
+        if (prefs.language) setVars.DICTATION_LANGUAGE = prefs.language;
+        if (isSherpaLocalProvider(prefs.localTranscriptionProvider)) {
+          setVars.PARAKEET_MODEL = prefs.model;
+          clearVars.push("LOCAL_WHISPER_MODEL");
+          this.whisperManager.stopServer().catch((err) => {
+            debugLogger.error("Failed to stop whisper-server on provider switch", {
+              error: err.message,
+            });
+          });
+        } else {
+          setVars.LOCAL_WHISPER_MODEL = prefs.model;
+          clearVars.push("PARAKEET_MODEL");
+          this.parakeetManager.stopServer().catch((err) => {
+            debugLogger.error("Failed to stop parakeet-server on provider switch", {
+              error: err.message,
+            });
+          });
+        }
+      } else if (prefs.useLocalWhisper) {
+        // Local mode enabled but no model selected - clear pre-warming vars
+        clearVars.push("LOCAL_TRANSCRIPTION_PROVIDER", "PARAKEET_MODEL", "LOCAL_WHISPER_MODEL");
+      } else {
+        // Cloud mode - stop local servers to free RAM
+        clearVars.push("LOCAL_TRANSCRIPTION_PROVIDER", "PARAKEET_MODEL", "LOCAL_WHISPER_MODEL");
+        this.whisperManager.stopServer().catch((err) => {
+          debugLogger.error("Failed to stop whisper-server on cloud switch", {
+            error: err.message,
+          });
+        });
+        this.parakeetManager.stopServer().catch((err) => {
+          debugLogger.error("Failed to stop parakeet-server on cloud switch", {
+            error: err.message,
+          });
+        });
+      }
+
+      const localServer = resolveLocalServerNeeds(prefs);
+
+      if (localServer.cleanup) {
+        setVars.CLEANUP_PROVIDER = "local";
+        setVars.LOCAL_CLEANUP_MODEL = localServer.cleanup;
+      } else {
+        clearVars.push("CLEANUP_PROVIDER", "LOCAL_CLEANUP_MODEL");
+      }
+      // TODO: drop legacy REASONING_PROVIDER / LOCAL_REASONING_MODEL clears once
+      // the read fallback is removed (~2 releases after this lands).
+      clearVars.push("REASONING_PROVIDER", "LOCAL_REASONING_MODEL");
+
+      if (localServer.dictationAgent) {
+        setVars.DICTATION_AGENT_PROVIDER = "local";
+        setVars.LOCAL_DICTATION_AGENT_MODEL = localServer.dictationAgent;
+      } else {
+        clearVars.push("DICTATION_AGENT_PROVIDER", "LOCAL_DICTATION_AGENT_MODEL");
+      }
+
+      // Stop the shared llama-server only when neither scope still needs it, so
+      // the active scope keeps its server when the other one switches away.
+      if (localServer.stopServer) {
+        const modelManager = require("./modelManagerBridge").default;
+        modelManager.stopServer().catch((err) => {
+          debugLogger.error("Failed to stop llama-server on provider switch", {
+            error: err.message,
+          });
+        });
+      }
+
+      this._syncStartupEnv(setVars, clearVars);
+    });
+    ipcMain.handle("save-all-keys-to-env", async () => {
+      return this.environmentManager.saveAllKeysToEnvFile();
+    });
+
+    // System settings
+    ipcMain.handle("open-microphone-settings", () => openSystemSettings("microphone"));
+
+    // Local reasoning (llama.cpp)
+    ipcMain.handle("check-local-reasoning-available", async () => {
+      try {
+        const LocalReasoningService = require("../services/localReasoningBridge").default;
+        return await LocalReasoningService.isAvailable();
+      } catch (error) {
+        return false;
+      }
+    });
+    ipcMain.handle("process-local-reasoning", async (event, text, modelId, _agentName, config) => {
+      try {
+        const LocalReasoningService = require("../services/localReasoningBridge").default;
+        const result = await LocalReasoningService.processText(text, modelId, config);
+        return { success: true, text: result };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("llama-server-start", async (event, modelId) => {
+      try {
+        const modelManager = require("./modelManagerBridge").default;
+        modelManager.ensureInitialized();
+        const modelInfo = modelManager.findModelById(modelId);
+        if (!modelInfo) {
+          return { success: false, error: `Model "${modelId}" not found` };
+        }
+
+        const modelPath = require("path").join(modelManager.modelsDir, modelInfo.model.fileName);
+
+        await modelManager.serverManager.start(
+          modelPath,
+          await modelManager.serverStartOptions(modelInfo)
+        );
+        modelManager.currentServerModelId = modelId;
+
+        this.environmentManager.saveAllKeysToEnvFile().catch(() => {});
+        return { success: true, port: modelManager.serverManager.port };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("llama-server-status", async () => {
+      try {
+        const modelManager = require("./modelManagerBridge").default;
+        return modelManager.getServerStatus();
+      } catch (error) {
+        return { available: false, running: false, error: error.message };
+      }
+    });
+    ipcMain.handle("llama-server-stop", async () => {
+      try {
+        const modelManager = require("./modelManagerBridge").default;
+        await modelManager.stopServer();
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("llama-gpu-reset", async () => {
+      try {
+        const modelManager = require("./modelManagerBridge").default;
+        const previousModelId = modelManager.currentServerModelId;
+        modelManager.serverManager.resetGpuDetection();
+        await modelManager.stopServer();
+
+        // Restart server with previous model so Vulkan binary is picked up
+        if (previousModelId) {
+          modelManager.prewarmServer(previousModelId).catch(() => {});
+        }
+
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    // Vulkan GPU pack
+    ipcMain.handle("detect-vulkan-gpu", async () => {
+      try {
+        const { detectVulkanGpu } = require("../utils/vulkanDetection");
+        return await detectVulkanGpu();
+      } catch (error) {
+        return { available: false, error: error.message };
+      }
+    });
+    ipcMain.handle("get-llama-vulkan-status", async () => {
+      try {
+        if (!this._llamaVulkanManager) {
+          const LlamaVulkanManager = require("./llamaVulkanManager");
+          this._llamaVulkanManager = new LlamaVulkanManager();
+        }
+        return this._llamaVulkanManager.getStatus();
+      } catch (error) {
+        return { supported: false, downloaded: false, error: error.message };
+      }
+    });
+    ipcMain.handle("download-llama-vulkan-binary", async (event) => {
+      try {
+        if (!this._llamaVulkanManager) {
+          const LlamaVulkanManager = require("./llamaVulkanManager");
+          this._llamaVulkanManager = new LlamaVulkanManager();
+        }
+
+        // Stop Vulkan server before downloading to release file locks on DLLs (Windows EBUSY)
+        const modelManager = require("./modelManagerBridge").default;
+        if (modelManager.serverManager.activeBackend === "vulkan") {
+          await modelManager.stopServer().catch((err) => {
+            debugLogger.warn("Failed to stop Vulkan server before download", {
+              error: err.message,
+            });
+          });
+        }
+
+        const result = await this._llamaVulkanManager.download((downloaded, total) => {
+          if (!event.sender.isDestroyed()) {
+            event.sender.send("llama-vulkan-download-progress", {
+              downloaded,
+              total,
+              percentage: total > 0 ? Math.round((downloaded / total) * 100) : 0,
+            });
+          }
+        });
+
+        if (result.success) {
+          process.env.LLAMA_VULKAN_ENABLED = "true";
+          delete process.env.LLAMA_GPU_BACKEND;
+          modelManager.serverManager.cachedServerBinaryPaths = null;
+          await this.environmentManager.saveAllKeysToEnvFile().catch(() => {});
+          // Stop server so next inference picks up the new Vulkan binary
+          await modelManager.stopServer().catch(() => {});
+        }
+
+        return result;
+      } catch (error) {
+        debugLogger.error("Vulkan binary download failed", {
+          error: error.message,
+          stack: error.stack,
+        });
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("cancel-llama-vulkan-download", async () => {
+      if (this._llamaVulkanManager) {
+        return { success: this._llamaVulkanManager.cancelDownload() };
+      }
+      return { success: false };
+    });
+    ipcMain.handle("delete-llama-vulkan-binary", async () => {
+      try {
+        if (!this._llamaVulkanManager) {
+          const LlamaVulkanManager = require("./llamaVulkanManager");
+          this._llamaVulkanManager = new LlamaVulkanManager();
+        }
+
+        const modelManager = require("./modelManagerBridge").default;
+        if (modelManager.serverManager.activeBackend === "vulkan") {
+          await modelManager.stopServer();
+        }
+
+        const result = await this._llamaVulkanManager.deleteBinary();
+
+        delete process.env.LLAMA_VULKAN_ENABLED;
+        delete process.env.LLAMA_GPU_BACKEND;
+        modelManager.serverManager.cachedServerBinaryPaths = null;
+        this.environmentManager.saveAllKeysToEnvFile().catch(() => {});
+
+        return result;
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
     ipcMain.handle("onboarding-set-window-mode", (_event, mode) =>
       this.windowManager.setOnboardingWindowMode(mode)
     );

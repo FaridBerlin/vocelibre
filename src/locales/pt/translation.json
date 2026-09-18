@@ -557,10 +557,6 @@
     }
   },
   "controlPanel": {
-    "updateRequiredByOrg": {
-      "title": "Atualização obrigatória",
-      "description": "Sua organização exige o VoceLibre {{version}} ou mais recente. Atualize o aplicativo."
-    },
     "update": {
       "readyTitle": "Atualização pronta para instalar",
       "readyDescription": "Clique em 'Instalar atualização' para reiniciar com a versão mais recente.",
