@@ -615,16 +615,6 @@
       0 0 26px rgb(33 150 243 / 0.32);
   }
 
-  /* Hold a single arc lit instead of flickering, so live still reads without
-     motion. */
-  .voice-pill-arc {
-    animation: none;
-  }
-
-  .voice-pill-arc[data-arc="1"] {
-    opacity: 0.8;
-  }
-
   .inline-response-shimmer {
     animation: none;
     color: var(--color-foreground);
@@ -712,80 +702,64 @@
   }
 }
 
-/* Sparking arcs marking live capture. The field extends 12px beyond the 60px
-   button, which is exactly the dock inset the overlay window reserves
-   (voice-pill-position-* above), so an arc can never clip at the window edge. */
-.voice-pill-arcs {
-  position: absolute;
-  inset: -12px;
-  pointer-events: none;
+/* ---------------------------------------------------------------------------
+   Floating trigger: live input meter
+   ------------------------------------------------------------------------ */
+
+/* One shell holds the bolt and the meter. Idle it is invisible and hugs the
+   bolt, so the resting trigger is unchanged; listening it fills in around the
+   same bolt rather than spawning a second widget beside it. */
+.voice-trigger-shell {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
 }
 
-.voice-pill-arc {
-  position: absolute;
-  inset: 0;
-  width: 100%;
+/* Docked right, the shell grows leftward so the bolt stays exactly where it
+   sat when idle — the meter appears, the button does not move. */
+.voice-trigger-shell[data-horizontal-direction="right"] {
+  flex-direction: row-reverse;
+}
+
+.voice-trigger-shell[data-live="true"] {
+  background: rgb(6 20 40 / 0.62);
+  border: 1px solid rgb(143 224 255 / 0.28);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 2px 10px rgb(4 20 45 / 0.45),
+    inset 0 0 14px rgb(46 163 255 / 0.12);
+}
+
+/* No padding on the bolt's end: the 60px circle fills the shell's end cap
+   exactly, so there is no seam between the two. Padding only on the far end,
+   past the last bar. */
+.voice-trigger-shell[data-live="true"] .voice-pill-eq-bars {
+  padding-right: 14px;
+}
+
+.voice-trigger-shell[data-live="true"][data-horizontal-direction="right"] .voice-pill-eq-bars {
+  padding-right: 0;
+  padding-left: 14px;
+}
+
+.voice-pill-eq-bars {
+  gap: 3px;
   height: 100%;
-  overflow: visible;
-  opacity: 0;
-  animation-name: voice-pill-arc-flicker;
-  animation-timing-function: steps(1, end);
-  animation-iteration-count: infinite;
 }
 
-.voice-pill-arc polyline {
-  fill: none;
-  stroke: #6fd3ff;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: miter;
-  filter: drop-shadow(0 0 3px rgb(111 211 255 / 0.9));
+/* Gradient runs bottom-up so a tall bar brightens toward its rounded cap.
+   100ms matches the 80ms sample interval closely enough to read as continuous
+   without lagging behind the voice. */
+.voice-pill-eq-bar {
+  width: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(to top, #2ea3ff, #9fe6ff);
+  box-shadow: 0 0 6px rgb(79 195 255 / 0.75);
+  transition: height 100ms ease-out;
 }
 
-/* Non-harmonic cycles: with no common period the six arcs never line up, so
-   the sparking reads as random without any JS randomness (which would also
-   differ between server render and hydration). Each arc is lit for ~280ms. */
-.voice-pill-arc[data-arc="1"] {
-  animation-duration: 1.7s;
-  animation-delay: 0s;
-}
-.voice-pill-arc[data-arc="2"] {
-  animation-duration: 2.3s;
-  animation-delay: 0.37s;
-}
-.voice-pill-arc[data-arc="3"] {
-  animation-duration: 1.9s;
-  animation-delay: 0.71s;
-}
-.voice-pill-arc[data-arc="4"] {
-  animation-duration: 2.9s;
-  animation-delay: 1.13s;
-}
-.voice-pill-arc[data-arc="5"] {
-  animation-duration: 2.1s;
-  animation-delay: 1.49s;
-}
-.voice-pill-arc[data-arc="6"] {
-  animation-duration: 2.6s;
-  animation-delay: 1.91s;
-}
-
-/* Hard steps rather than a fade: a lightning arc snaps on and off. The lit
-   window is a fraction of each cycle, so ~280ms at these durations. */
-@keyframes voice-pill-arc-flicker {
-  0% {
-    opacity: 0;
-  }
-  2% {
-    opacity: 1;
-  }
-  7% {
-    opacity: 0.55;
-  }
-  12% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
+@media (prefers-reduced-motion: reduce) {
+  .voice-pill-eq-bar {
+    transition: none;
   }
 }

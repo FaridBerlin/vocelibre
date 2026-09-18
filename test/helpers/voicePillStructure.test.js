@@ -47,7 +47,11 @@ test("thinking and recording keep the same persistent glow and pill roots", asyn
   const recording = await renderPill("recording", true);
 
   for (const markup of [thinking, recording]) {
-    assert.match(markup, /^<span class="voice-pill-glow-anchor"/);
+    // The floating trigger wraps the anchor in a row so the meter can sit
+    // beside it; the anchor and pill roots themselves stay shared, which is
+    // what keeps the glow continuous across state changes.
+    assert.match(markup, /^<span class="voice-trigger-shell"/);
+    assert.match(markup, /<span class="voice-pill-glow-anchor">/);
     assert.match(markup, /class="processing-signal-glow"/);
     assert.match(markup, /voice-pill-control/);
   }
@@ -364,22 +368,62 @@ test("the floating trigger keeps one circular bolt form across idle and listenin
   assert.doesNotMatch(panel, /data-bolt-surface/);
 });
 
-test("sparking arcs mark live capture only, and only on the floating trigger", async () => {
+test("the live meter appears only while recording, and only on the floating trigger", async () => {
+  const { WAVEFORM_BAR_MIN_PX } = await import("../../src/components/dictation/waveformMath.ts");
   const idle = await renderPill("idle", false);
   const listening = await renderPill("recording", true);
   const processing = await renderPill("processing", false);
   const panelListening = await renderPill("recording", true, "right", { variant: "panel" });
 
-  assert.doesNotMatch(idle, /voice-pill-arc/);
-  assert.doesNotMatch(processing, /voice-pill-arc/);
-  assert.doesNotMatch(panelListening, /voice-pill-arc/);
+  // Idle collapses the shell to the bolt alone: no live flag, no bars.
+  assert.doesNotMatch(idle, /data-live="true"/);
+  assert.doesNotMatch(idle, /voice-pill-eq-bar/);
+  assert.doesNotMatch(processing, /data-live="true"/);
+  // The panel capsule keeps its own inline waveform and never grows the shell.
+  assert.doesNotMatch(panelListening, /voice-trigger-shell/);
 
-  assert.match(listening, /class="voice-pill-arcs"/);
-  assert.equal((listening.match(/class="voice-pill-arc"/g) || []).length, 6);
-  // Each arc is addressed by index so the CSS can give it its own cycle.
-  for (let i = 1; i <= 6; i += 1) {
-    assert.match(listening, new RegExp(`data-arc="${i}"`));
+  // One fused component: the bolt and the bars live inside a single shell.
+  assert.match(listening, /<span class="voice-trigger-shell" data-live="true"/);
+  assert.match(listening, /voice-trigger-shell[^>]*>\s*<span class="voice-pill-glow-anchor"/);
+  // Exact class: "voice-pill-eq-bars" on the container would match a loose one.
+  assert.equal((listening.match(/class="voice-pill-eq-bar"/g) || []).length, 13);
+  // Bars start at rest; the rAF loop raises them from real input.
+  assert.match(listening, new RegExp(`height:${WAVEFORM_BAR_MIN_PX}px`));
+
+  // The bolt is untouched by the meter: same surface, same glyph, same size.
+  const footprint = await pillFootprints();
+  assert.match(listening, /data-bolt-surface="true"/);
+  assert.match(listening, /voice-pill-bolt[^"\n]*scale-100 opacity-100/);
+  assert.match(listening, footprint.idle);
+});
+
+test("bar height tracks input amplitude across the speech range", async () => {
+  const { resolveWaveformBarHeight, WAVEFORM_BAR_MIN_PX, WAVEFORM_BAR_MAX_PX } =
+    await import("../../src/components/dictation/waveformMath.ts");
+
+  // Silence rests at the floor and loud voicing reaches the ceiling.
+  assert.equal(resolveWaveformBarHeight(0), WAVEFORM_BAR_MIN_PX);
+  assert.equal(resolveWaveformBarHeight(1), WAVEFORM_BAR_MAX_PX);
+
+  // The point of a live meter is visible variation *within* conversational
+  // speech (RMS ~0.02-0.15), not just at the extremes: a mapping that
+  // saturated early would look like a canned animation.
+  const speech = [0.02, 0.04, 0.06, 0.09, 0.12, 0.15];
+  // Explicit arity: passing this straight to map would feed the index in as a
+  // second argument if the signature ever grows one again.
+  const heights = speech.map((rms) => resolveWaveformBarHeight(rms));
+  for (let i = 1; i < heights.length; i += 1) {
+    assert.ok(
+      heights[i] > heights[i - 1],
+      `louder input must give a taller bar (${speech[i]} vs ${speech[i - 1]})`
+    );
   }
+  // And the range actually spans a visible portion of the lane.
+  const lane = WAVEFORM_BAR_MAX_PX - WAVEFORM_BAR_MIN_PX;
+  assert.ok(
+    heights[heights.length - 1] - heights[0] > lane * 0.4,
+    "conversational speech must move the bars across a visible share of the lane"
+  );
 });
 
 test("the bolt treatment supplies its own contrast and keeps the glyph still", async () => {
@@ -394,13 +438,56 @@ test("the bolt treatment supplies its own contrast and keeps the glyph still", a
 
   // All motion lives in the glow and arcs; a moving bolt would not stay legible.
   assert.match(css, /@keyframes voice-pill-breathe/);
-  assert.match(css, /@keyframes voice-pill-arc-flicker/);
   assert.doesNotMatch(css, /voice-pill-bolt\s*\{[^}]*animation/);
 
-  // The radar rings the arcs replaced must be gone, not merely unused.
+  // Every earlier active-state treatment must be gone, not merely unused.
   assert.doesNotMatch(css, /voice-pill-listening-ring/);
   assert.doesNotMatch(css, /@keyframes voice-pill-ping/);
+  assert.doesNotMatch(css, /voice-pill-arc/);
+
+  // The meter shell and its gradient bars.
+  assert.match(css, /\.voice-trigger-shell\[data-live="true"\]\s*\{/);
+  assert.match(css, /backdrop-filter:\s*blur/);
+  assert.match(css, /linear-gradient\(to top, #2ea3ff, #9fe6ff\)/);
+  assert.match(css, /transition:\s*height 100ms/);
 
   // Reduced motion still has to distinguish resting from live.
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+});
+
+test("the live meter auto-ranges to the mic's own gain", async () => {
+  const { createLiveMeterRange, resolveMeterBarHeight, WAVEFORM_BAR_MIN_PX } =
+    await import("../../src/components/dictation/waveformMath.ts");
+
+  // Measured on a real USB interface: idle RMS sits at ~0.0055 and speech peaks
+  // well under the 0.02 the fixed curve assumes. With that curve every bar
+  // lands within ~2px of the floor, which is the "static dashes" report.
+  const quietMic = [0.0055, 0.0055, 0.012, 0.03, 0.045, 0.02, 0.008, 0.0055];
+  const norm = createLiveMeterRange();
+  const heights = quietMic.map((rms) => resolveMeterBarHeight(norm(rms), 26));
+
+  // Silence must rest exactly at the floor — a meter that idles high reads as
+  // broken just as much as one that never moves.
+  assert.equal(heights[0], WAVEFORM_BAR_MIN_PX);
+  assert.equal(heights[1], WAVEFORM_BAR_MIN_PX);
+
+  // Speech on this same quiet mic must reach the top of the lane.
+  assert.equal(Math.max(...heights), 26);
+
+  // And the strip must show real variation, not one step.
+  const distinct = new Set(heights.map((h) => Math.round(h)));
+  assert.ok(distinct.size >= 5, `expected a varied strip, got ${[...distinct].join(",")}`);
+});
+
+test("silence never amplifies hiss to full scale", async () => {
+  const { createLiveMeterRange, resolveMeterBarHeight, WAVEFORM_BAR_MIN_PX } =
+    await import("../../src/components/dictation/waveformMath.ts");
+  const norm = createLiveMeterRange();
+
+  // A naive peak-normaliser would divide by its own noise and paint a full
+  // dancing strip in a silent room; the minimum-peak floor prevents that.
+  for (let i = 0; i < 50; i += 1) {
+    const h = resolveMeterBarHeight(norm(0.0055 + Math.sin(i) * 0.0003), 26);
+    assert.ok(h < WAVEFORM_BAR_MIN_PX + 2, `silence must stay at rest, got ${h}px`);
+  }
 });

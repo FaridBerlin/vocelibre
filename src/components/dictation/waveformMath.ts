@@ -18,3 +18,38 @@ const toBarLevel = (rms: number) =>
 
 export const resolveWaveformBarHeight = (rms: number) =>
   WAVEFORM_BAR_MIN_PX + toBarLevel(rms) * (WAVEFORM_BAR_MAX_PX - WAVEFORM_BAR_MIN_PX);
+
+// --- Live meter auto-ranging -------------------------------------------------
+// The fixed curve above assumes a mic whose conversational RMS lands in
+// 0.02-0.15. Real capture gain varies enormously: a USB interface can idle at
+// 0.005 and peak well under 0.02, which pins every bar near the floor and reads
+// as a row of static dashes. The floating meter therefore scales against what
+// this mic is actually delivering.
+
+/** Just above a quiet room's noise floor; below this counts as silence. */
+export const LIVE_METER_NOISE_FLOOR = 0.006;
+/** Never divide by less than this, so silence cannot amplify hiss to full scale. */
+export const LIVE_METER_MIN_PEAK = 0.02;
+/** Per-sample decay (~80ms), so the range follows speech down after a shout. */
+export const LIVE_METER_PEAK_DECAY = 0.995;
+
+/**
+ * Returns a stateful normaliser mapping raw RMS to 0..1 against a decaying
+ * running peak. Silence yields exactly 0 (bars rest), and normal speech uses
+ * the full lane whatever the mic's gain.
+ */
+export function createLiveMeterRange({
+  noiseFloor = LIVE_METER_NOISE_FLOOR,
+  minPeak = LIVE_METER_MIN_PEAK,
+  decay = LIVE_METER_PEAK_DECAY,
+} = {}) {
+  let peak = minPeak;
+  return (rms: number) => {
+    const above = Math.max(0, (Number.isFinite(rms) ? rms : 0) - noiseFloor);
+    peak = Math.max(above, peak * decay, minPeak);
+    return Math.min(1, above / peak);
+  };
+}
+
+export const resolveMeterBarHeight = (level: number, maxPx: number) =>
+  WAVEFORM_BAR_MIN_PX + Math.min(1, Math.max(0, level)) * (maxPx - WAVEFORM_BAR_MIN_PX);

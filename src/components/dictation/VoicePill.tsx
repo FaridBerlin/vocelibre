@@ -35,23 +35,11 @@ const RESTING_WAVE_HEIGHTS = Array.from(
   (_, index) => RESTING_WAVE_SILHOUETTE[index % RESTING_WAVE_SILHOUETTE.length]
 );
 
-// Jagged polylines in a 100x100 viewBox. The button occupies r=30 (60px), so
-// arcs run from r~31 to r~42 — 12px of travel, matching the dock inset that
-// bounds the overlay window (voice-pill-position-* in dictation-panel.css).
-const LIGHTNING_ARCS = [
-  // up
-  "50,19 47,13 53,9 49,2",
-  // upper right
-  "72,29 78,26 76,20 82,16",
-  // lower right
-  "72,71 79,73 77,80 83,84",
-  // down
-  "50,81 53,87 47,91 51,98",
-  // lower left
-  "28,71 21,74 24,80 17,85",
-  // upper left
-  "28,29 22,25 25,19 18,15",
-];
+// Wider than the panel capsule's 11: the floating meter has its own lane and
+// reads better with a denser strip. PillWaveform keeps one sample per bar, so
+// this is also how much recent history the strip shows.
+const LIVE_METER_BAR_COUNT = 13;
+const LIVE_METER_BAR_MAX_PX = 26;
 
 const STATE_APPEARANCE: Record<VoicePillState, string> = {
   idle: "border-border-hover bg-surface-1 text-muted-foreground dark:border-border/50",
@@ -97,7 +85,7 @@ export const VoicePill = forwardRef<HTMLDivElement, VoicePillProps>(function Voi
   // The capsule (identity mark + waveform) is now a panel-only shape. The
   // floating trigger keeps one circular form across idle and listening so the
   // desktop only ever learns a single control; listening is signalled by the
-  // arcs instead of by changing shape.
+  // live meter beside it instead of by changing shape.
   const showCompactPill =
     isPanel && !collapseToIdentity && (isRecording || expanded || !waveformOnlyWhileRecording);
   const showDivider = showCompactPill && waveformVisible && !isRecording;
@@ -109,9 +97,10 @@ export const VoicePill = forwardRef<HTMLDivElement, VoicePillProps>(function Voi
   // The panel variant keeps the identity mark, which pairs with the waveform
   // and is what morphs into the Agent glyph.
   const showBolt = !isPanel && !collapseToIdentity && !showExpandChevron;
-  // Sparking arcs are the sole "live" signal, so listening reads as the same
-  // control energised rather than as a different surface.
-  const showListeningArcs = !isPanel && isRecording;
+  // The live meter is the "live" signal: it reacts to the actual voice, which
+  // a decorative animation cannot. It sits beside the bolt rather than
+  // replacing it, so the trigger the user aims at never moves or changes.
+  const showLiveMeter = !isPanel && isRecording;
   const footprint = showCompactPill ? VOICE_PILL_FOOTPRINT.recording : VOICE_PILL_FOOTPRINT.idle;
 
   const pill = (
@@ -124,7 +113,7 @@ export const VoicePill = forwardRef<HTMLDivElement, VoicePillProps>(function Voi
         // The bolt surface paints its own background, border and glyph colour,
         // so the per-state surface tokens would only be dead classes that make
         // idle and listening look different in the markup without differing on
-        // screen. Idle and listening must differ by the arcs alone.
+        // screen. Idle and listening must differ by the meter alone.
         showBolt ? "border-transparent" : STATE_APPEARANCE[state],
         className
       )}
@@ -252,27 +241,8 @@ export const VoicePill = forwardRef<HTMLDivElement, VoicePillProps>(function Voi
     </div>
   );
 
-  return (
+  const glowAnchor = (
     <span className="voice-pill-glow-anchor">
-      {showListeningArcs && (
-        // Six arcs around the circle. Their flicker cycles are deliberately
-        // non-harmonic (see the CSS), so the pattern never visibly repeats and
-        // reads as random sparking rather than a metronome. Geometry stays
-        // inside the pill's 12px dock inset so nothing clips at the window edge.
-        <span aria-hidden="true" className="voice-pill-arcs">
-          {LIGHTNING_ARCS.map((arc, index) => (
-            <svg
-              key={arc}
-              className="voice-pill-arc"
-              data-arc={index + 1}
-              viewBox="0 0 100 100"
-              fill="none"
-            >
-              <polyline points={arc} />
-            </svg>
-          ))}
-        </span>
-      )}
       <span
         aria-hidden="true"
         className="processing-signal-glow"
@@ -282,6 +252,39 @@ export const VoicePill = forwardRef<HTMLDivElement, VoicePillProps>(function Voi
         <span className="processing-signal-ring" />
       </span>
       {pill}
+    </span>
+  );
+
+  // The panel variant is a single capsule and keeps its existing root exactly.
+  if (isPanel) return glowAnchor;
+
+  // One shell, always mounted so the anchor and pill roots never change
+  // identity across states. Idle it is transparent and collapses to the bolt;
+  // listening it fills in, and the bolt sits flush in its end cap so the two
+  // read as a single continuous control rather than two floating widgets.
+  return (
+    <span
+      className="voice-trigger-shell"
+      data-live={showLiveMeter ? "true" : undefined}
+      data-horizontal-direction={horizontalDirection}
+    >
+      {glowAnchor}
+      {showLiveMeter && (
+        <PillWaveform
+          getLevel={getAudioLevel}
+          active={isRecording}
+          barCount={LIVE_METER_BAR_COUNT}
+          barMaxPx={LIVE_METER_BAR_MAX_PX}
+          autoRange
+          debugLabel={
+            typeof window !== "undefined" && window.localStorage?.getItem("debugVoiceMeter") === "1"
+              ? "voice-meter"
+              : undefined
+          }
+          barClassName="voice-pill-eq-bar"
+          className="voice-pill-eq-bars"
+        />
+      )}
     </span>
   );
 });
