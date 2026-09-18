@@ -1,4 +1,5 @@
 import React from "react";
+import { BRAND_MARK_BOLT_POINTS, BRAND_MARK_VIEW_BOX } from "../brandMarkGeometry";
 
 interface BrandMarkIconProps {
   size?: number;
@@ -6,7 +7,8 @@ interface BrandMarkIconProps {
 }
 
 /**
- * Circled sound-bars brand mark. Draws in `currentColor` so it follows the
+ * The bolt brand mark. Filled rather than stroked so it stays solid at the
+ * small sizes this is used at, and drawn in `currentColor` so it follows the
  * neutral foreground treatment of the surface that contains it.
  */
 export function BrandMarkIcon({ size = 24, className }: BrandMarkIconProps) {
@@ -14,15 +16,12 @@ export function BrandMarkIcon({ size = 24, className }: BrandMarkIconProps) {
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox={BRAND_MARK_VIEW_BOX}
       fill="none"
       className={className}
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-      <rect x="7.75" y="9.5" width="2" height="5" rx="1" fill="currentColor" />
-      <rect x="11" y="7" width="2" height="10" rx="1" fill="currentColor" />
-      <rect x="14.25" y="9.5" width="2" height="5" rx="1" fill="currentColor" />
+      <polygon points={BRAND_MARK_BOLT_POINTS} fill="currentColor" />
     </svg>
   );
 }
