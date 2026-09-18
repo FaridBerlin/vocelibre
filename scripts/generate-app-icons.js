@@ -13,7 +13,11 @@
  *          dropped. Neither is a Windows shell size (it uses 16/32/48/256), and
  *          electron-builder only requires a 256 to be present.
  *   .icns  512 + 1024, where the previous file carried a lone ic10 (1024).
- *   .png   256x256, the size Linux packaging consumed before.
+ *   .png   512x512. Given a single PNG, electron-builder ships exactly one
+ *          hicolor icon at that source's size and never upscales — a 256
+ *          source shipped only 256x256, leaving GNOME's app grid to upscale on
+ *          HiDPI. A multi-size set would need linux.icon pointed at a
+ *          directory, which would change a path electron-builder.json pins.
  */
 
 const fs = require("fs");
@@ -27,7 +31,7 @@ const source = path.join(assets, "icon-source-1024.png");
 
 const ICO_SIZES = [16, 24, 32, 48, 64, 128, 256];
 const ICNS_SIZES = [512, 1024];
-const LINUX_PNG_SIZE = 256;
+const LINUX_PNG_SIZE = 512;
 
 async function main() {
   if (!fs.existsSync(source)) {
