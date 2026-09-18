@@ -17,7 +17,7 @@
 
 ---
 
-VoceLibre is a local-first fork of [OpenWhispr](https://github.com/OpenWhispr/openwhispr), stripped down and focused on one thing: dictation that works completely offline, with **zero registration** — no email, no Google/Microsoft sign-in, nothing. Your voice never leaves your device. It's free software, sustained by donations rather than subscriptions or accounts.
+VoceLibre is local-first voice dictation, focused on one thing: dictation that works completely offline, with **zero registration** — no email, no Google/Microsoft sign-in, nothing. Your voice never leaves your device. It's free software, sustained by donations rather than subscriptions or accounts.
 
 ## Quick start
 
@@ -99,7 +99,7 @@ We welcome contributions. Fork the repo, create a feature branch, and open a pul
 
 ## License
 
-[MIT](LICENSE) — free for personal and commercial use. VoceLibre is a fork of [OpenWhispr](https://github.com/OpenWhispr/openwhispr) (also MIT); the original copyright notice is preserved in [LICENSE](LICENSE).
+[MIT](LICENSE) — free for personal and commercial use.
 
 ## Acknowledgments
 
@@ -112,4 +112,3 @@ We welcome contributions. Fork the repo, create a feature branch, and open a pul
 - **[Electron](https://www.electronjs.org/)** — cross-platform desktop framework
 - **[React](https://react.dev/)** — UI component library
 - **[shadcn/ui](https://ui.shadcn.com/)** — accessible components built on Radix primitives
-- **[OpenWhispr](https://github.com/OpenWhispr/openwhispr)** — the project VoceLibre is forked from

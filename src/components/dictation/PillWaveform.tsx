@@ -78,7 +78,6 @@ export function PillWaveform({
         levels.shift();
         levels.push(normalise ? normalise(raw) : raw);
         if (debugLabel) {
-          // eslint-disable-next-line no-console
           console.log(
             `[${debugLabel}] rms=${raw.toFixed(4)} scaled=${levels[levels.length - 1].toFixed(3)}`
           );
