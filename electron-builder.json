@@ -211,6 +211,7 @@
     ]
   },
   "deb": {
+    "maintainer": "Farid Berlin <174246426+FaridBerlin@users.noreply.github.com>",
     "afterInstall": "resources/linux/after-install.sh",
     "afterRemove": "resources/linux/after-remove.sh",
     "depends": ["ydotool", "libpipewire-0.3-0"],
