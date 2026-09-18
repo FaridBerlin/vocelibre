@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { OnboardingProgressState } from "./flow";
+import { BRAND_MARK_BOLT_POINTS, BRAND_MARK_VIEW_BOX } from "../brandMarkGeometry";
 import { Copy, Minus, Square, Undo2, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useTranslation } from "react-i18next";
@@ -359,15 +360,12 @@ export function BrandMark({ className = "" }: { className?: string }) {
   return (
     <svg
       className={className}
-      viewBox="0 0 1024 1024"
+      viewBox={BRAND_MARK_VIEW_BOX}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <circle cx="512" cy="512" r="314" stroke="currentColor" strokeWidth="74" />
-      <path d="M512 383V641" stroke="currentColor" strokeWidth="74" strokeLinecap="round" />
-      <path d="M627 457V568" stroke="currentColor" strokeWidth="74" strokeLinecap="round" />
-      <path d="M397 457V568" stroke="currentColor" strokeWidth="74" strokeLinecap="round" />
+      <polygon points={BRAND_MARK_BOLT_POINTS} fill="currentColor" />
     </svg>
   );
 }
