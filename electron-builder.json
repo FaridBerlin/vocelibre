@@ -254,11 +254,15 @@
     ]
   },
   "nsis": {
+    "artifactName": "${productName}-${version}-win-${arch}-setup.${ext}",
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "include": "resources/nsis/installer.nsh"
+  },
+  "portable": {
+    "artifactName": "${productName}-${version}-win-${arch}-portable.${ext}"
   },
   "dmg": {
     "title": "OpenWhispr",
