@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCircle } from "lucide-react";
-import UseCaseStep from "./onboarding/UseCaseStep";
-import { hasUseCaseIntent } from "./onboarding/useCases";
 import OnboardingShell, { OnboardingStepHeader } from "./onboarding/OnboardingShell";
 import CompactPermissionsStep from "./onboarding/CompactPermissionsStep";
 import LanguageSelectionStep from "./onboarding/LanguageSelectionStep";
 import ShortcutSetupStep from "./onboarding/ShortcutSetupStep";
-import AssistantHotkeyPreview from "./onboarding/AssistantHotkeyPreview";
 import DemoStep from "./onboarding/DemoStep";
-import CalendarConnectionsStep from "./onboarding/CalendarConnectionsStep";
 import { LocalModelSetupStep } from "./onboarding/ProviderSetupStep";
 import { AlertDialog } from "./ui/dialog";
 import { usePermissions } from "../hooks/usePermissions";
@@ -19,12 +15,10 @@ import { useSystemAudioPermission } from "../hooks/useSystemAudioPermission";
 import { useSettings } from "../hooks/useSettings";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useHotkeyRegistration } from "../hooks/useHotkeyRegistration";
-import { useHotkeyModeInfo } from "../hooks/useHotkeyModeInfo";
 import { useSettingsStore } from "../stores/settingsStore";
 import { getDefaultHotkey, parseHotkeyList, serializeHotkeyList } from "../utils/hotkeys";
 import { formatHotkeyInstruction } from "./onboarding/hotkeyPresentation";
 import { getValidationMessage } from "../utils/hotkeyValidator";
-import { validateHotkeyForSlot } from "../utils/hotkeyValidation";
 import { getPlatform } from "../utils/platform";
 import { ACCESSIBILITY_SKIPPED_KEY, areRequiredPermissionsMet } from "../utils/permissions";
 import logger from "../utils/logger";
@@ -34,19 +28,13 @@ import {
   getOnboardingProgress,
   getOnboardingRoute,
   reconcileStepWithRoute,
-  type OnboardingSetupMode,
-  type OnboardingStepId,
 } from "./onboarding/flow";
 import { useOnboardingSession } from "./onboarding/useOnboardingSession";
 import { clearPendingLocalModels, hasPendingLocalModels } from "./onboarding/pendingLocalModels";
-import { ActivationModeSelector } from "./ui/ActivationModeSelector";
-import LinuxPttSetupInfo from "./ui/LinuxPttSetupInfo";
 
 interface OnboardingFlowProps {
   onComplete: (options?: { openSettings?: boolean }) => void;
 }
-
-type OnboardingCompletionMode = Exclude<OnboardingSetupMode, null>;
 
 function DemoHotkeyDescription({ text, hotkey }: { text: string; hotkey: string }) {
   const hotkeyStart = text.indexOf(hotkey);
@@ -69,24 +57,18 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const screenContextAllowed = true;
   const settings = useSettings();
   const settingsStore = useSettingsStore();
-  const { session, setSession, goTo, goBack, setSetupMode, setSelfHostedRequested, clearSession } =
-    useOnboardingSession();
+  const { session, setSession, goTo, goBack, clearSession } = useOnboardingSession();
 
   const [dictationHotkey, setDictationHotkey] = useState(
     () => parseHotkeyList(settings.dictationKey)[0] || getDefaultHotkey()
   );
-  const [assistantHotkey, setAssistantHotkey] = useState(
-    () => parseHotkeyList(settings.voiceAgentKey)[0] || "CommandOrControl+Shift+Space"
-  );
   const [dictationHotkeyConfirmed, setDictationHotkeyConfirmed] = useState(false);
-  const [assistantHotkeyConfirmed, setAssistantHotkeyConfirmed] = useState(false);
   // Seeded from main rather than getDefaultHotkey(): main already knows when the
   // platform default can't bind (GNOME/X11 reject modifier-only combos) and
   // registered a fallback instead — recommending the unregistrable default would
   // make every confirm of it fail.
   const [recommendedDictationHotkey, setRecommendedDictationHotkey] = useState(getDefaultHotkey);
   const [dictationDemoSuccess, setDictationDemoSuccess] = useState(false);
-  const [assistantDemoSuccess, setAssistantDemoSuccess] = useState(false);
   const [stageReady, setStageReady] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
   const [fatalError, setFatalError] = useState<string | null>(null);
@@ -108,11 +90,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     needsRelaunch: screenRecordingNeedsRelaunch,
     request: requestScreenRecordingAccess,
   } = useScreenRecordingPermission();
-  const { supportsPushToTalk, pushToTalkUnavailableReason } = useHotkeyModeInfo(
-    "onboarding",
-    dictationHotkey
-  );
-  const { activationMode, setActivationMode } = settings;
+  const { activationMode } = settings;
   // This hook also starts the membership fetch for already-authenticated users;
   // relying on the login transition alone would leave resumed onboarding stuck
   // waiting for workspace resolution after an app restart.
@@ -148,10 +126,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     applyScreenContext,
   ]);
 
-  const route = useMemo(
-    () => getOnboardingRoute({ setupMode: session.setupMode, agentAllowed }),
-    [agentAllowed, session.setupMode]
-  );
+  const route = useMemo(() => getOnboardingRoute(), []);
   const currentStepId = reconcileStepWithRoute(session.currentStepId, route);
   const compact = COMPACT_STEPS.has(currentStepId);
 
@@ -228,15 +203,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     (value: string) => getValidationMessage(value, getPlatform()),
     []
   );
-  const validateAssistantHotkey = useCallback(
-    (value: string) =>
-      validateHotkeyForSlot(
-        value,
-        { "settingsPage.general.hotkey.title": withExtraDictationHotkeys(dictationHotkey) },
-        t
-      ),
-    [dictationHotkey, t, withExtraDictationHotkeys]
-  );
 
   const confirmDictationHotkey = useCallback(
     async (value: string) => {
@@ -246,94 +212,51 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     [registerHotkey, t, withExtraDictationHotkeys]
   );
 
-  const confirmAssistantHotkey = useCallback(
-    async (value: string) => {
-      const registered = await settings.setVoiceAgentKey(
-        serializeHotkeyList([value, ...parseHotkeyList(settings.voiceAgentKey).slice(1)])
-      );
-      return registered ? null : t("onboarding.rehaul.hotkey.inUse");
-    },
-    [settings, t]
-  );
-
-  const finalizeOnboarding = useCallback(
-    async (mode: OnboardingCompletionMode, options: { localPending?: boolean } = {}) => {
-      if (isFinishing) return;
-      setIsFinishing(true);
-      setFatalError(null);
-      try {
-        const registered = await registerHotkey(withExtraDictationHotkeys(dictationHotkey));
-        if (!registered) {
-          setFatalError(t("onboarding.hotkey.couldNotRegisterDescription"));
-          return;
-        }
-
-        await window.electronAPI?.saveAllKeysToEnv?.();
-        await window.electronAPI?.markBundleMigrated?.();
-        await window.electronAPI?.setOnboardingWindowMode?.("restore");
-
-        // hasPendingLocalModels() covers proceeding past a still-running download
-        // rather than skipping: the model was remembered when the download
-        // started, and BackgroundModelDownloadTray only applies it (and then
-        // clears this flag) while the flag is set.
-        //
-        if (mode === "local" && (options.localPending || hasPendingLocalModels())) {
-          localStorage.setItem("localSetupPending", "true");
-        } else {
-          localStorage.removeItem("localSetupPending");
-          clearPendingLocalModels();
-        }
-
-        clearSession();
-        localStorage.setItem("onboardingCompleted", "true");
-        onComplete();
-      } catch (error) {
-        logger.error("Failed to finish onboarding", { error }, "onboarding");
-        setFatalError(t("common.unknownError"));
-      } finally {
-        setIsFinishing(false);
+  const finalizeOnboarding = useCallback(async () => {
+    if (isFinishing) return;
+    setIsFinishing(true);
+    setFatalError(null);
+    try {
+      const registered = await registerHotkey(withExtraDictationHotkeys(dictationHotkey));
+      if (!registered) {
+        setFatalError(t("onboarding.hotkey.couldNotRegisterDescription"));
+        return;
       }
-    },
-    [
-      clearSession,
-      dictationHotkey,
-      isFinishing,
-      onComplete,
-      registerHotkey,
-      t,
-      withExtraDictationHotkeys,
-    ]
-  );
 
-  const applyReasoningSelectionToAllScopes = useCallback(
-    (mode: "local") => {
-      // getState(), not the render-time snapshot: the provider steps write
-      // chatAgentProvider/chatAgentModel via switchReasoningProvider and call
-      // onProceed() in the same tick, so `settingsStore` here still holds the
-      // values from before the pick. Reading it stale configured the other three
-      // scopes to the defaults (groq / openai/gpt-oss-120b) with no key.
-      const { chatAgentProvider, chatAgentModel } = useSettingsStore.getState();
-      settingsStore.setCloudReasoningForAllScopes({
-        cleanupCloudMode: mode,
-        cleanupProvider: chatAgentProvider,
-        cleanupModel: chatAgentModel,
-        useCleanupModel: true,
-        useDictationAgent: true,
-      });
-    },
-    [settingsStore]
-  );
+      await window.electronAPI?.saveAllKeysToEnv?.();
+      await window.electronAPI?.markBundleMigrated?.();
+      await window.electronAPI?.setOnboardingWindowMode?.("restore");
 
-  const handleSetupSelection = useCallback(
-    async (mode: Exclude<OnboardingSetupMode, null>, options?: { selfHosted?: boolean }) => {
-      setSetupMode(mode);
-      setSelfHostedRequested(!!options?.selfHosted);
-      const nextRoute = getOnboardingRoute({ setupMode: mode, agentAllowed });
-      const next = getNextOnboardingStep("notes", nextRoute);
-      if (next) goTo(next);
-    },
-    [agentAllowed, goTo, setSelfHostedRequested, setSetupMode]
-  );
+      // hasPendingLocalModels() covers proceeding past a still-running download
+      // rather than skipping: the model was remembered when the download
+      // started, and BackgroundModelDownloadTray only applies it (and then
+      // clears this flag) while the flag is set.
+      //
+      if (hasPendingLocalModels()) {
+        localStorage.setItem("localSetupPending", "true");
+      } else {
+        localStorage.removeItem("localSetupPending");
+        clearPendingLocalModels();
+      }
+
+      clearSession();
+      localStorage.setItem("onboardingCompleted", "true");
+      onComplete();
+    } catch (error) {
+      logger.error("Failed to finish onboarding", { error }, "onboarding");
+      setFatalError(t("common.unknownError"));
+    } finally {
+      setIsFinishing(false);
+    }
+  }, [
+    clearSession,
+    dictationHotkey,
+    isFinishing,
+    onComplete,
+    registerHotkey,
+    t,
+    withExtraDictationHotkeys,
+  ]);
 
   const continueFromCurrentStep = useCallback(async () => {
     // A banner from an earlier failed attempt must not outlive the retry.
@@ -352,28 +275,11 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         setFatalError(t("onboarding.hotkey.couldNotRegisterDescription"));
         return;
       }
-    } else if (currentStepId === "assistant-hotkey") {
-      if (parseHotkeyList(settings.voiceAgentKey)[0] !== assistantHotkey) {
-        const registered = await settings.setVoiceAgentKey(
-          serializeHotkeyList([
-            assistantHotkey,
-            ...parseHotkeyList(settings.voiceAgentKey).slice(1),
-          ])
-        );
-        if (!registered) {
-          setFatalError(t("onboarding.rehaul.hotkey.inUse"));
-          return;
-        }
-      }
     } else if (currentStepId === "local-dictation") {
       settingsStore.setCloudTranscriptionForAllScopes({ useLocalWhisper: true });
-      // On a policy-shortened route no local LLM was downloaded, so cleanup
-      // must not fall back to an unconfigured provider.
-      if (!route.includes("local-assistant")) {
-        settingsStore.updateCleanupSettings({ useCleanupModel: false });
-      }
-    } else if (currentStepId === "local-assistant") {
-      applyReasoningSelectionToAllScopes("local");
+      // Onboarding downloads no local LLM, so cleanup must not fall back to an
+      // unconfigured provider.
+      settingsStore.updateCleanupSettings({ useCleanupModel: false });
     }
 
     const next = getNextOnboardingStep(currentStepId, route);
@@ -382,10 +288,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       return;
     }
 
-    if (session.setupMode) await finalizeOnboarding(session.setupMode);
+    await finalizeOnboarding();
   }, [
-    applyReasoningSelectionToAllScopes,
-    assistantHotkey,
     currentStepId,
     dictationHotkey,
     finalizeOnboarding,
@@ -393,7 +297,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     permissions.accessibilityPermissionGranted,
     registerHotkey,
     route,
-    session.setupMode,
     setAccessibilitySkipped,
     settings,
     settingsStore,
@@ -401,34 +304,17 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     withExtraDictationHotkeys,
   ]);
 
-  const skipLocalSetup = useCallback(async () => {
-    if (currentStepId === "local-dictation") {
-      await continueFromCurrentStep();
-      return;
-    }
-    await finalizeOnboarding("local", { localPending: true });
-  }, [continueFromCurrentStep, currentStepId, finalizeOnboarding]);
-
   const canContinue = (() => {
     switch (currentStepId) {
       case "permissions":
         return areRequiredPermissionsMet(permissions.micPermissionGranted);
       case "languages":
         return settings.spokenLanguages.length > 0;
-      case "use-cases":
-        return hasUseCaseIntent(settings.onboardingUseCases, settings.onboardingUseCaseNote);
       case "dictation-hotkey":
         return dictationHotkeyConfirmed;
-      case "activation-mode":
-        return true;
       case "dictation-demo":
         return dictationDemoSuccess;
-      case "assistant-hotkey":
-        return assistantHotkeyConfirmed;
-      case "assistant-demo":
-        return assistantDemoSuccess;
       case "local-dictation":
-      case "local-assistant":
         return stageReady;
       default:
         return true;
@@ -477,228 +363,38 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           </div>
         );
 
-      case "use-cases":
-        return (
-          <div className="h-full w-full pt-1">
-            <UseCaseStep
-              useCases={settings.onboardingUseCases}
-              onUseCasesChange={settings.setOnboardingUseCases}
-              note={settings.onboardingUseCaseNote}
-              onNoteChange={settings.setOnboardingUseCaseNote}
-            />
-          </div>
-        );
-
       case "dictation-hotkey":
-      case "assistant-hotkey": {
-        const assistant = currentStepId === "assistant-hotkey";
         return (
-          // Flex column: the preview illustration is allowed to shrink so the
-          // capture box below it always stays inside the shell, which is
-          // overflow-hidden.
+          // Flex column so the capture box always stays inside the shell, which
+          // is overflow-hidden.
           <div className="flex h-full min-h-0 w-full flex-col pt-2">
             <OnboardingStepHeader
-              title={t(
-                assistant
-                  ? "onboarding.rehaul.assistantHotkey.title"
-                  : "onboarding.rehaul.dictationHotkey.title"
-              )}
-              titleLines={
-                assistant
-                  ? [
-                      t("onboarding.rehaul.assistantHotkey.titleLineOne"),
-                      t("onboarding.rehaul.assistantHotkey.titleLineTwo"),
-                    ]
-                  : [
-                      t("onboarding.rehaul.dictationHotkey.titleLineOne"),
-                      t("onboarding.rehaul.dictationHotkey.titleLineTwo"),
-                    ]
-              }
-              description={t(
-                assistant
-                  ? "onboarding.rehaul.assistantHotkey.description"
-                  : "onboarding.rehaul.dictationHotkey.description"
-              )}
+              title={t("onboarding.rehaul.dictationHotkey.title")}
+              titleLines={[
+                t("onboarding.rehaul.dictationHotkey.titleLineOne"),
+                t("onboarding.rehaul.dictationHotkey.titleLineTwo"),
+              ]}
+              description={t("onboarding.rehaul.dictationHotkey.description")}
             />
-            {assistant && <AssistantHotkeyPreview />}
             <ShortcutSetupStep
-              value={
-                (assistant ? assistantHotkeyConfirmed : dictationHotkeyConfirmed)
-                  ? assistant
-                    ? assistantHotkey
-                    : dictationHotkey
-                  : ""
-              }
+              value={dictationHotkeyConfirmed ? dictationHotkey : ""}
               onChange={(value) => {
-                if (assistant) {
-                  setAssistantHotkey(value);
-                  setAssistantHotkeyConfirmed(true);
-                } else {
-                  setDictationHotkey(value);
-                  setDictationHotkeyConfirmed(true);
-                }
+                setDictationHotkey(value);
+                setDictationHotkeyConfirmed(true);
               }}
-              onClearSelection={() => {
-                if (assistant) {
-                  setAssistantHotkeyConfirmed(false);
-                } else {
-                  setDictationHotkeyConfirmed(false);
-                }
-              }}
-              recommended={assistant ? "CommandOrControl+Shift+Space" : recommendedDictationHotkey}
+              onClearSelection={() => setDictationHotkeyConfirmed(false)}
+              recommended={recommendedDictationHotkey}
               captureLabel={t("onboarding.rehaul.hotkey.capture")}
               recommendedLabel={t("common.recommended")}
               chooseAnotherLabel={t("onboarding.rehaul.hotkey.chooseAnother")}
-              validate={assistant ? validateAssistantHotkey : validateDictationHotkey}
-              onConfirm={assistant ? confirmAssistantHotkey : confirmDictationHotkey}
-              dense={assistant}
-              showCandidateActions={!assistant}
+              validate={validateDictationHotkey}
+              onConfirm={confirmDictationHotkey}
+              showCandidateActions
             />
-          </div>
-        );
-      }
-
-      case "activation-mode":
-        return (
-          <div className="flex h-full min-h-0 w-full flex-col pt-2">
-            <OnboardingStepHeader
-              title={t("onboarding.activation.title")}
-              description={t("onboarding.activation.description")}
-            />
-            <div className="mx-auto mt-10 w-full max-w-md rounded-2xl border border-[var(--onboarding-control-border)] bg-[var(--onboarding-surface)] p-5">
-              <div className="flex items-center justify-between gap-5">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-[var(--onboarding-text-primary)]">
-                    {t("onboarding.activation.mode")}
-                  </p>
-                  <p className="mt-1 text-sm text-[var(--onboarding-text-secondary)]">
-                    {t(
-                      activationMode === "push"
-                        ? "onboarding.activation.holdDescription"
-                        : "onboarding.activation.tapDescription"
-                    )}
-                  </p>
-                </div>
-                <ActivationModeSelector
-                  value={activationMode}
-                  onChange={setActivationMode}
-                  pushDisabledReason={
-                    !supportsPushToTalk
-                      ? pushToTalkUnavailableReason || t("windows.pttUnavailable")
-                      : undefined
-                  }
-                />
-              </div>
-              {getPlatform() === "linux" && activationMode === "push" && (
-                <LinuxPttSetupInfo isAvailable={supportsPushToTalk} />
-              )}
-            </div>
-          </div>
-        );
-
-      case "dictation-demo":
-      case "assistant-demo": {
-        const assistant = currentStepId === "assistant-demo";
-        const hotkeyInstruction = formatHotkeyInstruction(
-          assistant ? assistantHotkey : dictationHotkey
-        );
-        const description = t(
-          assistant
-            ? "onboarding.rehaul.assistantDemo.description"
-            : activationMode === "push"
-              ? "onboarding.activation.holdHotkey"
-              : "onboarding.rehaul.dictationDemo.description",
-          // Formatted for reading: the raw accelerator would show internal
-          // syntax like "GLOBE" or "CommandOrControl+Shift+Space".
-          { hotkey: hotkeyInstruction }
-        );
-        return (
-          <div className="h-full w-full pt-2">
-            <OnboardingStepHeader
-              title={t(
-                assistant
-                  ? "onboarding.rehaul.assistantDemo.title"
-                  : "onboarding.rehaul.dictationDemo.title"
-              )}
-              titleLines={
-                assistant
-                  ? [
-                      t("onboarding.rehaul.assistantDemo.titleLineOne"),
-                      t("onboarding.rehaul.assistantDemo.titleLineTwo"),
-                    ]
-                  : [
-                      t("onboarding.rehaul.dictationDemo.titleLineOne"),
-                      t("onboarding.rehaul.dictationDemo.titleLineTwo"),
-                    ]
-              }
-              description={
-                assistant ? (
-                  description
-                ) : (
-                  <DemoHotkeyDescription text={description} hotkey={hotkeyInstruction} />
-                )
-              }
-            />
-            <DemoStep
-              kind={assistant ? "assistant" : "dictation"}
-              firstMessage={t(
-                assistant
-                  ? "onboarding.rehaul.assistantDemo.email"
-                  : "onboarding.rehaul.dictationDemo.founder"
-              )}
-              secondMessage={t(
-                assistant
-                  ? "onboarding.rehaul.assistantDemo.prompt"
-                  : "onboarding.rehaul.dictationDemo.prompt"
-              )}
-              // Only the dictation demo renders this: the assistant card passes
-              // secondMessage as its textarea placeholder.
-              placeholder={t("onboarding.rehaul.dictationDemo.placeholder")}
-              listeningLabel={t("onboarding.rehaul.demo.listening")}
-              processingLabel={t("onboarding.rehaul.demo.processing")}
-              stopLabel={t("onboarding.rehaul.demo.stop")}
-              retryLabel={t("common.retry")}
-              assistantResponse={t("onboarding.rehaul.assistantDemo.response")}
-              assistantSenderName={t("onboarding.rehaul.assistantDemo.senderName")}
-              assistantSenderEmail={t("onboarding.rehaul.assistantDemo.senderEmail")}
-              assistantRecipientLabel={t("onboarding.rehaul.assistantDemo.recipientLabel")}
-              onSuccessChange={assistant ? setAssistantDemoSuccess : setDictationDemoSuccess}
-            />
-          </div>
-        );
-      }
-
-      case "notes":
-        return (
-          // Compact centred column; the calendar body owns short-window scrolling.
-          <div className="flex h-full min-h-0 w-full flex-col items-center gap-5 pt-1">
-            <header className="flex w-full shrink-0 flex-col items-center gap-3 text-center">
-              <h1 className="onboarding-display-title text-[var(--onboarding-text-primary)]">
-                <span className="block">{t("onboarding.rehaul.notes.titleLineOne")}</span>
-                <span className="block">
-                  {t("onboarding.rehaul.notes.titleLineTwoPrefix")}{" "}
-                  {/* Caveat sits at the same 40px as the Inter run, per the spec. */}
-                  <span className="brand-script">
-                    {t("onboarding.rehaul.notes.titleLineTwoBrand")}
-                  </span>
-                </span>
-              </h1>
-              <p className="w-full max-w-xs text-sm leading-[1.5] text-[var(--onboarding-text-secondary)]">
-                {t("onboarding.rehaul.notes.description")}
-              </p>
-            </header>
-            {/* The hero panel and the connector list are both fixed-height, so on
-                a short window they run past the footer. The shell never scrolls,
-                so the content scrolls here instead — px-1/pb-1 keeps focus rings
-                off the clip edge. */}
-            <div className="onboarding-shell-scroll min-h-0 w-full flex-1 overflow-y-auto px-1 pb-1">
-              <CalendarConnectionsStep />
-            </div>
           </div>
         );
 
       case "local-dictation":
-      case "local-assistant":
         return (
           <div className="h-full w-full pt-2">
             <OnboardingStepHeader
@@ -713,22 +409,62 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               ]}
             />
             <LocalModelSetupStep
-              stepId={currentStepId}
+              stepId="local-dictation"
               onReadinessChange={setStageReady}
               onProceed={() => void continueFromCurrentStep()}
-              onSkip={() => void skipLocalSetup()}
+              // Skipping leaves dictation without a model; the demo after it
+              // stays skippable, and the model can be picked in Settings later.
+              onSkip={() => void continueFromCurrentStep()}
             />
           </div>
         );
+
+      case "dictation-demo": {
+        const hotkeyInstruction = formatHotkeyInstruction(dictationHotkey);
+        const description = t(
+          activationMode === "push"
+            ? "onboarding.activation.holdHotkey"
+            : "onboarding.rehaul.dictationDemo.description",
+          // Formatted for reading: the raw accelerator would show internal
+          // syntax like "GLOBE" or "CommandOrControl+Shift+Space".
+          { hotkey: hotkeyInstruction }
+        );
+        return (
+          <div className="h-full w-full pt-2">
+            <OnboardingStepHeader
+              title={t("onboarding.rehaul.dictationDemo.title")}
+              titleLines={[
+                t("onboarding.rehaul.dictationDemo.titleLineOne"),
+                t("onboarding.rehaul.dictationDemo.titleLineTwo"),
+              ]}
+              description={<DemoHotkeyDescription text={description} hotkey={hotkeyInstruction} />}
+            />
+            <DemoStep
+              kind="dictation"
+              firstMessage={t("onboarding.rehaul.dictationDemo.founder")}
+              secondMessage={t("onboarding.rehaul.dictationDemo.prompt")}
+              placeholder={t("onboarding.rehaul.dictationDemo.placeholder")}
+              listeningLabel={t("onboarding.rehaul.demo.listening")}
+              processingLabel={t("onboarding.rehaul.demo.processing")}
+              stopLabel={t("onboarding.rehaul.demo.stop")}
+              retryLabel={t("common.retry")}
+              assistantResponse={t("onboarding.rehaul.assistantDemo.response")}
+              assistantSenderName={t("onboarding.rehaul.assistantDemo.senderName")}
+              assistantSenderEmail={t("onboarding.rehaul.assistantDemo.senderEmail")}
+              assistantRecipientLabel={t("onboarding.rehaul.assistantDemo.recipientLabel")}
+              onSuccessChange={setDictationDemoSuccess}
+            />
+          </div>
+        );
+      }
     }
   };
 
   const hasShellNavigation = !compact;
-  const hotkeyStep = currentStepId === "dictation-hotkey" || currentStepId === "assistant-hotkey";
-  const demoStep = currentStepId === "dictation-demo" || currentStepId === "assistant-demo";
+  const hotkeyStep = currentStepId === "dictation-hotkey";
+  const demoStep = currentStepId === "dictation-demo";
   const inlineGatedStep = hotkeyStep || demoStep;
-  const inlineProviderStep =
-    currentStepId === "local-dictation" || currentStepId === "local-assistant";
+  const inlineProviderStep = currentStepId === "local-dictation";
   // Provider pages own their forward action, while hotkey/demo pages withhold
   // Continue until their task is complete.
   const showsContinue =
@@ -750,11 +486,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         // unreachable transcription backend must never dead-end setup, so they
         // stay skippable until they succeed.
         onSkip={showsSkip ? () => void continueFromCurrentStep() : undefined}
-        continueLabel={
-          currentStepId === "use-cases"
-            ? t("onboarding.useCase.proceedToSetup")
-            : t("common.continue")
-        }
+        continueLabel={t("common.continue")}
         skipLabel={t("common.skip")}
         continueDisabled={!canContinue}
         continueLoading={isFinishing || isRegistering}

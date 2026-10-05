@@ -221,7 +221,7 @@
         "titleLineOne": "最初の",
         "titleLineTwo": "ディクテーションを試す",
         "description": "{{hotkey}} を押して話し始めてください。VoceLibre が音声をテキストに変換します。",
-        "founder": "こんにちは、OpenWhispr創業者のゲイブです",
+        "founder": "こんにちは、VoceLibre創業者のファリドです",
         "prompt": "「初めてディクテーションを試しています」と話してみてください。",
         "placeholder": "ここにディクテーションが表示されます…"
       },

@@ -221,7 +221,7 @@
         "titleLineOne": "Essayez votre",
         "titleLineTwo": "première dictée",
         "description": "Appuyez sur {{hotkey}} et parlez. VoceLibre transformera votre voix en texte.",
-        "founder": "Bonjour, je suis Gabe, fondateur d’OpenWhispr",
+        "founder": "Bonjour, je suis Farid, fondateur de VoceLibre",
         "prompt": "Essayez de dire : « Je teste la dictée pour la première fois. »",
         "placeholder": "Votre dictée apparaîtra ici…"
       },

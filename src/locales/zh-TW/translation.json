@@ -221,7 +221,7 @@
         "titleLineOne": "試試你的",
         "titleLineTwo": "第一次語音輸入",
         "description": "按 {{hotkey}} 開始說話，VoceLibre 會把你的語音轉成文字。",
-        "founder": "你好，我是 Gabe，OpenWhispr 的創辦人",
+        "founder": "你好，我是 Farid，VoceLibre 的創辦人",
         "prompt": "試著說：「我第一次測試聽寫功能。」",
         "placeholder": "你的語音輸入結果會顯示在這裡…"
       },

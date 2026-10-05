@@ -3,55 +3,37 @@ const test = require("node:test");
 
 const load = () => import("../../src/components/onboarding/flow.ts");
 
-test("the single route walks permissions through notes", async () => {
+test("the route covers dictation setup only", async () => {
   const { getOnboardingRoute } = await load();
-  // Accounts were removed, so there is one route for everyone.
-  assert.deepEqual(getOnboardingRoute({ setupMode: null, agentAllowed: true }), [
+  // No account, assistant, notes or calendar steps: what a first dictation
+  // needs, then a practice run, then the app.
+  assert.deepEqual(getOnboardingRoute(), [
     "permissions",
     "languages",
-    "use-cases",
     "dictation-hotkey",
-    "activation-mode",
+    "local-dictation",
     "dictation-demo",
-    "assistant-hotkey",
-    "assistant-demo",
-    "notes",
   ]);
 });
 
 test("the route always grants permissions before capturing a hotkey", async () => {
   const { getOnboardingRoute } = await load();
-  // finalizeOnboarding registers the dictation hotkey on every path, so the mic
-  // grant and the key the user is getting must both come first.
-  const route = getOnboardingRoute({ setupMode: null, agentAllowed: true });
+  // finalizeOnboarding registers the dictation hotkey, so the mic grant and the
+  // key the user is getting must both come first.
+  const route = getOnboardingRoute();
   assert.ok(route.indexOf("permissions") < route.indexOf("dictation-hotkey"));
 });
 
-test("activation mode setup follows shortcut capture", async () => {
+test("a speech model is set up before the dictation demo", async () => {
   const { getOnboardingRoute } = await load();
-  const route = getOnboardingRoute({ setupMode: null, agentAllowed: true });
-  assert.equal(route[route.indexOf("dictation-hotkey") + 1], "activation-mode");
+  // The demo transcribes with the local model, so it must exist by then.
+  const route = getOnboardingRoute();
+  assert.ok(route.indexOf("local-dictation") < route.indexOf("dictation-demo"));
 });
 
-test("policy removes assistant states", async () => {
-  const { getOnboardingRoute } = await load();
-  const route = getOnboardingRoute({ setupMode: null, agentAllowed: false });
-  assert.equal(route.includes("assistant-hotkey"), false);
-  assert.equal(route.includes("assistant-demo"), false);
-  assert.equal(route.at(-1), "notes");
-});
-
-test("choosing local setup appends its two stages", async () => {
-  const { getOnboardingRoute } = await load();
-  assert.deepEqual(
-    getOnboardingRoute({ setupMode: "local", agentAllowed: true }).slice(-3),
-    ["notes", "local-dictation", "local-assistant"]
-  );
-  // Without the agent the assistant stage drops with it.
-  assert.deepEqual(getOnboardingRoute({ setupMode: "local", agentAllowed: false }).slice(-2), [
-    "notes",
-    "local-dictation",
-  ]);
+test("the demo is the last step, so finishing it completes onboarding", async () => {
+  const { getNextOnboardingStep, getOnboardingRoute } = await load();
+  assert.equal(getNextOnboardingStep("dictation-demo", getOnboardingRoute()), null);
 });
 
 test("versioned sessions reject malformed or old data", async () => {
@@ -59,17 +41,11 @@ test("versioned sessions reject malformed or old data", async () => {
   assert.equal(parseOnboardingSession(null), null);
   assert.equal(parseOnboardingSession("not json"), null);
   assert.equal(parseOnboardingSession('{"version":1,"currentStepId":"auth"}'), null);
+  // A v3 session parked on a removed step (it could stall on "notes") restarts.
+  assert.equal(parseOnboardingSession('{"version":3,"currentStepId":"notes","history":[]}'), null);
 
   const session = createOnboardingSession();
   assert.deepEqual(parseOnboardingSession(JSON.stringify(session)), session);
-
-  const legacyV2 = { ...session };
-  delete legacyV2.selfHostedRequested;
-  assert.equal(parseOnboardingSession(JSON.stringify(legacyV2)).selfHostedRequested, false);
-  assert.equal(
-    parseOnboardingSession(JSON.stringify({ ...session, selfHostedRequested: "yes" })),
-    null
-  );
 });
 
 test("an explicit restart clears every persisted route choice", async () => {
@@ -106,30 +82,18 @@ test("legacy numeric steps migrate conservatively", async () => {
   assert.equal(migrateLegacyOnboardingStep("999"), "local-dictation");
 });
 
-test("an off-route assistant step clamps to its neighbour, not the end of the route", async () => {
-  const { getOnboardingRoute, reconcileStepWithRoute } = await load();
-  // agentAllowed false is what a failed policy fetch produces, and it drops both
-  // assistant steps. Clamping to route.at(-1) would skip intermediate steps.
-  const route = getOnboardingRoute({ setupMode: null, agentAllowed: false });
-  assert.equal(route.includes("assistant-hotkey"), false);
-  assert.equal(reconcileStepWithRoute("assistant-hotkey", route), "dictation-demo");
-  assert.equal(reconcileStepWithRoute("assistant-demo", route), "notes");
-
-  const agentRoute = getOnboardingRoute({ setupMode: null, agentAllowed: true });
-  assert.equal(reconcileStepWithRoute("assistant-hotkey", agentRoute), "assistant-hotkey");
-});
-
-test("route helpers recover from ineligible steps", async () => {
+test("route helpers walk the route and clamp unknown steps", async () => {
   const { getNextOnboardingStep, getOnboardingRoute, reconcileStepWithRoute } = await load();
-  const route = getOnboardingRoute({ setupMode: null, agentAllowed: false });
-  assert.equal(reconcileStepWithRoute("local-assistant", route), "notes");
+  const route = getOnboardingRoute();
   assert.equal(getNextOnboardingStep("permissions", route), "languages");
-  assert.equal(getNextOnboardingStep("notes", route), null);
+  assert.equal(getNextOnboardingStep("dictation-hotkey", route), "local-dictation");
+  assert.equal(reconcileStepWithRoute("languages", route), "languages");
+  assert.equal(reconcileStepWithRoute("notes", route), "permissions");
 });
 
 test("progress counts every step the user is shown, once each", async () => {
   const { getOnboardingProgress, getOnboardingRoute } = await load();
-  const route = getOnboardingRoute({ setupMode: null, agentAllowed: true });
+  const route = getOnboardingRoute();
 
   // permissions renders in a compact frame with no footer, so it carries no row
   // and must not inflate the total.
@@ -140,28 +104,6 @@ test("progress counts every step the user is shown, once each", async () => {
     counted.map((stepId) => getOnboardingProgress(stepId, route).index),
     counted.map((_, index) => index)
   );
-  assert.deepEqual(getOnboardingProgress("languages", route), { index: 0, total: 8 });
-  assert.deepEqual(getOnboardingProgress("notes", route), { index: 7, total: 8 });
-});
-
-test("progress total tracks the conditional parts of the route", async () => {
-  const { getOnboardingProgress, getOnboardingRoute } = await load();
-
-  // Dropping the assistant pair shortens the row rather than leaving two dots
-  // that can never fill.
-  const noAgent = getOnboardingRoute({ setupMode: null, agentAllowed: false });
-  assert.equal(getOnboardingProgress("languages", noAgent).total, 6);
-  assert.deepEqual(getOnboardingProgress("notes", noAgent), { index: 5, total: 6 });
-
-  // Committing to local setup appends the provider pair, so the row grows by two
-  // and the last provider step is what fills it.
-  const local = getOnboardingRoute({ setupMode: "local", agentAllowed: true });
-  assert.deepEqual(getOnboardingProgress("notes", local), { index: 7, total: 10 });
-  assert.deepEqual(getOnboardingProgress("local-assistant", local), { index: 9, total: 10 });
-});
-
-test("an off-route step has no position to report", async () => {
-  const { getOnboardingProgress, getOnboardingRoute } = await load();
-  const route = getOnboardingRoute({ setupMode: null, agentAllowed: false });
-  assert.equal(getOnboardingProgress("assistant-demo", route), null);
+  assert.deepEqual(getOnboardingProgress("languages", route), { index: 0, total: 4 });
+  assert.deepEqual(getOnboardingProgress("dictation-demo", route), { index: 3, total: 4 });
 });
