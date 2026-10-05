@@ -1,6 +1,6 @@
 {
   "name": "vocelibre",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "description": "A free, local-first voice dictation app — no account, no cloud, no signup required.",
   "main": "main.js",
   "private": true,
