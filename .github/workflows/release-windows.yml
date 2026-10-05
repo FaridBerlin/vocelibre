@@ -1,0 +1,115 @@
+name: Release (Windows)
+
+# Builds the unsigned Windows installer and portable .exe and attaches them to
+# the existing GitHub Release for the version in package.json.
+#
+# Run it from the Actions tab ("Run workflow" on main) after the release has
+# been created. On a pull request that edits this file it only builds, so the
+# workflow is verified before it is ever used for a release.
+#
+# Unlike release.yml, this needs no repository secrets: the build is unsigned
+# (SmartScreen will show "Windows protected your PC" until the app is signed),
+# and the native helpers are compiled from this repo's own sources rather than
+# downloaded from helper releases that do not exist yet.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/release-windows.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-windows-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check the release exists
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "::error::Release ${{ steps.version.outputs.tag }} does not exist. Create it first (gh release create ${{ steps.version.outputs.tag }} ...), then rerun."
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install platform-specific native binaries
+        run: npm install @rollup/rollup-win32-x64-msvc lightningcss-win32-x64-msvc @tailwindcss/oxide-win32-x64-msvc --no-save
+
+      # The download-windows-* scripts that prebuild:win runs skip a binary that
+      # already exists, so compiling first means these are what gets packaged.
+      - name: Compile Windows native helpers
+        shell: cmd
+        run: |
+          if not exist resources\bin mkdir resources\bin
+          cl /O2 /nologo resources\windows-key-listener.c /Fe:resources\bin\windows-key-listener.exe user32.lib || exit /b 1
+          cl /O2 /nologo resources\windows-fast-paste.c /Fe:resources\bin\windows-fast-paste.exe user32.lib || exit /b 1
+          cl /O2 /nologo resources\windows-mic-listener.c /Fe:resources\bin\windows-mic-listener.exe ole32.lib oleaut32.lib || exit /b 1
+          cl /O2 /nologo resources\windows-system-audio-helper.c /Fe:resources\bin\windows-system-audio-helper.exe ole32.lib mmdevapi.lib || exit /b 1
+          cl /O2 /nologo resources\windows-text-monitor.c /Fe:resources\bin\windows-text-monitor.exe ole32.lib oleaut32.lib || exit /b 1
+          del /q *.obj 2>nul
+          exit /b 0
+
+      - name: Cache Electron
+        uses: actions/cache@v4
+        with:
+          path: ~/AppData/Local/electron/Cache
+          key: windows-electron-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: windows-electron-
+
+      # prebuild:win runs first (npm pre-hook) and downloads whisper.cpp,
+      # llama-server, sherpa-onnx, Qdrant, nircmd and the bundled models.
+      - name: Build unsigned installer
+        run: npm run build:win -- --publish never --config electron-builder.unsigned-win.json
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: List build output
+        shell: bash
+        run: ls -la dist/
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vocelibre-windows
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/latest.yml
+          retention-days: 7
+
+      - name: Attach to the GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ steps.version.outputs.tag }}" \
+            dist/*-setup.exe dist/*-setup.exe.blockmap dist/*-portable.exe dist/latest.yml \
+            --clobber

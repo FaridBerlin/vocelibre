@@ -40,7 +40,15 @@ chmod +x VoceLibre-*-linux-x86_64.AppImage
 
 To remove the deb: `sudo apt remove vocelibre`.
 
-### Building the packages yourself
+## Install on Windows
+
+Download `VoceLibre-<version>-win-x64-setup.exe` from the [Releases page](https://github.com/FaridBerlin/vocelibre/releases) and run it. There is also a `-portable.exe` that runs without installing.
+
+The installer is not code-signed yet, so Windows SmartScreen shows **"Windows protected your PC"**. Click **More info → Run anyway**.
+
+## Building the packages yourself
+
+Linux, on a Linux machine:
 
 ```bash
 npm install
@@ -48,6 +56,11 @@ npm run prebuild:linux        # compile/download the native helpers
 npm run build:linux:deb       # → dist/VoceLibre-<version>-linux-amd64.deb
 npm run build:linux:appimage  # → dist/VoceLibre-<version>-linux-x86_64.AppImage
 ```
+
+Windows builds run on GitHub Actions, since the native modules need a Windows
+toolchain: create the GitHub Release first, then run the **Release (Windows)**
+workflow from the Actions tab. It attaches the installer and portable `.exe` to
+the release matching the `package.json` version.
 
 ## Quick start (from source)
 
