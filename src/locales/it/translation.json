@@ -221,7 +221,7 @@
         "titleLineOne": "Prova la tua",
         "titleLineTwo": "prima dettatura",
         "description": "Premi {{hotkey}} e inizia a parlare. VoceLibre trasformerà la tua voce in testo.",
-        "founder": "Ciao, sono Gabe, fondatore di OpenWhispr",
+        "founder": "Ciao, sono Farid, fondatore di VoceLibre",
         "prompt": "Prova a dire: «Sto provando la dettatura per la prima volta».",
         "placeholder": "La tua dettatura apparirà qui…"
       },

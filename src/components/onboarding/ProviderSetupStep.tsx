@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { AudioLines, Check, CircleCheck, Download, MousePointer2 } from "lucide-react";
+import { Check, Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -17,59 +17,8 @@ import {
   type TranscriptionProviderData,
 } from "../../models/ModelRegistry";
 import { pickDefaultModelId } from "../../models/providerDefaultModel";
-import type { OnboardingStepId } from "./flow";
 import { forgetPendingLocalModel, rememberPendingLocalModel } from "./pendingLocalModels";
 import { isLocalStageDownloadActive } from "./localDownloadState";
-
-export function SetupStageStepper({ stepId }: { stepId: OnboardingStepId }) {
-  const { t } = useTranslation();
-  const assistant = stepId.endsWith("assistant");
-  const local = stepId.startsWith("local");
-  return (
-    <div
-      className="relative mx-auto flex w-36 items-start justify-between"
-      aria-label={t("onboarding.rehaul.provider.progress")}
-    >
-      <span className="absolute left-8 right-8 top-3.5 border-t border-dashed border-[var(--onboarding-control-border)]" />
-      <div className="relative z-10 flex w-14 flex-col items-center gap-1.5 text-[var(--onboarding-text-secondary)]">
-        <span
-          className={`flex size-7 items-center justify-center rounded-full ${
-            assistant
-              ? "bg-[var(--onboarding-accent)] text-[var(--onboarding-accent-foreground)]"
-              : "bg-[var(--onboarding-inverse-surface)] text-[var(--onboarding-inverse-text)]"
-          }`}
-        >
-          {assistant ? (
-            local ? (
-              <AudioLines className="size-3.5" />
-            ) : (
-              <CircleCheck className="size-3.5" strokeWidth={2} />
-            )
-          ) : (
-            <AudioLines className="size-3.5" />
-          )}
-        </span>
-        <span className="text-[0.6875rem]">{t("onboarding.rehaul.provider.dictation")}</span>
-      </div>
-      <div className="relative z-10 flex w-14 flex-col items-center gap-1.5 text-[var(--onboarding-text-secondary)]">
-        <span
-          className={`flex size-7 items-center justify-center rounded-full ${
-            assistant
-              ? "bg-[var(--onboarding-inverse-surface)] text-[var(--onboarding-inverse-text)]"
-              : "border border-[var(--onboarding-control-border)] bg-[var(--onboarding-surface)] text-[var(--onboarding-text-primary)]"
-          }`}
-        >
-          <MousePointer2 className="size-3.5" />
-        </span>
-        <span className="text-[0.6875rem]">
-          {local && assistant
-            ? t("onboarding.rehaul.local.agent")
-            : t("onboarding.rehaul.provider.assistant")}
-        </span>
-      </div>
-    </div>
-  );
-}
 
 /**
  * The card actions run on the same two pills as the shell footer (Figma
@@ -405,9 +354,7 @@ export function LocalModelSetupStep({
 
   return (
     <section className={`mt-5 ${SETUP_CARD_CLASS}`}>
-      <SetupStageStepper stepId={stepId} />
-
-      <div className="mt-5">
+      <div>
         <FieldLabel>{t("onboarding.rehaul.local.providerLabel")}</FieldLabel>
         <Select value={selectedProvider} onValueChange={chooseProvider}>
           <SelectTrigger className={SELECT_TRIGGER_CLASS}>

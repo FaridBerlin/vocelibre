@@ -215,7 +215,7 @@
         "titleLineOne": "Experimente seu",
         "titleLineTwo": "primeiro ditado",
         "description": "Pressione {{hotkey}} e comece a falar. O VoceLibre vai transformar sua voz em texto.",
-        "founder": "Olá, sou o Gabe, fundador do OpenWhispr",
+        "founder": "Olá, sou o Farid, fundador do VoceLibre",
         "prompt": "Tente dizer: “Estou testando o ditado pela primeira vez.”",
         "placeholder": "Seu ditado vai aparecer aqui…"
       },

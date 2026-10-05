@@ -1,62 +1,30 @@
 export const ONBOARDING_SESSION_KEY = "onboardingSessionV2";
 export const LEGACY_ONBOARDING_STEP_KEY = "onboardingCurrentStep";
-export const ONBOARDING_FLOW_VERSION = 3;
+export const ONBOARDING_FLOW_VERSION = 4;
 
 type OnboardingStorage = Pick<Storage, "setItem" | "removeItem">;
 
 export type OnboardingStepId =
-  | "permissions"
-  | "languages"
-  | "use-cases"
-  | "dictation-hotkey"
-  | "activation-mode"
-  | "dictation-demo"
-  | "assistant-hotkey"
-  | "assistant-demo"
-  | "notes"
-  | "local-dictation"
-  | "local-assistant";
-
-// Accounts and cloud/BYOK setup were removed: there is one route, and the only
-// runtime to set up is a downloaded local model.
-export type OnboardingSetupMode = "local" | null;
+  "permissions" | "languages" | "dictation-hotkey" | "local-dictation" | "dictation-demo";
 
 export interface OnboardingSession {
   version: typeof ONBOARDING_FLOW_VERSION;
   currentStepId: OnboardingStepId;
   history: OnboardingStepId[];
-  setupMode: OnboardingSetupMode;
-  selfHostedRequested: boolean;
 }
 
-export interface OnboardingRouteContext {
-  setupMode: OnboardingSetupMode;
-  agentAllowed: boolean;
-}
-
-const BASE_ROUTE: OnboardingStepId[] = [
-  "permissions",
-  "languages",
-  "use-cases",
-  "dictation-hotkey",
-  "activation-mode",
-  "dictation-demo",
-];
-
-// Canonical flow order, independent of any one route. reconcileStepWithRoute uses
-// it to clamp backwards instead of jumping to the end of the route.
+// Onboarding covers dictation only: what a first dictation needs (microphone,
+// language, shortcut, a local speech model), then a practice run. The assistant,
+// notes and calendar are reachable from the app itself. The model comes before
+// the demo because the demo transcribes with it.
+//
+// Also the canonical order reconcileStepWithRoute clamps against.
 const STEP_ORDER: OnboardingStepId[] = [
   "permissions",
   "languages",
-  "use-cases",
   "dictation-hotkey",
-  "activation-mode",
-  "dictation-demo",
-  "assistant-hotkey",
-  "assistant-demo",
-  "notes",
   "local-dictation",
-  "local-assistant",
+  "dictation-demo",
 ];
 
 const KNOWN_STEPS = new Set<OnboardingStepId>(STEP_ORDER);
@@ -79,8 +47,8 @@ const LEGACY_STEP_MAP: OnboardingStepId[] = [
   "permissions",
   "permissions",
   "dictation-hotkey",
-  "assistant-hotkey",
-  "notes",
+  "local-dictation",
+  "local-dictation",
   "local-dictation",
 ];
 
@@ -89,8 +57,6 @@ export function createOnboardingSession(): OnboardingSession {
     version: ONBOARDING_FLOW_VERSION,
     currentStepId: "permissions",
     history: [],
-    setupMode: null,
-    selfHostedRequested: false,
   };
 }
 
@@ -104,22 +70,8 @@ export function resetOnboardingProgress(storage: OnboardingStorage): void {
   storage.setItem(LEGACY_ONBOARDING_STEP_KEY, "0");
 }
 
-export function getOnboardingRoute(context: OnboardingRouteContext): OnboardingStepId[] {
-  const route = [
-    ...BASE_ROUTE,
-    ...(context.agentAllowed ? (["assistant-hotkey", "assistant-demo"] as OnboardingStepId[]) : []),
-    "notes" as const,
-  ];
-
-  if (context.setupMode) {
-    route.push(
-      ...(["local-dictation", "local-assistant"] as OnboardingStepId[]).filter(
-        (stepId) => context.agentAllowed || !stepId.endsWith("assistant")
-      )
-    );
-  }
-
-  return route;
+export function getOnboardingRoute(): OnboardingStepId[] {
+  return [...STEP_ORDER];
 }
 
 export function isOnboardingStepId(value: unknown): value is OnboardingStepId {
@@ -139,23 +91,10 @@ export function parseOnboardingSession(value: string | null): OnboardingSession 
       return null;
     }
 
-    const setupMode = parsed.setupMode;
-    if (setupMode !== null && setupMode !== "local") {
-      return null;
-    }
-    if (
-      parsed.selfHostedRequested !== undefined &&
-      typeof parsed.selfHostedRequested !== "boolean"
-    ) {
-      return null;
-    }
-
     return {
       version: ONBOARDING_FLOW_VERSION,
       currentStepId: parsed.currentStepId,
       history: parsed.history.filter(isOnboardingStepId),
-      setupMode,
-      selfHostedRequested: parsed.selfHostedRequested ?? false,
     };
   } catch {
     return null;
@@ -173,13 +112,10 @@ export function migrateLegacyOnboardingStep(value: string | null): OnboardingSte
 
 /**
  * Map a step onto the caller's route, for when a saved session names a step the
- * current route no longer has (the agent gets disallowed, setupMode changes, or a
- * dev jump asks for an off-route step).
+ * route no longer has (a dev jump asks for an off-route step).
  *
  * Clamps to the route step nearest in the canonical order, ties going to the
- * earlier one so nothing gets skipped — falling back to the route's last step
- * would teleport past intermediate steps (with agentAllowed false, asking for an
- * assistant step must land on its neighbour, not on setup-choice).
+ * earlier one so nothing gets skipped.
  */
 export function reconcileStepWithRoute(
   stepId: OnboardingStepId,
@@ -211,14 +147,8 @@ export interface OnboardingProgressState {
 }
 
 /**
- * Progress across the live route: one dot per step the user will actually see a
+ * Progress across the route: one dot per step the user will actually see a
  * counter on, filled up to the current one.
- *
- * The total comes from the route rather than a constant because the route itself
- * is conditional — the assistant pair drops out when the agent is disallowed, and
- * the provider pair only exists once a non-cloud setup mode is picked. Choosing
- * BYOK/local on setup-choice therefore appends two steps and the row
- * grows by two dots at that moment, which is the flow honestly getting longer.
  *
  * Returns null when there is nothing worth drawing: a compact step, an off-route
  * step, or a route with fewer than two counted steps, where a one-dot row would
@@ -236,5 +166,3 @@ export function getOnboardingProgress(
 
   return { index, total: counted.length };
 }
-
-/** Enterprise customers keep provider/model selection in Settings, outside onboarding. */

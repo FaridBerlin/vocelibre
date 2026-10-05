@@ -221,7 +221,7 @@
         "titleLineOne": "Try your",
         "titleLineTwo": "first dictation",
         "description": "Press {{hotkey}} and start speaking. VoceLibre will turn your voice into text.",
-        "founder": "Hi, I am Gabe, Founder of OpenWhispr",
+        "founder": "Hi, I am Farid, Founder of VoceLibre",
         "prompt": "Try saying: “I’m testing dictation for the first time.”",
         "placeholder": "Your dictation will appear here…"
       },
