@@ -19,7 +19,37 @@
 
 VoceLibre is local-first voice dictation, focused on one thing: dictation that works completely offline, with **zero registration** — no email, no Google/Microsoft sign-in, nothing. Your voice never leaves your device. It's free software, sustained by donations rather than subscriptions or accounts.
 
-## Quick start
+## Install on Linux
+
+Download the `.deb` (Ubuntu, Debian, Mint, Pop!_OS) or the `.AppImage` (any distro) from the [Releases page](https://github.com/FaridBerlin/vocelibre/releases).
+
+**Ubuntu / Debian (.deb), recommended:**
+
+```bash
+sudo apt install ./VoceLibre-*-linux-amd64.deb
+```
+
+Use `apt`, not `dpkg -i`, so dependencies such as `ydotool` (auto-paste on Wayland) are installed too. VoceLibre then appears in the app menu like any other app, and `vocelibre` works from a terminal. Log out and back in once after the first install. The installer adds you to the `input` group, which Wayland auto-paste needs.
+
+**AppImage:**
+
+```bash
+chmod +x VoceLibre-*-linux-x86_64.AppImage
+./VoceLibre-*-linux-x86_64.AppImage
+```
+
+To remove the deb: `sudo apt remove vocelibre`.
+
+### Building the packages yourself
+
+```bash
+npm install
+npm run prebuild:linux        # compile/download the native helpers
+npm run build:linux:deb       # → dist/VoceLibre-<version>-linux-amd64.deb
+npm run build:linux:appimage  # → dist/VoceLibre-<version>-linux-x86_64.AppImage
+```
+
+## Quick start (from source)
 
 ```bash
 git clone https://github.com/FaridBerlin/vocelibre.git

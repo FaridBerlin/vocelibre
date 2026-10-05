@@ -1,20 +1,90 @@
 #!/bin/bash
-# Post-install script for OpenWhispr (deb/rpm)
-# Sets up chrome-sandbox permissions and ydotool daemon prerequisites.
+# Post-install script for VoceLibre (deb/rpm)
+# Replaces electron-builder's default after-install template, so it must also do
+# that template's job: the /usr/bin launcher, desktop/MIME database refresh, the
+# AppArmor profile and chrome-sandbox permissions. Then it sets up the ydotool
+# daemon prerequisites.
 # Best-effort: nothing here may fail the package install.
+#
+# Paths are literal, not electron-builder ${...} macros: the rpm target passes
+# this file to fpm untemplated. They follow productName ("VoceLibre") and the
+# package.json name ("vocelibre").
 
 set -uo pipefail
 
-# 0. Set SUID bit on chrome-sandbox (required by Electron for Linux sandboxing)
-#    Find it wherever dpkg placed the package files, rather than hardcoding /opt/...
-CHROME_SANDBOX=$(dpkg -L open-whispr 2>/dev/null | grep chrome-sandbox || echo "")
-if [ -z "$CHROME_SANDBOX" ]; then
-  # Fallback: conventional electron-builder install path
-  CHROME_SANDBOX="/opt/OpenWhispr/chrome-sandbox"
+APP_DIR="/opt/VoceLibre"
+EXE="vocelibre"
+LAUNCHER="/usr/bin/$EXE"
+
+# 0a. /usr/bin launcher, so `vocelibre` works from a terminal
+if [ -e "$APP_DIR/$EXE" ]; then
+  if type update-alternatives >/dev/null 2>&1; then
+    # Drop a plain symlink left by an older install that did not use alternatives
+    if [ -L "$LAUNCHER" ] && [ "$(readlink "$LAUNCHER")" != "/etc/alternatives/$EXE" ]; then
+      rm -f "$LAUNCHER"
+    fi
+    update-alternatives --install "$LAUNCHER" "$EXE" "$APP_DIR/$EXE" 100 >/dev/null 2>&1 \
+      || ln -sf "$APP_DIR/$EXE" "$LAUNCHER" 2>/dev/null || true
+  else
+    ln -sf "$APP_DIR/$EXE" "$LAUNCHER" 2>/dev/null || true
+  fi
 fi
+
+# 0b. Make the app menu and the openwhispr:// handler pick up the new entry
+if hash update-mime-database 2>/dev/null; then
+  update-mime-database /usr/share/mime >/dev/null 2>&1 || true
+fi
+if hash update-desktop-database 2>/dev/null; then
+  update-desktop-database /usr/share/applications >/dev/null 2>&1 || true
+fi
+if hash gtk-update-icon-cache 2>/dev/null; then
+  gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor >/dev/null 2>&1 || true
+fi
+
+# 0c. AppArmor profile granting user namespaces (Ubuntu 24.04+ restricts them for
+#     unconfined apps, and Chromium's sandbox needs them). The dry-run parse skips
+#     AppArmor versions that predate abi/4.0, such as Ubuntu 22.04's, where the
+#     app runs without a profile anyway.
+APPARMOR_LOADED=0
+APPARMOR_SOURCE="$APP_DIR/resources/apparmor-profile"
+APPARMOR_TARGET="/etc/apparmor.d/$EXE"
+if [ -f "$APPARMOR_SOURCE" ] && hash apparmor_parser 2>/dev/null \
+  && apparmor_status --enabled >/dev/null 2>&1; then
+  if apparmor_parser --skip-kernel-load --debug "$APPARMOR_SOURCE" >/dev/null 2>&1; then
+    cp -f "$APPARMOR_SOURCE" "$APPARMOR_TARGET" 2>/dev/null || true
+    # Live-loading is meaningless in a chroot (image builds); the profile is
+    # picked up at next boot there instead.
+    if [ -x /usr/bin/ischroot ] && /usr/bin/ischroot; then
+      :
+    elif apparmor_parser --replace --write-cache --skip-read-cache "$APPARMOR_TARGET" >/dev/null 2>&1; then
+      APPARMOR_LOADED=1
+    fi
+  fi
+fi
+
+# 0d. chrome-sandbox. Chromium sandboxes through unprivileged user namespaces
+#     where it can and needs a root-owned setuid helper where it cannot. Keep the
+#     setuid bit off when namespaces work, as electron-builder's template does,
+#     and set it when the kernel lacks them or AppArmor restricts them and our
+#     profile could not be loaded. (scripts/lib/linux-launcher.js still falls
+#     back to --no-sandbox if neither path works at launch.)
+CHROME_SANDBOX="$APP_DIR/chrome-sandbox"
 if [ -f "$CHROME_SANDBOX" ]; then
+  NEEDS_SUID=0
+  if [ ! -L /proc/self/ns/user ] \
+    || [ "$(cat /proc/sys/kernel/unprivileged_userns_clone 2>/dev/null)" = "0" ] \
+    || [ "$(cat /proc/sys/user/max_user_namespaces 2>/dev/null)" = "0" ]; then
+    NEEDS_SUID=1
+  elif [ "$(cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns 2>/dev/null)" = "1" ] \
+    && [ "$APPARMOR_LOADED" != "1" ]; then
+    NEEDS_SUID=1
+  fi
   chown root:root "$CHROME_SANDBOX" 2>/dev/null || true
-  chmod 4755 "$CHROME_SANDBOX" 2>/dev/null || true
+  if [ "$NEEDS_SUID" = "1" ]; then
+    chmod 4755 "$CHROME_SANDBOX" 2>/dev/null || true
+  else
+    chmod 0755 "$CHROME_SANDBOX" 2>/dev/null || true
+  fi
 fi
 
 UDEV_RULE='KERNEL=="uinput", GROUP="input", MODE="0660", TAG+="uaccess"'
